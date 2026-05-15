@@ -1,0 +1,132 @@
+/**
+ * apt-planner 도메인 타입
+ * 설계 원칙 (apt-planner_AI프롬프트_설계서.md 참고):
+ *  - Quote Object를 Single Source of Truth로
+ *  - 자재는 consumer/installer 이중 표현
+ *  - JSON in, JSON out (LLM 단계에서도 유지)
+ */
+
+export type Grade = '가성비' | '표준' | '고급' | '단일등급';
+export type YesNo = 'Y' | 'N' | '-';
+
+export type RoomId = '거실' | '주방' | '안방' | '작은방1' | '작은방2';
+export type BathId = '공용욕실' | '부부욕실';
+
+/** 자재마스터 1행 */
+export type Material = {
+  material_id: string;
+  work_type: string;
+  category: string | null;
+  sub_category: string | null;
+  brand: string | null;
+  product_line: string | null;
+  installer_spec: string | null;     // 시공자용 풀스펙
+  tags: string[];
+  unit_type: string;                  // per_m2 / per_m / per_ea / per_set
+  material_price: number;
+  labor_price: number;
+  total_unit_price: number;
+  primary_grade: Grade;
+  lookup_key: string | null;          // "flooring|표준" 등
+  secondary_key: string | null;       // "강마루|표준" 등
+};
+
+/** 평형별 표준면적 (3베이 기준) */
+export type StandardAreas = {
+  pyeongs: number[];                  // [10,20,30,40,50,60]
+  rooms: Record<string, Record<number, number>>;       // m²
+  perimeters: Record<string, Record<number, number>>;  // m
+  balcony: Record<string, Record<number, number>>;     // 발코니/다용도실
+};
+
+/** 우리집 기본 정보 */
+export type Property = {
+  pyeong: number;            // 공급평형
+  bay: 2 | 3 | 4 | 5;
+  rooms: 2 | 3 | 4 | 5;      // 방 개수
+  common_bath: 1 | 2;        // 공용욕실 개수
+  master_bath: 0 | 1;        // 부부욕실 유무
+  balcony_depth_m: number;   // 발코니 깊이
+};
+
+/** 공간별 공종 매트릭스 */
+export type RoomScope = {
+  expansion_current: boolean; // 현재 확장 상태 (기존)
+  expansion_after: boolean;   // 확장 후 상태 (목표)
+  flooring: boolean;          // 바닥재
+  wallpaper: boolean;         // 도배
+  molding: boolean;           // 몰딩
+  aircon: boolean;            // 시스템에어컨
+  closet: boolean;            // 붙박이장
+  ceiling_fan: boolean;       // 실링팬
+  sash: boolean;              // 샷시
+};
+
+/** 전체 공종 토글 */
+export type GlobalScope = {
+  demolition: boolean;        // 철거
+  insulation: boolean;        // 단열
+  heating_pipe: boolean;      // 난방배관 교체
+  common_bath_set: boolean;   // 공용욕실 세트
+  master_bath_set: boolean;   // 부부욕실 세트
+  kitchen_set: boolean;       // 주방가구
+  middoor: boolean;           // 중문
+  entry_furniture: boolean;   // 현관 일반가구
+  lighting: boolean;          // 조명 풀세트
+  balcony_floor_tile: boolean;
+  balcony_paint: boolean;
+  electrical_base: boolean;
+  switch_outlet: boolean;
+  induction_line: boolean;
+  thermostat: boolean;
+  silicon: boolean;
+  expansion_report: boolean;   // 구청 확장공사 신고
+};
+
+export type Scope = {
+  rooms: Record<RoomId, RoomScope>;
+  global: GlobalScope;
+};
+
+/** 등급·자재 선택 */
+export type GradeSelection = {
+  default: Grade;                                       // 전체 일괄 등급
+  overrides: Partial<Record<string, Grade>>;            // work_type → grade
+  material_overrides: Partial<Record<string, string>>;  // work_type → material_id (등급 내 특정 자재)
+};
+
+/** 산출된 견적 한 줄 */
+export type LineItem = {
+  id: string;
+  room: string;                // '전체' or RoomId or BathId
+  work_type: string;           // 'flooring' 등
+  category: string;            // '바닥재' 같은 한글 라벨
+  unit_type: string;
+  qty: number;
+  grade: Grade;
+  material_id: string | null;
+  material_label: string;      // installer_spec
+  unit_price: number;
+  subtotal: number;
+};
+
+/** 견적 합계 */
+export type Totals = {
+  by_work_type: Record<string, number>;
+  by_room: Record<string, number>;
+  grand_total: number;          // 부가세 별도
+  vat: number;
+  grand_total_with_vat: number;
+  per_pyeong: number;           // 평당 (부가세 별도)
+};
+
+/** Quote Object — Single SoT */
+export type Quote = {
+  quote_id: string;
+  created_at: string;
+  property: Property;
+  scope: Scope;
+  grade: GradeSelection;
+  line_items: LineItem[];
+  totals: Totals;
+};

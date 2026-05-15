@@ -1,0 +1,128 @@
+/**
+ * 평형 → 공간별 면적·둘레 (선형보간)
+ * 데이터는 표준면적 시트(3베이 기준)에서 추출됨.
+ */
+import areas from '@/data/standard_areas.json';
+import type { Property } from './types';
+
+const SA = areas as {
+  pyeongs: number[];
+  rooms: Record<string, Record<string, number>>;
+  perimeters: Record<string, Record<string, number>>;
+  balcony: Record<string, Record<string, number>>;
+};
+
+function interp(table: Record<string, number>, pyeong: number): number {
+  const keys = Object.keys(table).map(Number).sort((a, b) => a - b);
+  if (pyeong <= keys[0]) return table[String(keys[0])];
+  if (pyeong >= keys[keys.length - 1]) return table[String(keys[keys.length - 1])];
+  for (let i = 0; i < keys.length - 1; i++) {
+    const lo = keys[i], hi = keys[i + 1];
+    if (pyeong >= lo && pyeong <= hi) {
+      const ratio = (pyeong - lo) / (hi - lo);
+      return table[String(lo)] + (table[String(hi)] - table[String(lo)]) * ratio;
+    }
+  }
+  return 0;
+}
+
+export function roomArea(roomName: string, pyeong: number): number {
+  const t = SA.rooms[roomName];
+  if (!t) return 0;
+  return interp(t, pyeong);
+}
+
+export function roomPerimeter(roomName: string, pyeong: number): number {
+  const t = SA.perimeters[roomName];
+  if (!t) return 0;
+  return interp(t, pyeong);
+}
+
+export function balconyArea(key: string, pyeong: number): number {
+  const t = SA.balcony[key];
+  if (!t) return 0;
+  return interp(t, pyeong);
+}
+
+/** 우리집 시트 매핑: RoomId → 표준면적 시트의 키 */
+const ROOM_KEY: Record<string, string> = {
+  '거실': '거실',
+  '주방': '주방',
+  '안방': '안방',
+  '작은방1': '작방1',
+  '작은방2': '작방2',
+};
+
+export function roomAreaForId(roomId: string, pyeong: number): number {
+  return roomArea(ROOM_KEY[roomId] || roomId, pyeong);
+}
+
+export function roomPerimeterForId(roomId: string, pyeong: number): number {
+  return roomPerimeter(ROOM_KEY[roomId] || roomId, pyeong);
+}
+
+/** 외부창 면적 (3베이 기준 보간). 우리집 시트의 자동값과 일치 */
+export function outsideWindowArea(pyeong: number): number {
+  return roomArea('외부창', pyeong);
+}
+
+/** 공급면적 (㎡) — 평 × 3.31 */
+export function supplyAreaM2(pyeong: number): number {
+  return pyeong * 3.31;
+}
+
+/** 전용면적 (㎡) — 공급 × 0.75 */
+export function exclusiveAreaM2(pyeong: number): number {
+  return supplyAreaM2(pyeong) * 0.75;
+}
+
+/** 평형 기반 방 개수 권장값 */
+export function recommendedRoomCount(pyeong: number): 2 | 3 | 4 | 5 {
+  if (pyeong < 22) return 2;
+  if (pyeong < 32) return 3;
+  if (pyeong < 45) return 4;
+  return 5;
+}
+
+/** 우리집 시트의 "스위치/콘센트 평형별 자동 산출" 룩업 */
+export function switchOutletCount(pyeong: number): number {
+  // 10평 18ea → 30평 34ea → 60평 56ea (선형보간)
+  const table: Record<number, number> = { 10: 18, 30: 34, 60: 56 };
+  return Math.round(interp(table as never, pyeong));
+}
+
+/** 평형별 문짝 개수 권장 */
+export function doorCount(pyeong: number): number {
+  if (pyeong < 27) return 5;
+  if (pyeong < 38) return 7;
+  return 9;
+}
+
+/** 활성 공간 ID 목록 (방 개수에 따라 작방2 등 빠짐) */
+export function activeRooms(p: Property): string[] {
+  const rooms = ['거실', '주방', '안방'];
+  if (p.rooms >= 3) rooms.push('작은방1');
+  if (p.rooms >= 4) rooms.push('작은방2');
+  return rooms;
+}
+
+export function activeBathrooms(p: Property): string[] {
+  const list = [];
+  if (p.common_bath >= 1) list.push('공용욕실');
+  if (p.master_bath >= 1) list.push('부부욕실');
+  return list;
+}
+
+/**
+ * 공간별 베이 폭(m) — v4 시트 '확장설정' 공식: SQRT(공간면적)
+ * 정사각형 가정의 한 변. 베이별 외관 분배 계산에 사용.
+ */
+export function bayWidthForRoom(roomId: string, pyeong: number): number {
+  const a = roomAreaForId(roomId, pyeong);
+  return Math.sqrt(Math.max(a, 0));
+}
+
+/** 공간별 발코니 면적 = 베이폭 × 발코니깊이 (확장 대상 면적의 기준) */
+export function balconyAreaForRoom(roomId: string, pyeong: number, depth: number): number {
+  return bayWidthForRoom(roomId, pyeong) * depth;
+}
