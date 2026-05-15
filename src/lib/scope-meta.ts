@@ -2,7 +2,7 @@
  * 공사 항목의 친근한 라벨·설명·아이콘 메타데이터.
  * 인테리어 초보자가 한눈에 의도를 파악할 수 있도록 작성.
  */
-import type { RoomScope, Scope } from './types';
+import type { Property, RoomId, RoomScope, Scope } from './types';
 
 export type RoomWorkMeta = {
   key: keyof RoomScope;
@@ -30,6 +30,63 @@ export const ROOM_META: Record<string, { icon: string; label: string }> = {
   '작은방1': { icon: '📚', label: '작은방 1' },
   '작은방2': { icon: '🧸', label: '작은방 2' },
 };
+
+/** 공종 토글 ON 시 기본 적용 공간. 사용자는 이후 개별 공간을 해제할 수 있다. */
+export function defaultRoomsForWork(
+  key: keyof RoomScope,
+  p: Property,
+  visible: RoomId[],
+): RoomId[] {
+  switch (key) {
+    case 'flooring':
+    case 'wallpaper':
+    case 'molding':
+    case 'sash':
+      // 공간 마감/외창은 전 공간 일괄
+      return visible.slice();
+    case 'aircon': {
+      // 30평대까지는 거실+침실, 40평 이상은 주방 포함
+      const base = (['거실', '안방', '작은방1', '작은방2'] as RoomId[]).filter(r => visible.includes(r));
+      if (p.pyeong >= 40 && visible.includes('주방')) base.unshift('주방');
+      return base;
+    }
+    case 'closet':
+      // 침실에만
+      return (['안방', '작은방1', '작은방2'] as RoomId[]).filter(r => visible.includes(r));
+    case 'ceiling_fan':
+      // 거실 + 안방
+      return (['거실', '안방'] as RoomId[]).filter(r => visible.includes(r));
+    default:
+      return [];
+  }
+}
+
+/** ② 공사 항목 — RoomScope 공종을 카테고리로 묶음 */
+export const ROOM_WORK_GROUPS: {
+  title: string;
+  icon: string;
+  desc: string;
+  keys: (keyof RoomScope)[];
+}[] = [
+  {
+    title: '공간 마감',
+    icon: '📐',
+    desc: '바닥재·도배·몰딩·외창 — 활성 공간 전체에 일괄 적용',
+    keys: ['flooring', 'wallpaper', 'molding', 'sash'],
+  },
+  {
+    title: '공조·환기',
+    icon: '❄️',
+    desc: '에어컨·실링팬 — 공간별로 시공 여부 선택',
+    keys: ['aircon', 'ceiling_fan'],
+  },
+  {
+    title: '수납',
+    icon: '👔',
+    desc: '붙박이장 — 시공할 공간 선택',
+    keys: ['closet'],
+  },
+];
 
 export type GlobalItemMeta = {
   key: keyof Scope['global'];

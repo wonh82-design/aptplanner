@@ -36,7 +36,7 @@ export function defaultRoomScope(roomId: RoomId): Scope['rooms'][RoomId] {
     case '작은방1':
       return { ...base, expansion_after: true, aircon: true, closet: true };
     case '작은방2':
-      return { ...base, expansion_after: true, closet: true };
+      return { ...base, expansion_after: true, aircon: true, closet: true };
     default:
       return base;
   }

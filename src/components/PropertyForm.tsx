@@ -250,7 +250,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
                 </span>
                 <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs flex-1 max-w-md">
                   <ExpBtn active={state === 'none'} onClick={() => updateExpansion(room, 'none')}
-                    label="그대로" hint="발코니 유지" />
+                    label="발코니 있음" hint="확장 안됨" />
                   <ExpBtn active={state === 'plan'} onClick={() => updateExpansion(room, 'plan')}
                     label="확장 시공" hint="이번에 확장" tone="amber" />
                   <ExpBtn active={state === 'done'} onClick={() => updateExpansion(room, 'done')}
