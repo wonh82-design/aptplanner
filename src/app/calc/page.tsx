@@ -9,6 +9,7 @@ import { MaterialOverrides } from '@/components/MaterialOverrides';
 import { QuotePanel } from '@/components/QuotePanel';
 import { StepIndicator } from '@/components/StepIndicator';
 import { ServicesPricing } from '@/components/ServicesPricing';
+import { ConsultRequestModal } from '@/components/ConsultRequestModal';
 import { QuotePdfTemplate } from '@/components/pdf/QuotePdfTemplate';
 import { PlanPdfTemplate } from '@/components/pdf/PlanPdfTemplate';
 import { TipsPdfTemplate } from '@/components/pdf/TipsPdfTemplate';
@@ -26,6 +27,7 @@ export default function CalcPage() {
   const [grade, setGrade] = useState(defaultGrade());
   const [downloading, setDownloading] = useState<string | null>(null);
   const [premiumOpen, setPremiumOpen] = useState(false);
+  const [consultOpen, setConsultOpen] = useState(false);
 
   const quote = useMemo(
     () => buildQuote(property, scope, grade),
@@ -138,7 +140,7 @@ export default function CalcPage() {
               onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
               downloadingFree={downloading === 'quote'}
               onApplySpec={() => setPremiumOpen(true)}
-              onApplyConsult={() => setPremiumOpen(true)}
+              onApplyConsult={() => setConsultOpen(true)}
               recommended="spec"
             />
 
@@ -149,7 +151,7 @@ export default function CalcPage() {
             <details className="rounded-xl bg-white border border-zinc-200 group">
               <summary className="cursor-pointer px-5 py-3 flex items-center justify-between hover:bg-zinc-50 rounded-xl">
                 <div>
-                  <div className="text-sm font-semibold text-zinc-900">📊 견적 상세 내역 보기</div>
+                  <div className="text-sm font-semibold text-zinc-900">견적 상세 내역 보기</div>
                   <div className="text-[11px] text-zinc-500">공종별·공간별 합계 + 상세 라인 {quote.line_items.length}건</div>
                 </div>
                 <span className="text-zinc-400 text-xs transition-transform group-open:rotate-180">▼</span>
@@ -181,7 +183,7 @@ export default function CalcPage() {
         </div>
       </footer>
 
-      {/* 유료 신청 모달 */}
+      {/* 유료 신청 모달 (스펙북) */}
       {premiumOpen && (
         <PremiumModal
           onClose={() => setPremiumOpen(false)}
@@ -189,6 +191,21 @@ export default function CalcPage() {
           onDownloadTips={() => downloadPdf('tips', tipsRootRef, `apt-planner_인테리어실전가이드.pdf`)}
           downloadingPlan={downloading === 'plan'}
           downloadingTips={downloading === 'tips'}
+        />
+      )}
+
+      {/* 전문가 컨설팅 신청 모달 */}
+      {consultOpen && (
+        <ConsultRequestModal
+          onClose={() => setConsultOpen(false)}
+          meta={{
+            pyeong: property.pyeong,
+            bay: property.bay,
+            rooms: property.rooms,
+            grade: grade.default,
+            grand_total: quote.totals.grand_total,
+            quote_id: quote.quote_id,
+          }}
         />
       )}
 
@@ -221,7 +238,7 @@ function ResultBanner({
 }) {
   return (
     <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-blue-50 border border-emerald-200 p-5">
-      <div className="text-xs text-emerald-700 font-medium">📊 산출 완료</div>
+      <div className="text-xs text-emerald-700 font-semibold uppercase tracking-wider">산출 완료</div>
       <div className="mt-1 text-2xl font-bold text-zinc-900">
         {quote.property.pyeong}평 · {gradeLabel} 기준 예상 공사비
       </div>
@@ -250,8 +267,9 @@ function TrustNudge() {
   return (
     <Link href="/about" className="block group">
       <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 flex items-center gap-4 hover:border-blue-400 hover:shadow-sm transition">
-        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-700 text-white flex items-center justify-center text-lg">
-          🏗️
+        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-700 text-white flex flex-col items-center justify-center">
+          <span className="text-[10px] uppercase tracking-wide opacity-70 leading-none">since</span>
+          <span className="text-sm font-bold leading-tight">15Y</span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-bold text-zinc-900">누가 이 견적을 만들었나요?</div>
@@ -274,7 +292,7 @@ function FinalNudge() {
         위 카드에서 다음 단계를 선택하시면 <strong className="text-zinc-900">진짜 견적 비교</strong>가 시작됩니다.
       </div>
       <div className="mt-2 text-[11px] text-zinc-500">
-        🔒 어떤 인테리어 업체와도 광고비·수수료·제휴 관계 없음
+        어떤 인테리어 업체와도 광고비·수수료·제휴 관계 없음
       </div>
     </div>
   );
@@ -303,7 +321,7 @@ function PremiumModal({
           <div className="flex items-start justify-between mb-6">
             <div>
               <div className="text-[10px] font-semibold uppercase tracking-widest text-blue-700 mb-2">
-                ⭐ 유료 패키지 · 데모 버전
+                유료 패키지 · 데모 버전
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
                 인테리어 계획서 + 실전 가이드 패키지
@@ -325,7 +343,6 @@ function PremiumModal({
 
           <div className="space-y-4 mb-6">
             <PackageItem
-              icon="📋"
               title="우리집 인테리어 계획서 PDF"
               desc="선택하신 자재·수량 그대로의 상세 계획서. 인테리어 업체에 그대로 전달하면 같은 조건으로 비교 견적을 받을 수 있습니다."
               bullets={[
@@ -337,7 +354,6 @@ function PremiumModal({
               downloading={downloadingPlan}
             />
             <PackageItem
-              icon="📖"
               title="인테리어 실전 가이드 PDF"
               desc="인테리어 처음하는 분들이 가장 궁금해하는 핵심을 정리한 가이드입니다."
               bullets={[
@@ -352,7 +368,7 @@ function PremiumModal({
           </div>
 
           <div className="text-[11px] text-zinc-500 leading-relaxed border-t border-zinc-200 pt-4">
-            🔒 <strong>중립성 약속</strong>: 본 패키지는 어떤 인테리어 업체와도 무관하게 제작된 소비자용 자료입니다.
+            <strong>중립성 약속</strong> · 본 패키지는 어떤 인테리어 업체와도 무관하게 제작된 소비자용 자료입니다.
             특정 업체를 추천·노출하지 않으며, 광고비·제휴비를 받지 않습니다.
           </div>
         </div>
@@ -362,9 +378,8 @@ function PremiumModal({
 }
 
 function PackageItem({
-  icon, title, desc, bullets, onDownload, downloading,
+  title, desc, bullets, onDownload, downloading,
 }: {
-  icon: string;
   title: string;
   desc: string;
   bullets: string[];
@@ -374,9 +389,7 @@ function PackageItem({
   return (
     <div className="rounded-xl border border-zinc-200 p-4">
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-xl">
-          {icon}
-        </div>
+        <div className="flex-shrink-0 w-1.5 self-stretch rounded-full bg-blue-500" />
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-zinc-900 mb-1">{title}</h3>
           <p className="text-xs text-zinc-600 leading-relaxed mb-2">{desc}</p>

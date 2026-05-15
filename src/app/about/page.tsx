@@ -27,7 +27,7 @@ export default function About() {
       <section className="border-b border-zinc-100">
         <div className="max-w-3xl mx-auto px-6 pt-20 pb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-zinc-700 text-xs font-medium mb-6">
-            🧑‍🔧 만든 사람 · 만든 이유
+            만든 사람 · 만든 이유
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 leading-[1.2] mb-5">
             현장에서 15년, <span className="text-blue-700">소비자 편으로 돌아섰습니다</span>
@@ -45,12 +45,14 @@ export default function About() {
         <div className="max-w-4xl mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
             <div className="md:col-span-1">
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 flex items-center justify-center text-white">
-                <div className="text-center">
-                  <div className="text-6xl mb-2">🏗️</div>
-                  <div className="text-xs uppercase tracking-widest opacity-70">apt-planner</div>
-                  <div className="text-sm font-medium mt-1">founder</div>
+              <div className="aspect-square rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 flex flex-col items-center justify-center text-white p-6">
+                <div className="text-3xl font-extrabold tracking-tight mb-3">15년</div>
+                <div className="text-[11px] uppercase tracking-widest opacity-70">건설사 시공·CS</div>
+                <div className="h-px w-8 bg-white/30 my-3" />
+                <div className="text-sm font-medium opacity-90 text-center leading-snug">
+                  건축사<br />건축시공기술사
                 </div>
+                <div className="text-[10px] uppercase tracking-widest opacity-60 mt-4">apt-planner · founder</div>
               </div>
             </div>
             <div className="md:col-span-2 space-y-5">
@@ -60,10 +62,10 @@ export default function About() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Cred icon="🏢" title="대형 건설사 15년+" desc="시공관리·CS 책임자로 다수 단지 운영" />
-                <Cred icon="🏠" title="수만세대 시공·CS" desc="입주민 하자 대응·보수 누적 경험" />
-                <Cred icon="📜" title="건축사" desc="국가공인 건축 설계 자격" />
-                <Cred icon="📜" title="건축시공기술사" desc="시공 분야 최상위 국가기술자격" />
+                <Cred title="대형 건설사 15년+" desc="시공관리·CS 책임자로 다수 단지 운영" />
+                <Cred title="수만세대 시공·CS" desc="입주민 하자 대응·보수 누적 경험" />
+                <Cred title="건축사" desc="국가공인 건축 설계 자격" />
+                <Cred title="건축시공기술사" desc="시공 분야 최상위 국가기술자격" />
               </div>
 
               <p className="text-sm text-zinc-600 leading-relaxed pt-2 border-t border-zinc-200">
@@ -142,17 +144,17 @@ export default function About() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Pillar
-              icon="🔒"
+              n="01"
               title="완전한 중립성"
               desc="어떤 인테리어 업체와도 광고비·수수료·제휴 관계를 맺지 않습니다. 특정 업체를 추천·노출하지 않습니다."
             />
             <Pillar
-              icon="🔬"
+              n="02"
               title="검증된 데이터"
-              desc="실제 시장가 기반 자재 224 SKU, v4 산출 검증 1% 이내 정확도. 데이터는 분기마다 업데이트합니다."
+              desc="실제 시장가 기반 224개 자재, v4 산출 검증 1% 이내 정확도. 데이터는 분기마다 업데이트합니다."
             />
             <Pillar
-              icon="🤝"
+              n="03"
               title="소비자 편에서"
               desc="유일한 수익원은 사용자가 직접 신청하는 유료 패키지. 그래서 우리는 어떤 업체에도 유리하게 작용할 동기가 없습니다."
             />
@@ -191,11 +193,11 @@ export default function About() {
 
 // ===== 보조 컴포넌트 =====
 
-function Cred({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+function Cred({ title, desc }: { title: string; desc: string }) {
   return (
     <div className="rounded-lg border border-zinc-200 bg-white p-3">
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-base">{icon}</span>
+        <span className="inline-block w-1 h-4 rounded-sm bg-blue-500" />
         <span className="font-semibold text-sm text-zinc-900">{title}</span>
       </div>
       <p className="text-[11px] text-zinc-600 leading-relaxed">{desc}</p>
@@ -219,10 +221,10 @@ function StoryBlock({ n, title, body }: { n: string; title: string; body: string
   );
 }
 
-function Pillar({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+function Pillar({ n, title, desc }: { n: string; title: string; desc: string }) {
   return (
     <div className="rounded-xl bg-white border border-zinc-200 p-6">
-      <div className="text-3xl mb-3">{icon}</div>
+      <div className="font-mono text-xs font-bold text-blue-600 mb-2">{n}</div>
       <h3 className="font-bold text-zinc-900 mb-2">{title}</h3>
       <p className="text-sm text-zinc-600 leading-relaxed">{desc}</p>
     </div>

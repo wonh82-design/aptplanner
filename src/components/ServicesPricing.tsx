@@ -42,25 +42,21 @@ export function ServicesPricing({
       {savings && (
         <div className="rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-2 border-amber-300 p-6 sm:p-7 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-200/40 to-transparent rounded-full -translate-y-1/3 translate-x-1/3" />
-          <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
-            <div className="text-5xl sm:text-6xl flex-shrink-0">💰</div>
-            <div className="flex-1">
-              <div className="text-[11px] font-bold uppercase tracking-widest text-amber-700 mb-1">
-                {pyeong}평 기준 · 추가금 분쟁 방지 시 절감 가능액
-              </div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-zinc-900 leading-tight">
-                <span className="text-amber-700">{fmtSaving(savings.min)} ~ {fmtSaving(savings.max)}</span>
-              </div>
-              <p className="text-sm text-zinc-700 mt-2 leading-relaxed">
-                같은 사양으로 비교 견적을 받으면 평균 <strong>{fmtSaving(savings.min)} 이상</strong>,
-                추가금 분쟁까지 막으면 최대 <strong className="text-amber-700">{fmtSaving(savings.max)}</strong> 까지 절약 가능합니다.
-              </p>
-              <div className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-white border border-amber-300">
-                <span className="text-xs">🍱</span>
-                <span className="text-xs font-semibold text-zinc-800">
-                  한 끼 식사값 ₩29,000 = 최대 절감액의 <span className="text-amber-700">단 {specSavingMax ?? 0.1}%</span>
-                </span>
-              </div>
+          <div className="relative">
+            <div className="text-[11px] font-bold uppercase tracking-widest text-amber-700 mb-1">
+              {pyeong}평 기준 · 추가금 분쟁 방지 시 절감 가능액
+            </div>
+            <div className="text-3xl sm:text-4xl font-extrabold text-zinc-900 leading-tight">
+              <span className="text-amber-700">{fmtSaving(savings.min)} ~ {fmtSaving(savings.max)}</span>
+            </div>
+            <p className="text-sm text-zinc-700 mt-2 leading-relaxed">
+              같은 사양으로 비교 견적을 받으면 평균 <strong>{fmtSaving(savings.min)} 이상</strong>,
+              추가금 분쟁까지 막으면 최대 <strong className="text-amber-700">{fmtSaving(savings.max)}</strong> 까지 절약 가능합니다.
+            </p>
+            <div className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-white border border-amber-300">
+              <span className="text-xs font-semibold text-zinc-800">
+                한 끼 식사값 ₩29,000 = 최대 절감액의 <span className="text-amber-700">단 {specSavingMax ?? 0.1}%</span>
+              </span>
             </div>
           </div>
         </div>
@@ -72,14 +68,13 @@ export function ServicesPricing({
         <PricingCard
           tone="free"
           recommended={recommended === 'free'}
-          icon={SERVICE_FREE.icon}
           name={SERVICE_FREE.name}
           subBadge="무료"
           priceMain="₩0"
           priceSub="가입 없이 즉시"
           description={SERVICE_FREE.description}
           features={SERVICE_FREE.features}
-          ctaText={downloadingFree ? '📄 생성 중…' : '지금 바로 무료 다운로드'}
+          ctaText={downloadingFree ? '생성 중…' : '지금 바로 무료 다운로드'}
           ctaDisabled={downloadingFree}
           onClick={onDownloadFree}
         />
@@ -88,9 +83,8 @@ export function ServicesPricing({
         <PricingCard
           tone="spec"
           recommended={recommended === 'spec'}
-          icon={SERVICE_SPEC.icon}
           name={SERVICE_SPEC.name}
-          subBadge="🍱 한 끼 식사값"
+          subBadge="한 끼 식사값"
           priceMain="₩29,000"
           priceSub="단 1회 결제 · 평생 소장"
           description={SERVICE_SPEC.description}
@@ -108,9 +102,8 @@ export function ServicesPricing({
         <PricingCard
           tone="consult"
           recommended={recommended === 'consult'}
-          icon={SERVICE_CONSULT.icon}
           name={SERVICE_CONSULT.name}
-          subBadge="🔥 5월 한정 50% 할인"
+          subBadge="5월 한정 50% 할인"
           priceMain="₩150,000"
           priceOriginal="₩300,000"
           discountLabel="-50%"
@@ -124,7 +117,7 @@ export function ServicesPricing({
           } : undefined}
           ctaText={SERVICE_CONSULT.cta + ' →'}
           onClick={onApplyConsult}
-          credential="🏗️ 건축사 · 건축시공기술사가 직접 진단"
+          credential="건축사 · 건축시공기술사가 직접 진단"
         />
       </div>
     </div>
@@ -138,14 +131,13 @@ export function ServicesPricing({
 type Tone = 'free' | 'spec' | 'consult';
 
 function PricingCard({
-  tone, recommended, icon, name, subBadge,
+  tone, recommended, name, subBadge,
   priceMain, priceOriginal, priceSub, discountLabel,
   description, features, bonus, savingAnchor, credential,
   ctaText, ctaDisabled, onClick,
 }: {
   tone: Tone;
   recommended: boolean;
-  icon: string;
   name: string;
   subBadge: string;
   priceMain: string;
@@ -167,20 +159,17 @@ function PricingCard({
       ${recommended ? `${styles.borderActive} shadow-xl md:scale-[1.02] z-10` : 'border-zinc-200'}`}>
       {recommended && (
         <div className={`${styles.bgBadge} text-white text-xs font-bold text-center py-1.5 uppercase tracking-wider`}>
-          ⭐ 가장 인기 · 추천
+          가장 인기 · 추천
         </div>
       )}
 
       {/* 헤더 */}
       <div className={`px-6 pt-6 pb-4 ${styles.gradientHeader} border-b border-zinc-200/50`}>
-        <div className="flex items-start gap-3 mb-3">
-          <span className="text-3xl">{icon}</span>
-          <div className="flex-1">
-            <div className={`inline-block text-[10px] font-bold uppercase tracking-wider ${styles.text} ${styles.subBadgeBg} px-2 py-0.5 rounded mb-1.5`}>
-              {subBadge}
-            </div>
-            <h3 className="font-bold text-zinc-900 text-base leading-tight">{name}</h3>
+        <div className="mb-3">
+          <div className={`inline-block text-[10px] font-bold uppercase tracking-wider ${styles.text} ${styles.subBadgeBg} px-2 py-0.5 rounded mb-1.5`}>
+            {subBadge}
           </div>
+          <h3 className="font-bold text-zinc-900 text-base leading-tight">{name}</h3>
         </div>
         <div className="flex items-center gap-2 mt-4">
           {priceOriginal && (
@@ -216,7 +205,7 @@ function PricingCard({
 
         {bonus && (
           <div className={`rounded-lg ${styles.bgSoft} p-3 mb-4 border ${styles.borderSoft}`}>
-            <div className={`text-[11px] font-bold ${styles.text} mb-1.5`}>🎁 {bonus.title}</div>
+            <div className={`text-[11px] font-bold ${styles.text} mb-1.5 uppercase tracking-wider`}>{bonus.title}</div>
             <ul className="space-y-1 text-[11px] text-zinc-700">
               {bonus.items.map((f, i) => (
                 <li key={i} className="flex gap-1.5">
@@ -230,7 +219,7 @@ function PricingCard({
 
         {savingAnchor && (
           <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 mb-4">
-            <div className="text-xs font-bold text-amber-900 mb-0.5">💰 {savingAnchor.label}</div>
+            <div className="text-xs font-bold text-amber-900 mb-0.5">{savingAnchor.label}</div>
             {savingAnchor.ratio && (
               <div className="text-[10px] text-amber-700">{savingAnchor.ratio}</div>
             )}

@@ -236,7 +236,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
         </div>
         <div className="space-y-1.5">
           {visibleRooms.map(room => {
-            const meta = ROOM_META[room] || { icon: '📐', label: room };
+            const meta = ROOM_META[room] || { label: room };
             const rs = rooms[room];
             const state: 'none' | 'plan' | 'done' =
               rs.expansion_current ? 'done' :
@@ -244,8 +244,8 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
               'none';
             return (
               <div key={room} className="flex items-center gap-3 py-1.5">
-                <span className="text-sm flex items-center gap-1.5 min-w-[80px]">
-                  <span className="text-base">{meta.icon}</span>
+                <span className="text-sm flex items-center gap-2 min-w-[80px]">
+                  <span className="inline-block w-1 h-4 rounded-sm bg-zinc-300" />
                   <span className="font-medium">{meta.label}</span>
                 </span>
                 <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs flex-1 max-w-md">

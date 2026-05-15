@@ -59,14 +59,14 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
           <span className="text-[10px] text-zinc-400">대표 시나리오로 한 번에 설정</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {PRESETS.map(preset => (
+          {PRESETS.map((preset, idx) => (
             <button
               key={preset.id}
               onClick={() => onChange(preset.apply(property))}
               className="flex flex-col items-start gap-0.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left
                          hover:border-blue-400 hover:bg-blue-50/30 active:scale-[0.98] transition-all"
             >
-              <span className="text-lg leading-none">{preset.icon}</span>
+              <span className="text-[10px] font-mono font-bold text-blue-600 mb-0.5">PRESET {idx + 1}</span>
               <span className="text-xs font-semibold text-zinc-900">{preset.label}</span>
               <span className="text-[10px] text-zinc-500 leading-tight">{preset.desc}</span>
             </button>

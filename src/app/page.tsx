@@ -44,9 +44,9 @@ export default function Landing() {
           </p>
 
           <div className="inline-flex flex-wrap items-center gap-2 mb-8 text-xs">
-            <span className="px-2 py-1 rounded bg-emerald-50 text-emerald-800 font-semibold">✓ 가입 없이 무료</span>
-            <span className="px-2 py-1 rounded bg-blue-50 text-blue-800 font-semibold">✓ 업체 수수료 0원</span>
-            <span className="px-2 py-1 rounded bg-amber-50 text-amber-800 font-semibold">🔥 컨설팅 50% 할인</span>
+            <span className="px-2 py-1 rounded bg-emerald-50 text-emerald-800 font-semibold">가입 없이 무료</span>
+            <span className="px-2 py-1 rounded bg-blue-50 text-blue-800 font-semibold">업체 수수료 0원</span>
+            <span className="px-2 py-1 rounded bg-amber-50 text-amber-800 font-semibold">컨설팅 50% 할인</span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -113,7 +113,7 @@ export default function Landing() {
           </div>
 
           <div className="mt-8 rounded-xl bg-white border border-zinc-200 p-5 text-sm text-zinc-700 leading-relaxed">
-            <strong className="text-zinc-900">📌 우리의 약속</strong> · apt-planner는 어떤 인테리어 업체로부터도
+            <strong className="text-zinc-900">우리의 약속</strong> · apt-planner는 어떤 인테리어 업체로부터도
             광고비·수수료·제휴비를 받지 않습니다. 본 서비스의 유일한 수익원은 사용자가 직접 신청하는
             <strong className="text-blue-700"> 유료 인테리어 계획서·가이드 패키지</strong>뿐입니다.
             그래서 우리는 어떤 업체에도 유리하게 작용할 동기가 없습니다.
@@ -134,17 +134,14 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <ProblemCard
-              icon="💸"
               title="업체마다 견적이 너무 다름"
               desc="같은 평형인데 1,000만원에서 3,000만원까지 차이 나는 이유는 자재 사양·수량·인건비 기준이 다르기 때문. 같은 조건으로 비교 견적을 받아야 진짜 비교가 됩니다."
             />
             <ProblemCard
-              icon="🤔"
               title="무엇을 비교해야 할지 모름"
               desc="단순히 총액만 비교하면 자재 다운그레이드한 곳이 가장 싸 보입니다. 자재 사양·수량별로 항목을 펼쳐서 비교해야 진짜 가성비를 알 수 있습니다."
             />
             <ProblemCard
-              icon="💥"
               title="공사 중 추가금 폭탄"
               desc="견적에 빠진 항목은 시공 중 추가금으로 청구됩니다. 사전에 모든 공종이 빠짐없이 들어간 견적인지 검증할 수 있어야 합니다."
             />
@@ -177,7 +174,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-xs font-medium mb-4">
-              🔥 출시 기념 컨설팅 50% 할인 (5월 한정)
+              출시 기념 컨설팅 50% 할인 (5월 한정)
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-4">
               3가지 방식으로 <span className="text-blue-700">정확한 견적</span>을 만드세요
@@ -218,7 +215,7 @@ export default function Landing() {
               </p>
             </div>
             <div className="text-xs text-zinc-500 leading-relaxed max-w-md">
-              <p className="mb-2 font-semibold text-zinc-300">🔒 중립성 약속</p>
+              <p className="mb-2 font-semibold text-zinc-300">중립성 약속</p>
               <p>
                 apt-planner는 어떤 인테리어 업체와도 <strong className="text-zinc-300">광고비·수수료·제휴</strong> 관계가 없습니다.
                 본 서비스는 100% 소비자 편의를 위해 운영되며, 어떤 업체의 노출 순위·견적도 조작하지 않습니다.
@@ -252,8 +249,9 @@ function CompareCard({
   const isGood = tone === 'good';
   return (
     <div className={`rounded-xl border p-5 ${isGood ? 'border-emerald-300 bg-emerald-50/30' : 'border-zinc-300 bg-white'}`}>
-      <h3 className={`font-bold mb-3 ${isGood ? 'text-emerald-900' : 'text-zinc-700'}`}>
-        {isGood ? '✅' : '🚫'} {title}
+      <h3 className={`font-bold mb-3 flex items-center gap-2 ${isGood ? 'text-emerald-900' : 'text-zinc-700'}`}>
+        <span className={`inline-block w-1.5 h-4 rounded-sm ${isGood ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
+        {title}
       </h3>
       <ul className="space-y-1.5 text-sm">
         {items.map((s, i) => (
@@ -267,10 +265,9 @@ function CompareCard({
   );
 }
 
-function ProblemCard({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+function ProblemCard({ title, desc }: { title: string; desc: string }) {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-6 hover:border-blue-300 hover:shadow-sm transition">
-      <div className="text-3xl mb-3">{icon}</div>
       <h3 className="font-bold text-zinc-900 mb-2">{title}</h3>
       <p className="text-sm text-zinc-600 leading-relaxed">{desc}</p>
     </div>
