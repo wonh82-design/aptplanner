@@ -23,6 +23,14 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
     onChange({ ...value, global: { ...value.global, [key]: !value.global[key] } });
   };
 
+  // 모든 활성 공간이 이미 확장되어 있으면 '전체 확장' 프리셋은 의미가 없으므로 숨김
+  const allAlreadyExpanded = (activeRooms(property) as RoomId[]).every(r =>
+    Boolean(value.rooms[r]?.expansion_current),
+  );
+  const visiblePresets = PRESETS.filter(p =>
+    !(p.id === 'full-expand-sash' && allAlreadyExpanded),
+  );
+
   return (
     <section className="rounded-xl bg-white p-5 shadow-sm border border-zinc-200 space-y-6">
       <header>
@@ -38,8 +46,12 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
           <h3 className="text-xs font-semibold text-zinc-700">① 빠른 시작</h3>
           <span className="text-[10px] text-zinc-400">대표 시나리오로 한 번에 설정</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {PRESETS.map((preset, idx) => (
+        <div className={`grid grid-cols-1 gap-2 ${
+          visiblePresets.length === 2 ? 'sm:grid-cols-2' :
+          visiblePresets.length === 3 ? 'sm:grid-cols-3' :
+          'sm:grid-cols-3'
+        }`}>
+          {visiblePresets.map((preset, idx) => (
             <button
               key={preset.id}
               onClick={() => onChange(preset.apply(property))}

@@ -70,13 +70,23 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
     Math.abs(p.pyeong - value.pyeong) < 0.5
   );
 
-  const updateExpansion = (roomId: RoomId, state: 'none' | 'plan' | 'done') => {
+  /** 현재 상태 변경 — 이미 확장됨이면 공사후도 자동 true (추가 공사 불필요 상태) */
+  const setExpansionCurrent = (roomId: RoomId, isExpanded: boolean) => {
     const prev = rooms[roomId];
-    let patch: Partial<RoomScope>;
-    if (state === 'none') patch = { expansion_current: false, expansion_after: false };
-    else if (state === 'plan') patch = { expansion_current: false, expansion_after: true };
-    else patch = { expansion_current: true, expansion_after: true };
-    onRoomsChange({ ...rooms, [roomId]: { ...prev, ...patch } });
+    const next: RoomScope = {
+      ...prev,
+      expansion_current: isExpanded,
+      // 이미 확장된 상태로 바꾸면 공사후도 확장 상태로 정렬 (추가 공사 불필요)
+      expansion_after: isExpanded ? true : prev.expansion_after,
+    };
+    onRoomsChange({ ...rooms, [roomId]: next });
+  };
+
+  /** 공사 후 상태 변경 — 현재 이미 확장된 공간은 변경 불가 */
+  const setExpansionAfter = (roomId: RoomId, willExpand: boolean) => {
+    const prev = rooms[roomId];
+    if (prev.expansion_current) return; // 이미 확장된 공간은 추가 변경 불가
+    onRoomsChange({ ...rooms, [roomId]: { ...prev, expansion_after: willExpand } });
   };
 
   return (
@@ -232,29 +242,70 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
       <div className="mt-6 pt-5 border-t border-zinc-200">
         <div className="flex items-baseline justify-between mb-3">
           <h3 className="text-sm font-semibold text-zinc-800">발코니 확장 현황</h3>
-          <span className="text-[10px] text-zinc-500">공간별로 현재·향후 확장 여부</span>
+          <span className="text-[10px] text-zinc-500">현재 상태·공사 후를 따로 선택</span>
         </div>
+
+        {/* 컬럼 헤더 */}
+        <div className="grid grid-cols-12 gap-3 mb-1 text-[10px] uppercase tracking-wide text-zinc-500 font-semibold">
+          <div className="col-span-3">공간</div>
+          <div className="col-span-4">현재 상태</div>
+          <div className="col-span-5">공사 후</div>
+        </div>
+
         <div className="space-y-1.5">
           {visibleRooms.map(room => {
             const meta = ROOM_META[room] || { label: room };
             const rs = rooms[room];
-            const state: 'none' | 'plan' | 'done' =
-              rs.expansion_current ? 'done' :
-              rs.expansion_after   ? 'plan' :
-              'none';
+            const already = rs.expansion_current;
             return (
-              <div key={room} className="flex items-center gap-3 py-1.5">
-                <span className="text-sm flex items-center gap-2 min-w-[80px]">
-                  <span className="inline-block w-1 h-4 rounded-sm bg-zinc-300" />
-                  <span className="font-medium">{meta.label}</span>
+              <div key={room} className="grid grid-cols-12 gap-3 items-center py-1">
+                {/* 공간 라벨 */}
+                <span className="col-span-3 text-sm flex items-center gap-2 min-w-0">
+                  <span className="inline-block w-1 h-4 rounded-sm bg-zinc-300 flex-shrink-0" />
+                  <span className="font-medium truncate">{meta.label}</span>
                 </span>
-                <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs flex-1 max-w-md">
-                  <ExpBtn active={state === 'none'} onClick={() => updateExpansion(room, 'none')}
-                    label="발코니 있음" hint="확장 안됨" />
-                  <ExpBtn active={state === 'plan'} onClick={() => updateExpansion(room, 'plan')}
-                    label="확장 시공" hint="이번에 확장" tone="amber" />
-                  <ExpBtn active={state === 'done'} onClick={() => updateExpansion(room, 'done')}
-                    label="이미 확장됨" hint="기존부터 확장" />
+
+                {/* 현재 상태 */}
+                <div className="col-span-4">
+                  <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs w-full">
+                    <ExpBtn
+                      active={!already}
+                      onClick={() => setExpansionCurrent(room, false)}
+                      label="발코니 있음"
+                      hint="확장 안됨"
+                    />
+                    <ExpBtn
+                      active={already}
+                      onClick={() => setExpansionCurrent(room, true)}
+                      label="이미 확장됨"
+                      hint="기존부터 확장"
+                    />
+                  </div>
+                </div>
+
+                {/* 공사 후 — 이미 확장된 공간은 숨김 */}
+                <div className="col-span-5">
+                  {already ? (
+                    <div className="text-[11px] text-zinc-400 italic px-2">
+                      추가 확장공사 불필요
+                    </div>
+                  ) : (
+                    <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs w-full">
+                      <ExpBtn
+                        active={!rs.expansion_after}
+                        onClick={() => setExpansionAfter(room, false)}
+                        label="확장 안 함"
+                        hint="발코니 유지"
+                      />
+                      <ExpBtn
+                        active={rs.expansion_after}
+                        onClick={() => setExpansionAfter(room, true)}
+                        label="확장 시공"
+                        hint="이번에 확장"
+                        tone="amber"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             );
