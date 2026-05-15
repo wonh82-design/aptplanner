@@ -38,7 +38,8 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
       .map(([wt, v]) => ({ wt, sub: v.sub, label: labelOf(wt) }));
   }, [quote.line_items]);
 
-  const visible = showAll ? workTypes : workTypes.slice(0, 10);
+  const TOP_N = 5;
+  const visible = showAll ? workTypes : workTypes.slice(0, TOP_N);
 
   const effectiveGrade = (wt: string): Grade =>
     (value.overrides[wt] as Grade) ?? value.default;
@@ -117,12 +118,12 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
         })}
       </div>
 
-      {workTypes.length > 10 && (
+      {workTypes.length > TOP_N && (
         <button
           onClick={() => setShowAll(s => !s)}
-          className="mt-3 w-full text-xs text-zinc-500 hover:text-zinc-900 underline underline-offset-2"
+          className="mt-3 w-full text-xs text-zinc-500 hover:text-zinc-900 underline underline-offset-2 py-2"
         >
-          {showAll ? '주요 10개만 보기' : `전체 ${workTypes.length}개 공종 펼치기`}
+          {showAll ? `주요 ${TOP_N}개만 보기` : `전체 ${workTypes.length}개 공종 펼치기 (현재 ${TOP_N}개 표시)`}
         </button>
       )}
     </section>

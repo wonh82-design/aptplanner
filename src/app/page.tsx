@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ServicesPricing } from '@/components/ServicesPricing';
 
 export const metadata = {
   title: 'apt-planner — 인테리어 업체에 휘둘리지 않는 첫걸음',
@@ -32,16 +33,21 @@ export default function Landing() {
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-zinc-900 leading-[1.15] mb-6">
-            인테리어 업체에 휘둘리지 않는 <br className="hidden sm:block" />
-            <span className="text-blue-700">정확한 첫 견적</span>을 만드세요
+            한 끼 식사값으로 <br className="hidden sm:block" />
+            <span className="text-orange-600">500~3,000만원</span> 아끼는 법
           </h1>
 
-          <p className="text-base sm:text-lg text-zinc-600 leading-relaxed max-w-2xl mx-auto mb-10">
-            업체마다 천차만별인 견적,
-            <strong className="text-zinc-900"> 같은 사양으로 비교 견적을 받아야</strong> 의미가 있습니다.
-            apt-planner는 우리집 평형·사양에 맞는 시장가 기반 예산을 먼저 알려드리고,
-            여러 업체에 그대로 전달할 수 있는 인테리어 계획서를 만들어드립니다.
+          <p className="text-base sm:text-lg text-zinc-600 leading-relaxed max-w-2xl mx-auto mb-6">
+            정확한 스펙 없이 받은 견적은 비교가 불가능하고,
+            <strong className="text-zinc-900"> 시공 중 추가금 분쟁의 80%</strong>가 그 모호함에서 시작됩니다.
+            apt-planner로 우리집 사양을 먼저 확정하고, 같은 조건으로 여러 업체에서 비교 견적을 받으세요.
           </p>
+
+          <div className="inline-flex flex-wrap items-center gap-2 mb-8 text-xs">
+            <span className="px-2 py-1 rounded bg-emerald-50 text-emerald-800 font-semibold">✓ 가입 없이 무료</span>
+            <span className="px-2 py-1 rounded bg-blue-50 text-blue-800 font-semibold">✓ 업체 수수료 0원</span>
+            <span className="px-2 py-1 rounded bg-amber-50 text-amber-800 font-semibold">🔥 컨설팅 50% 할인</span>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Link
@@ -166,57 +172,33 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== Premium CTA ===== */}
-      <section className="border-t border-zinc-200 bg-gradient-to-br from-blue-50 via-white to-emerald-50">
-        <div className="max-w-4xl mx-auto px-6 py-20">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-800 text-xs font-medium mb-4">
-              ⭐ 유료 패키지
+      {/* ===== Pricing — 3종 서비스 ===== */}
+      <section id="pricing" className="border-t border-zinc-200 bg-gradient-to-br from-blue-50/40 via-white to-emerald-50/40">
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-xs font-medium mb-4">
+              🔥 출시 기념 컨설팅 50% 할인 (1달 한정)
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-4">
-              제대로 된 비교 견적, <span className="text-blue-700">계획서 한 장</span>이면 끝납니다
+              3가지 방식으로 <span className="text-blue-700">정확한 견적</span>을 만드세요
             </h2>
-            <p className="text-zinc-600 max-w-2xl mx-auto leading-relaxed">
-              내 예산에 맞춰 선택한 스펙 그대로,
-              여러 업체에 동일 조건으로 비교 견적을 받을 수 있는
-              인테리어 계획서를 만들어드립니다.
-              인테리어 잘하는 법·업체 고르는 법까지 가이드 PDF로 함께 받으세요.
+            <p className="text-zinc-600 max-w-2xl mx-auto leading-relaxed text-sm">
+              무료로 예상 공사비부터 확인하고,
+              비교 견적이 필요하면 한 끼 식사값으로 스펙북을,
+              우리집에 딱 맞는 최적안이 필요하면 전문가 컨설팅을 받으세요.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            <PremiumCard
-              icon="📋"
-              title="우리집 인테리어 계획서 PDF"
-              bullets={[
-                '내 사양·수량 그대로의 상세 계획서',
-                '여러 업체에 같은 조건으로 견적 요청 가능',
-                '단가만 회신받아 같은 항목끼리 비교',
-                '추가금 발생 가능 항목 체크리스트 포함',
-              ]}
-            />
-            <PremiumCard
-              icon="📖"
-              title="인테리어 실전 가이드 PDF"
-              bullets={[
-                '인테리어 잘하는 5가지 원칙',
-                '좋은 업체 vs 위험한 업체 구분법',
-                '견적 요청·비교·협상의 정석',
-                '계약 직전 마지막 체크리스트',
-              ]}
-            />
-          </div>
+          <ServicesPricing />
 
-          <div className="text-center">
+          <div className="text-center mt-10">
             <Link
               href="/calc"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 px-7 py-3.5 text-white font-semibold shadow-md transition active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 hover:bg-black px-7 py-3.5 text-white font-semibold shadow-md transition active:scale-[0.98]"
             >
               먼저 무료 산정부터 시작하기 →
             </Link>
-            <p className="text-xs text-zinc-500 mt-3">
-              계산 결과 화면에서 유료 패키지를 신청하실 수 있습니다
-            </p>
+            <p className="text-xs text-zinc-500 mt-3">가입 없이 30초 안에 결과를 받아보세요</p>
           </div>
         </div>
       </section>
@@ -307,19 +289,3 @@ function StepCard({ n, title, desc }: { n: string; title: string; desc: string }
   );
 }
 
-function PremiumCard({ icon, title, bullets }: { icon: string; title: string; bullets: string[] }) {
-  return (
-    <div className="rounded-xl border-2 border-blue-200 bg-white p-6 hover:border-blue-400 hover:shadow-md transition">
-      <div className="text-3xl mb-3">{icon}</div>
-      <h3 className="font-bold text-zinc-900 mb-3">{title}</h3>
-      <ul className="space-y-1.5 text-sm text-zinc-700">
-        {bullets.map((s, i) => (
-          <li key={i} className="flex gap-2">
-            <span className="text-blue-600 flex-shrink-0">✓</span>
-            <span>{s}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}

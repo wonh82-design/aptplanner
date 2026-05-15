@@ -8,6 +8,7 @@ import { GradeSelector } from '@/components/GradeSelector';
 import { MaterialOverrides } from '@/components/MaterialOverrides';
 import { QuotePanel } from '@/components/QuotePanel';
 import { StepIndicator } from '@/components/StepIndicator';
+import { ServicesPricing } from '@/components/ServicesPricing';
 import { QuotePdfTemplate } from '@/components/pdf/QuotePdfTemplate';
 import { PlanPdfTemplate } from '@/components/pdf/PlanPdfTemplate';
 import { TipsPdfTemplate } from '@/components/pdf/TipsPdfTemplate';
@@ -128,17 +129,38 @@ export default function CalcPage() {
         )}
 
         {step === 3 && (
-          <div className="max-w-4xl mx-auto flex flex-col gap-4">
+          <div className="max-w-5xl mx-auto flex flex-col gap-5">
             <ResultBanner quote={quote} gradeLabel={grade.default} />
 
-            <FreePdfCard
-              onDownload={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
-              downloading={downloading === 'quote'}
+            {/* 3종 서비스 가격 카드 — 결과 보자마자 노출 */}
+            <ServicesPricing
+              pyeong={property.pyeong}
+              onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
+              downloadingFree={downloading === 'quote'}
+              onApplySpec={() => setPremiumOpen(true)}
+              onApplyConsult={() => setPremiumOpen(true)}
+              recommended="spec"
             />
 
-            <QuotePanel quote={quote} />
+            {/* 신뢰 nudge — 누가 만들었나 */}
+            <TrustNudge />
 
-            <PremiumPromptCard onClick={() => setPremiumOpen(true)} />
+            {/* 견적 상세 (접기 가능) */}
+            <details className="rounded-xl bg-white border border-zinc-200 group">
+              <summary className="cursor-pointer px-5 py-3 flex items-center justify-between hover:bg-zinc-50 rounded-xl">
+                <div>
+                  <div className="text-sm font-semibold text-zinc-900">📊 견적 상세 내역 보기</div>
+                  <div className="text-[11px] text-zinc-500">공종별·공간별 합계 + 상세 라인 {quote.line_items.length}건</div>
+                </div>
+                <span className="text-zinc-400 text-xs transition-transform group-open:rotate-180">▼</span>
+              </summary>
+              <div className="px-5 pb-5">
+                <QuotePanel quote={quote} />
+              </div>
+            </details>
+
+            {/* 마무리 nudge */}
+            <FinalNudge />
 
             <StepNav
               left={
@@ -224,66 +246,40 @@ function Stat({ label, value, highlight = false }: { label: string; value: strin
   );
 }
 
-function FreePdfCard({ onDownload, downloading }: { onDownload: () => void; downloading: boolean }) {
+function TrustNudge() {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 flex items-center gap-4">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-xl">
-        📄
+    <Link href="/about" className="block group">
+      <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 flex items-center gap-4 hover:border-blue-400 hover:shadow-sm transition">
+        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-700 text-white flex items-center justify-center text-lg">
+          🏗️
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-bold text-zinc-900">누가 이 견적을 만들었나요?</div>
+          <div className="text-xs text-zinc-600 leading-relaxed mt-0.5">
+            대형 건설사 <strong>15년 시공·CS 경험</strong> · 건축사 + 건축시공기술사가 직접 검증한 데이터
+          </div>
+        </div>
+        <span className="text-xs text-blue-700 font-semibold group-hover:underline">소개 보기 →</span>
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-zinc-900">예상 공사비 PDF 다운로드</div>
-        <div className="text-xs text-zinc-500">공종별·공간별·상세 라인 포함 · 무료</div>
+    </Link>
+  );
+}
+
+function FinalNudge() {
+  return (
+    <div className="rounded-xl bg-gradient-to-br from-zinc-50 to-blue-50/30 border border-zinc-200 p-5 text-center">
+      <div className="text-sm text-zinc-700 leading-relaxed">
+        견적 결과가 마음에 드시나요?
+        <br className="sm:hidden" />
+        위 카드에서 다음 단계를 선택하시면 <strong className="text-zinc-900">진짜 견적 비교</strong>가 시작됩니다.
       </div>
-      <button
-        onClick={onDownload}
-        disabled={downloading}
-        className="btn-primary text-xs whitespace-nowrap"
-      >
-        {downloading ? '생성 중...' : '다운로드'}
-      </button>
+      <div className="mt-2 text-[11px] text-zinc-500">
+        🔒 어떤 인테리어 업체와도 광고비·수수료·제휴 관계 없음
+      </div>
     </div>
   );
 }
 
-function PremiumPromptCard({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="rounded-xl border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-emerald-50 p-5 text-left
-                 hover:border-blue-500 hover:shadow-md transition w-full"
-    >
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-white shadow-sm flex items-center justify-center text-2xl">
-          ⭐
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-              유료 패키지
-            </span>
-          </div>
-          <h3 className="font-bold text-zinc-900 text-base mb-1">
-            제대로 된 비교 견적을 받고 싶다면?
-          </h3>
-          <p className="text-sm text-zinc-600 leading-relaxed mb-3">
-            지금 선택하신 사양 그대로 여러 인테리어 업체에 동일 조건으로 견적 요청할 수 있는
-            <strong className="text-zinc-900"> 우리집 인테리어 계획서 PDF</strong>와
-            <strong className="text-zinc-900"> 인테리어 실전 가이드 PDF</strong>를 받아보세요.
-          </p>
-          <ul className="space-y-0.5 text-xs text-zinc-700 mb-3">
-            <li>✓ 자재 사양·수량 그대로의 시공자용 계획서</li>
-            <li>✓ 인테리어 잘하는 법 · 좋은 업체 고르는 법</li>
-            <li>✓ 견적 요청·비교·협상의 정석 가이드</li>
-            <li>✓ 계약 직전 마지막 체크리스트</li>
-          </ul>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700">
-            자세히 보기 →
-          </span>
-        </div>
-      </div>
-    </button>
-  );
-}
 
 function PremiumModal({
   onClose, onDownloadPlan, onDownloadTips, downloadingPlan, downloadingTips,
