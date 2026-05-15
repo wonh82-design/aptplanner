@@ -1,169 +1,324 @@
-'use client';
+import Link from 'next/link';
 
-import { useMemo, useState } from 'react';
-import { PropertyForm } from '@/components/PropertyForm';
-import { ScopeMatrix } from '@/components/ScopeMatrix';
-import { GradeSelector } from '@/components/GradeSelector';
-import { MaterialOverrides } from '@/components/MaterialOverrides';
-import { QuotePanel } from '@/components/QuotePanel';
-import { StepIndicator } from '@/components/StepIndicator';
-import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
-import { buildQuote, fmtKRWShort } from '@/lib/calculator';
+export const metadata = {
+  title: 'apt-planner — 인테리어 업체에 휘둘리지 않는 첫걸음',
+  description:
+    '수수료 0원·업체 제휴 0건. 정확한 시장가 기반 예산을 먼저 알아보고, 여러 업체에서 정직하게 비교 견적을 받으세요.',
+};
 
-type Step = 1 | 2 | 3;
-
-export default function Home() {
-  const [step, setStep] = useState<Step>(1);
-  const [maxReached, setMaxReached] = useState<Step>(1);
-  const [property, setProperty] = useState(defaultProperty());
-  const [scope, setScope] = useState(defaultScope());
-  const [grade, setGrade] = useState(defaultGrade());
-
-  const quote = useMemo(
-    () => buildQuote(property, scope, grade),
-    [property, scope, grade]
-  );
-
-  const goTo = (s: Step) => {
-    setStep(s);
-    if (s > maxReached) setMaxReached(s);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const reset = () => {
-    setProperty(defaultProperty());
-    setScope(defaultScope());
-    setGrade(defaultGrade());
-    setMaxReached(1);
-    goTo(1);
-  };
-
+export default function Landing() {
   return (
-    <div className="flex-1 w-full">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold tracking-tight">apt-planner</h1>
-            <p className="text-xs text-zinc-500">우리집 인테리어 공사비 산정 · 1단계 MVP</p>
-          </div>
-          <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-            {quote.quote_id}
-          </span>
+    <div className="flex-1 w-full bg-white">
+      {/* ===== Top bar ===== */}
+      <header className="border-b border-zinc-200 bg-white/80 backdrop-blur sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold">a</span>
+            <span className="font-bold tracking-tight">apt-planner</span>
+          </Link>
+          <Link href="/calc" className="text-xs font-medium text-zinc-700 hover:text-zinc-900">
+            예산 산정 시작 →
+          </Link>
         </div>
       </header>
 
-      <StepIndicator current={step} maxReached={maxReached} onStepClick={goTo} />
+      {/* ===== Hero ===== */}
+      <section className="relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            인테리어 처음하는 분들을 위한 도구 · 100% 소비자 편의
+          </div>
 
-      <main className="max-w-7xl mx-auto px-6 py-6">
-        {step === 1 && (
-          <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            <PropertyForm value={property} onChange={setProperty} />
-            <ScopeMatrix property={property} value={scope} onChange={setScope} />
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-zinc-900 leading-[1.15] mb-6">
+            인테리어 업체에 휘둘리지 않는 <br className="hidden sm:block" />
+            <span className="text-blue-700">정확한 첫 견적</span>을 만드세요
+          </h1>
 
-            <StepNav
-              right={
-                <button
-                  onClick={() => goTo(2)}
-                  className="btn-primary"
-                >
-                  다음: 자재 등급 선택 →
-                </button>
-              }
+          <p className="text-base sm:text-lg text-zinc-600 leading-relaxed max-w-2xl mx-auto mb-10">
+            업체마다 천차만별인 견적,
+            <strong className="text-zinc-900"> 같은 사양으로 비교 견적을 받아야</strong> 의미가 있습니다.
+            apt-planner는 우리집 평형·사양에 맞는 시장가 기반 예산을 먼저 알려드리고,
+            여러 업체에 그대로 전달할 수 있는 인테리어 계획서를 만들어드립니다.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <Link
+              href="/calc"
+              className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 hover:bg-black px-7 py-3.5 text-white font-semibold shadow-sm transition active:scale-[0.98]"
+            >
+              무료로 예상 공사비 산정하기 →
+            </Link>
+            <span className="text-xs text-zinc-500">
+              가입 없이 바로 시작 · 결과 PDF 무료 다운로드
+            </span>
+          </div>
+
+          {/* Hero stats */}
+          <div className="mt-14 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
+            <Stat n="224" l="실제 시장가 자재" />
+            <Stat n="60+" l="세부 공종 산출" />
+            <Stat n="₩0" l="업체 수수료" highlight />
+          </div>
+        </div>
+      </section>
+
+      {/* ===== Differentiator ===== */}
+      <section className="border-t border-zinc-200 bg-zinc-50">
+        <div className="max-w-5xl mx-auto px-6 py-20">
+          <div className="text-center mb-12">
+            <div className="text-xs font-semibold uppercase tracking-widest text-emerald-700 mb-3">
+              왜 apt-planner인가
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-4">
+              우리는 인테리어 업체 연결 서비스가 아닙니다
+            </h2>
+            <p className="text-zinc-600 max-w-2xl mx-auto leading-relaxed">
+              시중의 견적 비교 사이트 대부분은 업체로부터 <strong>3~10% 수수료</strong>를 받고 운영됩니다.
+              이는 곧 그 비용이 견적에 반영된다는 뜻이고, &ldquo;공정한 비교&rdquo;라는 본래 취지가 흔들립니다.
+              <br /><br />
+              apt-planner는 어떤 인테리어 업체와도 거래·제휴 관계가 없습니다.
+              오직 소비자가 정확한 정보로 무장할 수 있도록 돕습니다.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CompareCard
+              tone="bad"
+              title="기존 견적 비교 서비스"
+              items={[
+                '업체에서 수수료 3~10% 수취',
+                '제휴 업체 중심으로 견적 제공',
+                '뭉뚱그린 견적 (상세 사양 X)',
+                '업체 노출 순위가 비즈니스 모델',
+              ]}
+            />
+            <CompareCard
+              tone="good"
+              title="apt-planner"
+              items={[
+                '업체 수수료·제휴 0건',
+                '실제 시장가 기반 중립 산출',
+                '자재 SKU·수량까지 상세',
+                '여러 업체 비교 견적을 위한 도구',
+              ]}
             />
           </div>
-        )}
 
-        {step === 2 && (
-          <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            <GradeSelector value={grade} onChange={setGrade} />
-            <MaterialOverrides quote={quote} value={grade} onChange={setGrade} />
+          <div className="mt-8 rounded-xl bg-white border border-zinc-200 p-5 text-sm text-zinc-700 leading-relaxed">
+            <strong className="text-zinc-900">📌 우리의 약속</strong> · apt-planner는 어떤 인테리어 업체로부터도
+            광고비·수수료·제휴비를 받지 않습니다. 본 서비스의 유일한 수익원은 사용자가 직접 신청하는
+            <strong className="text-blue-700"> 유료 인테리어 계획서·가이드 패키지</strong>뿐입니다.
+            그래서 우리는 어떤 업체에도 유리하게 작용할 동기가 없습니다.
+          </div>
+        </div>
+      </section>
 
-            <StepNav
-              left={
-                <button onClick={() => goTo(1)} className="btn-secondary">
-                  ← 이전
-                </button>
-              }
-              right={
-                <button onClick={() => goTo(3)} className="btn-primary">
-                  공사비 계산하기 →
-                </button>
-              }
+      {/* ===== Problem ===== */}
+      <section className="border-t border-zinc-200 bg-white">
+        <div className="max-w-5xl mx-auto px-6 py-20">
+          <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 text-center mb-3">
+            인테리어 처음하는 분들의 흔한 고민
+          </h2>
+          <p className="text-zinc-600 text-center max-w-2xl mx-auto mb-12 leading-relaxed">
+            한 번도 안 해본 일이라 무엇을 비교해야 할지 모르는 게 당연합니다.
+            이 도구는 그 정보 격차를 메우기 위해 만들었습니다.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <ProblemCard
+              icon="💸"
+              title="업체마다 견적이 너무 다름"
+              desc="같은 평형인데 1,000만원에서 3,000만원까지 차이 나는 이유는 자재 사양·수량·인건비 기준이 다르기 때문. 같은 조건으로 비교 견적을 받아야 진짜 비교가 됩니다."
+            />
+            <ProblemCard
+              icon="🤔"
+              title="무엇을 비교해야 할지 모름"
+              desc="단순히 총액만 비교하면 자재 다운그레이드한 곳이 가장 싸 보입니다. 자재 사양·수량별로 항목을 펼쳐서 비교해야 진짜 가성비를 알 수 있습니다."
+            />
+            <ProblemCard
+              icon="💥"
+              title="공사 중 추가금 폭탄"
+              desc="견적에 빠진 항목은 시공 중 추가금으로 청구됩니다. 사전에 모든 공종이 빠짐없이 들어간 견적인지 검증할 수 있어야 합니다."
             />
           </div>
-        )}
+        </div>
+      </section>
 
-        {step === 3 && (
-          <div className="max-w-4xl mx-auto flex flex-col gap-4">
-            <ResultBanner quote={quote} property={{
-              pyeong: property.pyeong,
-              grade: grade.default,
-            }} />
-            <QuotePanel quote={quote} />
+      {/* ===== How it works ===== */}
+      <section className="border-t border-zinc-200 bg-zinc-50">
+        <div className="max-w-5xl mx-auto px-6 py-20">
+          <div className="text-center mb-12">
+            <div className="text-xs font-semibold uppercase tracking-widest text-blue-700 mb-3">
+              How it works
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900">
+              3단계로 정확한 예산을 알아보세요
+            </h2>
+          </div>
 
-            <StepNav
-              left={
-                <button onClick={() => goTo(2)} className="btn-secondary">
-                  ← 이전: 등급 수정
-                </button>
-              }
-              right={
-                <button onClick={reset} className="btn-secondary">
-                  새로 시작
-                </button>
-              }
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <StepCard n="1" title="우리집 정보 입력" desc="평형·베이·욕실·발코니 등 기본 정보. 30초면 충분합니다." />
+            <StepCard n="2" title="공사 범위·자재 등급" desc="공간별로 무엇을 시공할지, 자재는 어떤 등급으로 할지 직관적으로 선택." />
+            <StepCard n="3" title="실시간 공사비 산출" desc="공종별·공간별 상세 견적. PDF로 다운받아 업체에 그대로 전달 가능." />
+          </div>
+        </div>
+      </section>
+
+      {/* ===== Premium CTA ===== */}
+      <section className="border-t border-zinc-200 bg-gradient-to-br from-blue-50 via-white to-emerald-50">
+        <div className="max-w-4xl mx-auto px-6 py-20">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-800 text-xs font-medium mb-4">
+              ⭐ 유료 패키지
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-4">
+              제대로 된 비교 견적, <span className="text-blue-700">계획서 한 장</span>이면 끝납니다
+            </h2>
+            <p className="text-zinc-600 max-w-2xl mx-auto leading-relaxed">
+              내 예산에 맞춰 선택한 스펙 그대로,
+              여러 업체에 동일 조건으로 비교 견적을 받을 수 있는
+              인테리어 계획서를 만들어드립니다.
+              인테리어 잘하는 법·업체 고르는 법까지 가이드 PDF로 함께 받으세요.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            <PremiumCard
+              icon="📋"
+              title="우리집 인테리어 계획서 PDF"
+              bullets={[
+                '내 사양·수량 그대로의 상세 계획서',
+                '여러 업체에 같은 조건으로 견적 요청 가능',
+                '단가만 회신받아 같은 항목끼리 비교',
+                '추가금 발생 가능 항목 체크리스트 포함',
+              ]}
+            />
+            <PremiumCard
+              icon="📖"
+              title="인테리어 실전 가이드 PDF"
+              bullets={[
+                '인테리어 잘하는 5가지 원칙',
+                '좋은 업체 vs 위험한 업체 구분법',
+                '견적 요청·비교·협상의 정석',
+                '계약 직전 마지막 체크리스트',
+              ]}
             />
           </div>
-        )}
-      </main>
 
-      <footer className="border-t border-zinc-200 bg-white mt-12">
-        <div className="max-w-7xl mx-auto px-6 py-4 text-xs text-zinc-500">
-          ※ 본 견적은 표준 자재가 기준의 예상치이며, 실제 시공·견적은 업체 협의가 필요합니다.
+          <div className="text-center">
+            <Link
+              href="/calc"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 px-7 py-3.5 text-white font-semibold shadow-md transition active:scale-[0.98]"
+            >
+              먼저 무료 산정부터 시작하기 →
+            </Link>
+            <p className="text-xs text-zinc-500 mt-3">
+              계산 결과 화면에서 유료 패키지를 신청하실 수 있습니다
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== Footer ===== */}
+      <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300">
+        <div className="max-w-5xl mx-auto px-6 py-12">
+          <div className="flex flex-col sm:flex-row items-start gap-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="inline-block w-7 h-7 rounded bg-white text-zinc-900 text-xs flex items-center justify-center font-bold">a</span>
+                <span className="font-bold text-white">apt-planner</span>
+              </div>
+              <p className="text-xs leading-relaxed text-zinc-400 max-w-md">
+                인테리어 처음하는 소비자가 정직하고 실력있는 업체를 고를 수 있도록 돕는
+                중립적인 정보 도구입니다.
+              </p>
+            </div>
+            <div className="text-xs text-zinc-500 leading-relaxed max-w-md">
+              <p className="mb-2 font-semibold text-zinc-300">🔒 중립성 약속</p>
+              <p>
+                apt-planner는 어떤 인테리어 업체와도 <strong className="text-zinc-300">광고비·수수료·제휴</strong> 관계가 없습니다.
+                본 서비스는 100% 소비자 편의를 위해 운영되며, 어떤 업체의 노출 순위·견적도 조작하지 않습니다.
+              </p>
+            </div>
+          </div>
+          <div className="mt-8 pt-6 border-t border-zinc-800 text-xs text-zinc-500 flex flex-col sm:flex-row gap-2 justify-between">
+            <span>© apt-planner — All rights reserved</span>
+            <span>본 견적은 표준 시장가 기반 예상치이며, 실제 시공·견적은 업체 협의가 필요합니다.</span>
+          </div>
         </div>
       </footer>
     </div>
   );
 }
 
-function StepNav({ left, right }: { left?: React.ReactNode; right?: React.ReactNode }) {
+// ===== 보조 컴포넌트 =====
+
+function Stat({ n, l, highlight = false }: { n: string; l: string; highlight?: boolean }) {
   return (
-    <div className="flex items-center justify-between mt-2 pt-4 border-t border-zinc-200">
-      <div>{left}</div>
-      <div>{right}</div>
+    <div>
+      <div className={`text-2xl sm:text-3xl font-bold ${highlight ? 'text-emerald-600' : 'text-zinc-900'}`}>{n}</div>
+      <div className="text-[11px] sm:text-xs text-zinc-500 mt-1">{l}</div>
     </div>
   );
 }
 
-function ResultBanner({
-  quote, property,
-}: {
-  quote: ReturnType<typeof buildQuote>;
-  property: { pyeong: number; grade: string };
-}) {
+function CompareCard({
+  tone, title, items,
+}: { tone: 'good' | 'bad'; title: string; items: string[] }) {
+  const isGood = tone === 'good';
   return (
-    <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-blue-50 border border-emerald-200 p-5">
-      <div className="text-xs text-emerald-700 font-medium">📊 산출 완료</div>
-      <div className="mt-1 text-2xl font-bold text-zinc-900">
-        {property.pyeong}평 · {property.grade} 기준 예상 공사비
-      </div>
-      <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Stat label="총 공사비" value={fmtKRWShort(quote.totals.grand_total)} highlight />
-        <Stat label="부가세 포함" value={fmtKRWShort(quote.totals.grand_total_with_vat)} />
-        <Stat label="평당" value={`${fmtKRWShort(quote.totals.per_pyeong)}/평`} />
-        <Stat label="라인 항목" value={`${quote.line_items.length}건`} />
-      </div>
+    <div className={`rounded-xl border p-5 ${isGood ? 'border-emerald-300 bg-emerald-50/30' : 'border-zinc-300 bg-white'}`}>
+      <h3 className={`font-bold mb-3 ${isGood ? 'text-emerald-900' : 'text-zinc-700'}`}>
+        {isGood ? '✅' : '🚫'} {title}
+      </h3>
+      <ul className="space-y-1.5 text-sm">
+        {items.map((s, i) => (
+          <li key={i} className={`flex gap-2 ${isGood ? 'text-emerald-900' : 'text-zinc-600 line-through decoration-zinc-400'}`}>
+            <span className="text-zinc-400">·</span>
+            <span>{s}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-function Stat({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
+function ProblemCard({ icon, title, desc }: { icon: string; title: string; desc: string }) {
   return (
-    <div className="bg-white/70 rounded-lg px-3 py-2">
-      <div className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</div>
-      <div className={`mt-0.5 font-semibold tabular-nums ${highlight ? 'text-lg text-blue-900' : 'text-sm text-zinc-800'}`}>
-        {value}
+    <div className="rounded-xl border border-zinc-200 bg-white p-6 hover:border-blue-300 hover:shadow-sm transition">
+      <div className="text-3xl mb-3">{icon}</div>
+      <h3 className="font-bold text-zinc-900 mb-2">{title}</h3>
+      <p className="text-sm text-zinc-600 leading-relaxed">{desc}</p>
+    </div>
+  );
+}
+
+function StepCard({ n, title, desc }: { n: string; title: string; desc: string }) {
+  return (
+    <div className="rounded-xl bg-white border border-zinc-200 p-6">
+      <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center mb-4">
+        {n}
       </div>
+      <h3 className="font-bold text-zinc-900 mb-2">{title}</h3>
+      <p className="text-sm text-zinc-600 leading-relaxed">{desc}</p>
+    </div>
+  );
+}
+
+function PremiumCard({ icon, title, bullets }: { icon: string; title: string; bullets: string[] }) {
+  return (
+    <div className="rounded-xl border-2 border-blue-200 bg-white p-6 hover:border-blue-400 hover:shadow-md transition">
+      <div className="text-3xl mb-3">{icon}</div>
+      <h3 className="font-bold text-zinc-900 mb-3">{title}</h3>
+      <ul className="space-y-1.5 text-sm text-zinc-700">
+        {bullets.map((s, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="text-blue-600 flex-shrink-0">✓</span>
+            <span>{s}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
