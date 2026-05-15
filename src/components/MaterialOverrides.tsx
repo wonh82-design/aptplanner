@@ -23,16 +23,19 @@ const GRADE_META: Record<Grade, { color: string; bg: string; ring: string; label
 export function MaterialOverrides({ quote, value, onChange }: Props) {
   const [showAll, setShowAll] = useState(false);
 
-  // 견적에 등장하는 work_type만, 소계 큰 순
+  // 견적에 등장하는 work_type. 등장 순서 기준(calculator 생성 순)으로 안정 정렬
+  // — 등급 변경 시 소계가 달라져도 행 순서가 흔들리지 않게.
   const workTypes = useMemo(() => {
-    const subtotalByWT = new Map<string, number>();
-    for (const it of quote.line_items) {
-      if (!it.material_id) continue;
-      subtotalByWT.set(it.work_type, (subtotalByWT.get(it.work_type) || 0) + it.subtotal);
-    }
-    return Array.from(subtotalByWT.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([wt, sub]) => ({ wt, sub, label: labelOf(wt) }));
+    const map = new Map<string, { sub: number; firstIdx: number }>();
+    quote.line_items.forEach((it, idx) => {
+      if (!it.material_id) return;
+      const prev = map.get(it.work_type);
+      if (prev) prev.sub += it.subtotal;
+      else map.set(it.work_type, { sub: it.subtotal, firstIdx: idx });
+    });
+    return Array.from(map.entries())
+      .sort((a, b) => a[1].firstIdx - b[1].firstIdx)
+      .map(([wt, v]) => ({ wt, sub: v.sub, label: labelOf(wt) }));
   }, [quote.line_items]);
 
   const visible = showAll ? workTypes : workTypes.slice(0, 10);
