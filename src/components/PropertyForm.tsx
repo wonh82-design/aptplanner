@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import type { Property, RoomScope, Scope, RoomId } from '@/lib/types';
+import type { Property, RoomScope, Scope, RoomId, RegionId, AgeId } from '@/lib/types';
 import {
   recommendedRoomCount, exclusiveAreaM2, supplyAreaM2, outsideWindowArea, activeRooms,
 } from '@/lib/areas';
 import { ROOM_META } from '@/lib/scope-meta';
+import { REGION_LABEL, AGE_LABEL, REGION_MULTIPLIER, AGE_MULTIPLIER } from '@/lib/calculator';
 
 /** 공급평 ↔ 전용 m² 변환 계수 (공급평 × 3.31 × 0.75) */
 const PYEONG_TO_EX_M2 = 2.4825;
@@ -216,6 +217,34 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           >
             <option value={0}>없음</option>
             <option value={1}>있음</option>
+          </select>
+        </Field>
+
+        <Field label="지역">
+          <select
+            value={value.region}
+            onChange={(e) => setField('region', e.target.value as RegionId)}
+            className="input"
+          >
+            {(Object.keys(REGION_LABEL) as RegionId[]).map(k => (
+              <option key={k} value={k}>
+                {REGION_LABEL[k]} ({REGION_MULTIPLIER[k].toFixed(2)}×)
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="아파트 연식">
+          <select
+            value={value.age}
+            onChange={(e) => setField('age', e.target.value as AgeId)}
+            className="input"
+          >
+            {(Object.keys(AGE_LABEL) as AgeId[]).map(k => (
+              <option key={k} value={k}>
+                {AGE_LABEL[k]} ({AGE_MULTIPLIER[k].toFixed(2)}×)
+              </option>
+            ))}
           </select>
         </Field>
 

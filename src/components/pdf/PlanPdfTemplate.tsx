@@ -10,6 +10,7 @@ import { PdfCover } from './PdfCover';
 import {
   BodyPage, Section, KeyValGrid, Footer, tdL, tdR, unitShort, Table,
 } from './QuotePdfTemplate';
+import { REGION_LABEL, AGE_LABEL, fmtKRW } from '@/lib/calculator';
 
 type Props = {
   quote: Quote;
@@ -66,14 +67,14 @@ export function PlanPdfTemplate({ quote, gradeLabel, rootRef }: Props) {
         <Section num="02" title="우리집 정보 & 공사 범위">
           <KeyValGrid items={[
             { k: '평형', v: `${quote.property.pyeong}평 (공급)` },
+            { k: '지역', v: REGION_LABEL[quote.property.region] },
+            { k: '연식', v: AGE_LABEL[quote.property.age] },
             { k: '베이수', v: `${quote.property.bay}베이` },
             { k: '방 개수', v: `${quote.property.rooms}개` },
-            { k: '공용욕실', v: `${quote.property.common_bath}개` },
-            { k: '부부욕실', v: quote.property.master_bath ? '있음' : '없음' },
-            { k: '발코니 깊이', v: `${quote.property.balcony_depth_m}m` },
+            { k: '욕실', v: `공용 ${quote.property.common_bath} / 부부 ${quote.property.master_bath ? '있음' : '없음'}` },
             { k: '자재 등급', v: gradeLabel },
-            { k: '총 라인 항목', v: `${quote.line_items.length}건` },
-            { k: '총 예상 공사비', v: `${quote.totals.grand_total.toLocaleString('ko-KR')}원` },
+            { k: '보정 계수', v: `${quote.totals.adjustment_multiplier.toFixed(2)}×` },
+            { k: '예상 공사비 범위', v: `${fmtKRW(quote.totals.grand_total_low)} ~ ${fmtKRW(quote.totals.grand_total_high)}` },
           ]} />
         </Section>
       </BodyPage>

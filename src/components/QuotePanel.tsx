@@ -9,14 +9,17 @@ type Props = { quote: Quote };
 export function QuotePanel({ quote }: Props) {
   const [showLines, setShowLines] = useState(false);
   const [vatIncluded, setVatIncluded] = useState(false);
-  const grand = vatIncluded ? quote.totals.grand_total_with_vat : quote.totals.grand_total;
+  const t = quote.totals;
+  const lowVat = vatIncluded ? Math.round(t.grand_total_low * 1.1) : t.grand_total_low;
+  const highVat = vatIncluded ? Math.round(t.grand_total_high * 1.1) : t.grand_total_high;
+  const midVat = vatIncluded ? t.grand_total_with_vat : t.grand_total;
 
   // 시장가 평가 (180~220만/평 기준)
-  const py = quote.totals.per_pyeong;
-  let grade = '✓ 합리적';
+  const py = t.per_pyeong;
+  let grade = '합리적';
   let gradeTone = 'text-emerald-600 bg-emerald-50';
-  if (py < 1_800_000) { grade = '↓ 가성비'; gradeTone = 'text-blue-600 bg-blue-50'; }
-  else if (py > 2_200_000) { grade = '↑ 고급'; gradeTone = 'text-amber-600 bg-amber-50'; }
+  if (py < 1_800_000) { grade = '가성비'; gradeTone = 'text-blue-600 bg-blue-50'; }
+  else if (py > 2_200_000) { grade = '고급'; gradeTone = 'text-amber-600 bg-amber-50'; }
 
   return (
     <aside className="rounded-xl bg-white shadow-sm border border-zinc-200 overflow-hidden">
@@ -26,10 +29,12 @@ export function QuotePanel({ quote }: Props) {
           <h2 className="text-sm font-medium opacity-90">우리집 예상 공사비</h2>
           <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${gradeTone}`}>{grade}</span>
         </div>
-        <div className="text-3xl font-bold tracking-tight tabular-nums">
-          {fmtKRWShort(grand)}
+        <div className="text-2xl font-bold tracking-tight tabular-nums">
+          {fmtKRWShort(lowVat)} ~ {fmtKRWShort(highVat)}
         </div>
-        <div className="text-xs opacity-75 mt-1 font-mono">{fmtKRW(grand)}</div>
+        <div className="text-[11px] opacity-75 mt-1 font-mono">
+          중앙값 {fmtKRW(midVat)} · 보정 {t.adjustment_multiplier.toFixed(2)}×
+        </div>
 
         <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/10 text-xs">
           <button
@@ -39,7 +44,7 @@ export function QuotePanel({ quote }: Props) {
             {vatIncluded ? '부가세 포함' : '부가세 별도'}
           </button>
           <span className="opacity-75">
-            평당 <span className="font-semibold text-white">{fmtKRWShort(quote.totals.per_pyeong)}</span>/평
+            평당 <span className="font-semibold text-white">{fmtKRWShort(t.per_pyeong)}</span>/평
           </span>
         </div>
       </div>

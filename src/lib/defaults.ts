@@ -9,6 +9,8 @@ export function defaultProperty(): Property {
     common_bath: 1,
     master_bath: 1,
     balcony_depth_m: 1.5,
+    region: 'gyeonggi',  // 보정 1.0× 기준
+    age: '15-30',        // 보정 1.0× 기준
   };
 }
 

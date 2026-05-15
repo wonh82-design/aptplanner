@@ -6,7 +6,7 @@
  */
 
 import type { Quote } from '@/lib/types';
-import { fmtKRW, fmtKRWShort } from '@/lib/calculator';
+import { fmtKRW, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { PdfCover } from './PdfCover';
 
 const LINES_PER_CHUNK = 18;   // 가로 A4 한 페이지에 들어가는 라인 행 수
@@ -48,21 +48,25 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
         <HeroBox
           gradeLabel={gradeLabel}
           pyeong={quote.property.pyeong}
-          grand={grand}
-          vat={vat}
+          low={quote.totals.grand_total_low}
+          high={quote.totals.grand_total_high}
+          mid={grand}
+          adj={quote.totals.adjustment_multiplier}
+          regionLabel={REGION_LABEL[quote.property.region]}
+          ageLabel={AGE_LABEL[quote.property.age]}
           perPyeong={quote.totals.per_pyeong}
         />
 
         <Section num="01" title="우리집 정보 & 공사 범위">
           <KeyValGrid items={[
             { k: '평형 (공급)', v: `${quote.property.pyeong}평` },
+            { k: '지역', v: REGION_LABEL[quote.property.region] },
+            { k: '연식', v: AGE_LABEL[quote.property.age] },
             { k: '베이수', v: `${quote.property.bay}베이` },
             { k: '방 개수', v: `${quote.property.rooms}개` },
-            { k: '공용욕실', v: `${quote.property.common_bath}개` },
-            { k: '부부욕실', v: quote.property.master_bath ? '있음' : '없음' },
-            { k: '발코니 깊이', v: `${quote.property.balcony_depth_m}m` },
+            { k: '욕실', v: `공용 ${quote.property.common_bath} / 부부 ${quote.property.master_bath ? '있음' : '없음'}` },
             { k: '자재 등급', v: gradeLabel },
-            { k: '라인 항목', v: `${quote.line_items.length}건` },
+            { k: '보정 계수', v: `${quote.totals.adjustment_multiplier.toFixed(2)}×` },
             { k: '평당 단가', v: fmtKRWShort(quote.totals.per_pyeong) + '/평' },
           ]} />
         </Section>
@@ -130,9 +134,17 @@ export function BodyPage({
 // =====================================================
 
 export function HeroBox({
-  gradeLabel, pyeong, grand, vat, perPyeong,
+  gradeLabel, pyeong, low, mid, high, adj, regionLabel, ageLabel, perPyeong,
 }: {
-  gradeLabel: string; pyeong: number; grand: number; vat: number; perPyeong: number;
+  gradeLabel: string;
+  pyeong: number;
+  low: number;
+  mid: number;
+  high: number;
+  adj: number;
+  regionLabel: string;
+  ageLabel: string;
+  perPyeong: number;
 }) {
   return (
     <div style={{
@@ -141,24 +153,19 @@ export function HeroBox({
       borderRadius: '12px',
       padding: '20px 26px',
       marginBottom: '20px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '24px',
     }}>
-      <div>
-        <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: '4px' }}>
-          한눈에 보기 · {pyeong}평 · {gradeLabel}
-        </div>
-        <div style={{ fontSize: '34px', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-          {fmtKRW(grand)}
-        </div>
-        <div style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '6px' }}>
-          부가세 별도
-        </div>
+      <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: '6px' }}>
+        한눈에 보기 · {pyeong}평 · {regionLabel} · {ageLabel} · {gradeLabel}
       </div>
-      <div style={{ display: 'flex', gap: '20px' }}>
-        <HeroStat label="부가세 포함" value={fmtKRW(grand + vat)} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '24px' }}>
+        <div>
+          <div style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+            {fmtKRW(low)} ~ {fmtKRW(high)}
+          </div>
+          <div style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '6px' }}>
+            중앙값 {fmtKRW(mid)} · 보정 {adj.toFixed(2)}× · ±5% 범위 · 부가세 별도 · 10만원 단위 반올림
+          </div>
+        </div>
         <HeroStat label="평당 단가" value={`${fmtKRWShort(perPyeong)}/평`} />
       </div>
     </div>

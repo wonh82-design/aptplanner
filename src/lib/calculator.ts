@@ -18,6 +18,7 @@
  */
 import type {
   Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade, RoomScope,
+  RegionId, AgeId,
 } from './types';
 import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
@@ -29,6 +30,48 @@ import { getPrimaryMaterial, getMaterialById, labelOf } from './materials';
 const WALL_RATIO = 2.8;             // 도배 면적 = 바닥 × 2.8 (벽면 환산)
 const BASEBOARD_HEIGHT = 0.343;     // 걸레받이 ㎡ 환산 계수 (시트 v4 기준)
 const VAT_RATE = 0.10;
+
+/** 지역별 공사비 보정 계수 */
+export const REGION_MULTIPLIER: Record<RegionId, number> = {
+  seoul: 1.10,
+  gyeonggi: 1.00,
+  metro: 1.05,
+  small_city: 1.10,
+  jeju: 1.30,
+};
+
+/** 아파트 연식별 보정 계수 */
+export const AGE_MULTIPLIER: Record<AgeId, number> = {
+  'new': 0.90,
+  '5-15': 0.95,
+  '15-30': 1.00,
+  '30+': 1.05,
+};
+
+/** 지역·연식 라벨 (UI/PDF용) */
+export const REGION_LABEL: Record<RegionId, string> = {
+  seoul: '서울',
+  gyeonggi: '경기도',
+  metro: '지방 광역시',
+  small_city: '지방 중소도시',
+  jeju: '제주도',
+};
+export const AGE_LABEL: Record<AgeId, string> = {
+  'new': '5년 이내 (준신축)',
+  '5-15': '5~15년',
+  '15-30': '15~30년',
+  '30+': '30년 이상',
+};
+
+/** 우리집 보정 계수 (지역 × 연식) */
+export function adjustmentMultiplier(p: Property): number {
+  return REGION_MULTIPLIER[p.region] * AGE_MULTIPLIER[p.age];
+}
+
+/** 10만원 단위 반올림 */
+function roundToHundredK(n: number): number {
+  return Math.round(n / 100_000) * 100_000;
+}
 
 /** 그레이드 결정: override > default */
 function effectiveGrade(work: string, sel: GradeSelection): Grade {
@@ -300,24 +343,36 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   return items;
 }
 
-/** 합계 집계 */
-export function aggregateTotals(items: LineItem[], pyeong: number): Totals {
+/** 합계 집계 + 지역/연식 보정 + 10만원 단위 반올림 */
+export function aggregateTotals(items: LineItem[], property: Property): Totals {
   const by_work_type: Record<string, number> = {};
   const by_room: Record<string, number> = {};
-  let grand = 0;
+  let raw = 0;
   for (const it of items) {
     by_work_type[it.category] = (by_work_type[it.category] || 0) + it.subtotal;
     by_room[it.room] = (by_room[it.room] || 0) + it.subtotal;
-    grand += it.subtotal;
+    raw += it.subtotal;
   }
+
+  // 지역 × 연식 보정 적용 + 10만원 반올림
+  const adj = adjustmentMultiplier(property);
+  const adjusted = raw * adj;
+  const grand = roundToHundredK(adjusted);
+  const low   = roundToHundredK(adjusted * 0.95);
+  const high  = roundToHundredK(adjusted * 1.05);
+
   const vat = Math.round(grand * VAT_RATE);
   return {
     by_work_type,
     by_room,
+    grand_total_raw: Math.round(raw),
+    adjustment_multiplier: adj,
     grand_total: grand,
+    grand_total_low: low,
+    grand_total_high: high,
     vat,
     grand_total_with_vat: grand + vat,
-    per_pyeong: pyeong > 0 ? Math.round(grand / pyeong) : 0,
+    per_pyeong: property.pyeong > 0 ? Math.round(grand / property.pyeong) : 0,
   };
 }
 
@@ -328,7 +383,7 @@ export function buildQuote(
   grade: GradeSelection,
 ): Quote {
   const line_items = buildLineItems(property, scope, grade);
-  const totals = aggregateTotals(line_items, property.pyeong);
+  const totals = aggregateTotals(line_items, property);
   return {
     quote_id: 'Q-' + new Date().toISOString().slice(0, 10) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase(),
     created_at: new Date().toISOString(),

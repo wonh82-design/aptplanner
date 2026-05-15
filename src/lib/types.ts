@@ -39,14 +39,21 @@ export type StandardAreas = {
   balcony: Record<string, Record<number, number>>;     // 발코니/다용도실
 };
 
+/** 지역 — 공사비 보정 계수 산정용 */
+export type RegionId = 'seoul' | 'gyeonggi' | 'metro' | 'small_city' | 'jeju';
+/** 아파트 연식 */
+export type AgeId = 'new' | '5-15' | '15-30' | '30+';
+
 /** 우리집 기본 정보 */
 export type Property = {
   pyeong: number;            // 공급평형
   bay: 2 | 3 | 4 | 5;
-  rooms: 2 | 3 | 4 | 5;      // 방 개수
+  rooms: 2 | 3 | 4 | 5;      // 방 개수 (거실 제외)
   common_bath: 1 | 2;        // 공용욕실 개수
   master_bath: 0 | 1;        // 부부욕실 유무
   balcony_depth_m: number;   // 발코니 깊이
+  region: RegionId;          // 지역 (보정 계수)
+  age: AgeId;                // 아파트 연식 (보정 계수)
 };
 
 /** 공간별 공종 매트릭스 */
@@ -114,10 +121,19 @@ export type LineItem = {
 export type Totals = {
   by_work_type: Record<string, number>;
   by_room: Record<string, number>;
-  grand_total: number;          // 부가세 별도
+  /** 보정 전 원시 합계 (부가세 별도) */
+  grand_total_raw: number;
+  /** 지역·연식 보정 계수 (예: 서울 × 5~15년 = 1.1 × 0.95) */
+  adjustment_multiplier: number;
+  /** 보정 적용 후 (부가세 별도) — 10만원 단위 반올림 */
+  grand_total: number;
+  /** -5% 하한 (10만원 단위 반올림) */
+  grand_total_low: number;
+  /** +5% 상한 (10만원 단위 반올림) */
+  grand_total_high: number;
   vat: number;
   grand_total_with_vat: number;
-  per_pyeong: number;           // 평당 (부가세 별도)
+  per_pyeong: number;           // 평당 (부가세 별도, 보정 후)
 };
 
 /** Quote Object — Single SoT */

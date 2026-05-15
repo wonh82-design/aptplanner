@@ -14,7 +14,7 @@ import { QuotePdfTemplate } from '@/components/pdf/QuotePdfTemplate';
 import { PlanPdfTemplate } from '@/components/pdf/PlanPdfTemplate';
 import { TipsPdfTemplate } from '@/components/pdf/TipsPdfTemplate';
 import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
-import { buildQuote, fmtKRWShort } from '@/lib/calculator';
+import { buildQuote, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { exportPagedPdf } from '@/lib/pdf/export';
 
 type Step = 1 | 2 | 3;
@@ -236,16 +236,35 @@ function ResultBanner({
   quote: ReturnType<typeof buildQuote>;
   gradeLabel: string;
 }) {
+  const { totals, property } = quote;
   return (
     <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-blue-50 border border-emerald-200 p-5">
       <div className="text-xs text-emerald-700 font-semibold uppercase tracking-wider">산출 완료</div>
-      <div className="mt-1 text-2xl font-bold text-zinc-900">
-        {quote.property.pyeong}평 · {gradeLabel} 기준 예상 공사비
+      <div className="mt-1 text-lg sm:text-xl font-bold text-zinc-900">
+        {property.pyeong}평 · {REGION_LABEL[property.region]} · {AGE_LABEL[property.age]} · {gradeLabel}
       </div>
-      <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Stat label="총 공사비" value={fmtKRWShort(quote.totals.grand_total)} highlight />
-        <Stat label="부가세 포함" value={fmtKRWShort(quote.totals.grand_total_with_vat)} />
-        <Stat label="평당" value={`${fmtKRWShort(quote.totals.per_pyeong)}/평`} />
+
+      {/* 범위 표시 */}
+      <div className="mt-4 rounded-lg bg-white/70 p-4">
+        <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-1">예상 공사비 (부가세 별도)</div>
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="text-2xl sm:text-3xl font-extrabold text-blue-900 tabular-nums">
+            {fmtKRWShort(totals.grand_total_low)} ~ {fmtKRWShort(totals.grand_total_high)}
+          </span>
+          <span className="text-xs text-zinc-500">
+            (중앙값 {fmtKRWShort(totals.grand_total)})
+          </span>
+        </div>
+        <div className="text-[11px] text-zinc-600 mt-2">
+          보정 계수 <strong>{totals.adjustment_multiplier.toFixed(2)}×</strong>
+          {' '}· 지역 {REGION_LABEL[property.region]} · 연식 {AGE_LABEL[property.age]}
+          {' '}· 10만원 단위 반올림 · ±5% 범위
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <Stat label="부가세 포함" value={fmtKRWShort(totals.grand_total_with_vat)} />
+        <Stat label="평당" value={`${fmtKRWShort(totals.per_pyeong)}/평`} />
         <Stat label="라인 항목" value={`${quote.line_items.length}건`} />
       </div>
     </div>
