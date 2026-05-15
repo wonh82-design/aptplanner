@@ -1,6 +1,9 @@
 /**
- * 공사 범위 프리셋 — 대표 시나리오를 한 번에 설정.
- * UX: 초보자가 가장 흔한 케이스 5개 중 골라 시작 → 세부 조정.
+ * 공사 범위 프리셋 — 가장 자주 발생하는 3가지 시나리오.
+ *
+ * "올수리" 정의: 바닥/도배/몰딩 (전 공간) + 욕실 풀세트 + 주방 + 중문/신발장
+ *                + 조명 + 전기·설비 + 발코니 정리 + 마감 디테일까지 일체.
+ * 차이점: 1) 확장 여부  2) 샷시 교체 여부
  */
 import type { Property, RoomScope, Scope, RoomId } from './types';
 import { activeRooms } from './areas';
@@ -28,135 +31,93 @@ function makeRoomScope(opts: Partial<RoomScope> = {}): RoomScope {
   };
 }
 
-function emptyGlobal(): Scope['global'] {
-  return {
-    demolition: false,
-    insulation: false,
-    heating_pipe: false,
-    common_bath_set: false,
-    master_bath_set: false,
-    kitchen_set: false,
-    middoor: false,
-    entry_furniture: false,
-    lighting: false,
-    balcony_floor_tile: false,
-    balcony_paint: false,
-    electrical_base: false,
-    switch_outlet: false,
-    induction_line: false,
-    thermostat: false,
-    silicon: false,
-    expansion_report: false,
-  };
+/** 올수리 공통: 모든 공간 바닥/도배/몰딩 ON + 등급 표준 배치 */
+function fullRenovateRoom(roomId: RoomId, opts: { sash: boolean; expand: boolean } = { sash: false, expand: false }): RoomScope {
+  const base = makeRoomScope({
+    flooring: true,
+    wallpaper: true,
+    molding: true,
+    sash: opts.sash,
+    expansion_after: opts.expand,
+  });
+  if (roomId === '거실')    return { ...base, aircon: true, ceiling_fan: true };
+  if (roomId === '주방')    return { ...base };
+  if (roomId === '안방')    return { ...base, aircon: true, closet: true, ceiling_fan: true };
+  if (roomId === '작은방1') return { ...base, aircon: true, closet: true };
+  if (roomId === '작은방2') return { ...base, closet: true };
+  return base;
 }
 
 function makeRoomMap(p: Property, factory: (roomId: RoomId) => RoomScope): Scope['rooms'] {
-  const rooms = activeRooms(p) as RoomId[];
-  // 항상 5개 키를 갖도록 (활성 외 공간은 empty)
+  const visible = activeRooms(p) as RoomId[];
   const all: RoomId[] = ['거실', '주방', '안방', '작은방1', '작은방2'];
   const map: Partial<Record<RoomId, RoomScope>> = {};
   for (const r of all) {
-    map[r] = rooms.includes(r) ? factory(r) : makeRoomScope();
+    map[r] = visible.includes(r) ? factory(r) : makeRoomScope();
   }
   return map as Scope['rooms'];
 }
 
+/** 올수리 글로벌 토글 풀세트 */
+function fullRenovateGlobal(opts: { expand: boolean }): Scope['global'] {
+  return {
+    demolition: true,
+    insulation: true,
+    heating_pipe: false,           // 노후 의심 시 별도 추가
+    common_bath_set: true,
+    master_bath_set: true,
+    kitchen_set: true,
+    middoor: true,
+    entry_furniture: true,
+    lighting: true,
+    balcony_floor_tile: true,
+    balcony_paint: true,
+    electrical_base: true,
+    switch_outlet: true,
+    induction_line: true,
+    thermostat: true,
+    silicon: true,
+    expansion_report: opts.expand, // 확장 시에만 신고
+  };
+}
+
 export const PRESETS: Preset[] = [
   {
-    id: 'full',
-    icon: '🏠',
-    label: '풀 리모델링',
-    desc: '집 전체 — 가장 일반적',
+    id: 'full-expand-sash',
+    icon: '🏗️',
+    label: '전체 철거 + 전체 확장 + 샷시 + 올수리',
+    desc: '가장 큰 공사 — 발코니 모두 확장 + 외창 교체',
     apply(p) {
       return {
         rooms: makeRoomMap(p, (room) => {
-          const base = makeRoomScope({
-            flooring: true, wallpaper: true, molding: true, sash: true,
-          });
-          if (room === '거실') return { ...base, expansion_after: true, aircon: true, ceiling_fan: true };
-          if (room === '주방') return { ...base, expansion_after: true };
-          if (room === '안방') return { ...base, aircon: true, closet: true, ceiling_fan: true };
-          if (room === '작은방1') return { ...base, expansion_after: true, aircon: true, closet: true };
-          if (room === '작은방2') return { ...base, expansion_after: true, closet: true };
-          return base;
+          // 안방까지 포함 모든 공간 확장+샷시 ON
+          return fullRenovateRoom(room, { sash: true, expand: true });
         }),
-        global: {
-          ...emptyGlobal(),
-          demolition: true, insulation: true,
-          common_bath_set: true, master_bath_set: true,
-          kitchen_set: true, middoor: true, entry_furniture: true,
-          lighting: true,
-          balcony_floor_tile: true, balcony_paint: true,
-          electrical_base: true, switch_outlet: true,
-          induction_line: true, thermostat: true,
-          silicon: true, expansion_report: true,
-        },
+        global: fullRenovateGlobal({ expand: true }),
       };
     },
   },
   {
-    id: 'bath',
-    icon: '🛁',
-    label: '욕실만',
-    desc: '욕실 풀세트 + 기본 정비',
+    id: 'full-sash',
+    icon: '🪟',
+    label: '전체 철거 + 샷시 + 올수리',
+    desc: '확장은 없지만 외창은 모두 새로',
     apply(p) {
       return {
-        rooms: makeRoomMap(p, () => makeRoomScope()),
-        global: {
-          ...emptyGlobal(),
-          common_bath_set: true, master_bath_set: true,
-          electrical_base: true,
-          silicon: true,
-        },
+        rooms: makeRoomMap(p, (room) => fullRenovateRoom(room, { sash: true, expand: false })),
+        global: fullRenovateGlobal({ expand: false }),
       };
     },
   },
   {
-    id: 'kitchen',
-    icon: '🍳',
-    label: '주방만',
-    desc: '주방가구 + 인덕션 전용선',
+    id: 'full-only',
+    icon: '🧰',
+    label: '전체 철거 + 올수리',
+    desc: '확장·샷시 없이 내부만 새로',
     apply(p) {
       return {
-        rooms: makeRoomMap(p, (room) =>
-          room === '주방' ? makeRoomScope({ flooring: true, wallpaper: true }) : makeRoomScope()
-        ),
-        global: {
-          ...emptyGlobal(),
-          kitchen_set: true, induction_line: true,
-          electrical_base: true, silicon: true,
-        },
-      };
-    },
-  },
-  {
-    id: 'wallfloor',
-    icon: '🎨',
-    label: '도배·바닥 새단장',
-    desc: '벽지·바닥만 깔끔하게',
-    apply(p) {
-      return {
-        rooms: makeRoomMap(p, () =>
-          makeRoomScope({ flooring: true, wallpaper: true, molding: true })
-        ),
-        global: {
-          ...emptyGlobal(),
-          lighting: true,
-          electrical_base: true, switch_outlet: true,
-          silicon: true,
-        },
-      };
-    },
-  },
-  {
-    id: 'clear',
-    icon: '🧹',
-    label: '전체 해제',
-    desc: '처음부터 직접 선택',
-    apply(p) {
-      return {
-        rooms: makeRoomMap(p, () => makeRoomScope()),
-        global: emptyGlobal(),
+        rooms: makeRoomMap(p, (room) => fullRenovateRoom(room, { sash: false, expand: false })),
+        global: fullRenovateGlobal({ expand: false }),
       };
     },
   },

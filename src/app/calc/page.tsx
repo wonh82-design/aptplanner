@@ -13,7 +13,7 @@ import { PlanPdfTemplate } from '@/components/pdf/PlanPdfTemplate';
 import { TipsPdfTemplate } from '@/components/pdf/TipsPdfTemplate';
 import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
 import { buildQuote, fmtKRWShort } from '@/lib/calculator';
-import { exportPagesToPdf } from '@/lib/pdf/export';
+import { exportPagedPdf } from '@/lib/pdf/export';
 
 type Step = 1 | 2 | 3;
 
@@ -31,12 +31,9 @@ export default function CalcPage() {
     [property, scope, grade]
   );
 
-  const quoteCoverRef = useRef<HTMLDivElement>(null);
-  const quoteBodyRef = useRef<HTMLDivElement>(null);
-  const planCoverRef = useRef<HTMLDivElement>(null);
-  const planBodyRef = useRef<HTMLDivElement>(null);
-  const tipsCoverRef = useRef<HTMLDivElement>(null);
-  const tipsBodyRef = useRef<HTMLDivElement>(null);
+  const quoteRootRef = useRef<HTMLDivElement>(null);
+  const planRootRef = useRef<HTMLDivElement>(null);
+  const tipsRootRef = useRef<HTMLDivElement>(null);
 
   const goTo = (s: Step) => {
     setStep(s);
@@ -54,14 +51,13 @@ export default function CalcPage() {
 
   const downloadPdf = async (
     which: 'quote' | 'plan' | 'tips',
-    refs: React.RefObject<HTMLDivElement | null>[],
+    ref: React.RefObject<HTMLDivElement | null>,
     filename: string,
   ) => {
-    const elements = refs.map(r => r.current).filter((e): e is HTMLDivElement => Boolean(e));
-    if (elements.length === 0) return;
+    if (!ref.current) return;
     setDownloading(which);
     try {
-      await exportPagesToPdf(elements, { filename });
+      await exportPagedPdf(ref.current, { filename, orientation: 'l' });
     } catch (e) {
       console.error('PDF export failed', e);
       alert('PDF 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
@@ -95,7 +91,12 @@ export default function CalcPage() {
       <main className="max-w-7xl mx-auto px-6 py-6">
         {step === 1 && (
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            <PropertyForm value={property} onChange={setProperty} />
+            <PropertyForm
+              value={property}
+              onChange={setProperty}
+              rooms={scope.rooms}
+              onRoomsChange={(rooms) => setScope({ ...scope, rooms })}
+            />
             <ScopeMatrix property={property} value={scope} onChange={setScope} />
 
             <StepNav
@@ -131,7 +132,7 @@ export default function CalcPage() {
             <ResultBanner quote={quote} gradeLabel={grade.default} />
 
             <FreePdfCard
-              onDownload={() => downloadPdf('quote', [quoteCoverRef, quoteBodyRef], `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
+              onDownload={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
               downloading={downloading === 'quote'}
             />
 
@@ -162,8 +163,8 @@ export default function CalcPage() {
       {premiumOpen && (
         <PremiumModal
           onClose={() => setPremiumOpen(false)}
-          onDownloadPlan={() => downloadPdf('plan', [planCoverRef, planBodyRef], `apt-planner_인테리어계획서_${property.pyeong}평_${quote.quote_id}.pdf`)}
-          onDownloadTips={() => downloadPdf('tips', [tipsCoverRef, tipsBodyRef], `apt-planner_인테리어실전가이드.pdf`)}
+          onDownloadPlan={() => downloadPdf('plan', planRootRef, `apt-planner_인테리어계획서_${property.pyeong}평_${quote.quote_id}.pdf`)}
+          onDownloadTips={() => downloadPdf('tips', tipsRootRef, `apt-planner_인테리어실전가이드.pdf`)}
           downloadingPlan={downloading === 'plan'}
           downloadingTips={downloading === 'tips'}
         />
@@ -171,9 +172,9 @@ export default function CalcPage() {
 
       {/* PDF 캡처용 hidden 영역 — 화면 밖에 렌더링 */}
       <div style={{ position: 'fixed', left: '-99999px', top: 0, pointerEvents: 'none', zIndex: -1 }} aria-hidden>
-        <QuotePdfTemplate quote={quote} gradeLabel={grade.default} coverRef={quoteCoverRef} bodyRef={quoteBodyRef} />
-        <PlanPdfTemplate quote={quote} gradeLabel={grade.default} coverRef={planCoverRef} bodyRef={planBodyRef} />
-        <TipsPdfTemplate coverRef={tipsCoverRef} bodyRef={tipsBodyRef} />
+        <QuotePdfTemplate quote={quote} gradeLabel={grade.default} rootRef={quoteRootRef} />
+        <PlanPdfTemplate quote={quote} gradeLabel={grade.default} rootRef={planRootRef} />
+        <TipsPdfTemplate rootRef={tipsRootRef} />
       </div>
     </div>
   );

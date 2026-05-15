@@ -41,7 +41,7 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
           <h3 className="text-xs font-semibold text-zinc-700">① 빠른 시작</h3>
           <span className="text-[10px] text-zinc-400">대표 시나리오로 한 번에 설정</span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {PRESETS.map(preset => (
             <button
               key={preset.id}
@@ -106,17 +106,6 @@ function RoomCard({
   onChange: (patch: Partial<RoomScope>) => void;
 }) {
   const meta = ROOM_META[room] || { icon: '📐', label: room };
-  // 확장 3-상태 도출
-  const expansion: 'none' | 'plan' | 'done' =
-    value.expansion_current ? 'done' :
-    value.expansion_after   ? 'plan' :
-    'none';
-
-  const setExpansion = (s: 'none' | 'plan' | 'done') => {
-    if (s === 'none') onChange({ expansion_current: false, expansion_after: false });
-    if (s === 'plan') onChange({ expansion_current: false, expansion_after: true });
-    if (s === 'done') onChange({ expansion_current: true,  expansion_after: true });
-  };
 
   return (
     <div className="rounded-lg border border-zinc-200 bg-zinc-50/40 p-3 space-y-3">
@@ -128,16 +117,6 @@ function RoomCard({
         <span className="text-[10px] text-zinc-500 font-mono">
           {area.toFixed(1)}㎡ · 둘레 {perim.toFixed(1)}m
         </span>
-      </div>
-
-      {/* 확장 상태 (라디오) */}
-      <div>
-        <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-1">발코니 확장</div>
-        <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs">
-          <ExpansionRadio active={expansion === 'none'} onClick={() => setExpansion('none')} label="그대로" hint="발코니 유지" />
-          <ExpansionRadio active={expansion === 'plan'} onClick={() => setExpansion('plan')} label="확장 시공" hint="이번에 확장" tone="amber" />
-          <ExpansionRadio active={expansion === 'done'} onClick={() => setExpansion('done')} label="이미 확장됨" hint="기존부터 확장" />
-        </div>
       </div>
 
       {/* 공종 칩 */}
@@ -157,33 +136,6 @@ function RoomCard({
         </div>
       </div>
     </div>
-  );
-}
-
-function ExpansionRadio({
-  active, onClick, label, hint, tone = 'blue',
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  hint: string;
-  tone?: 'blue' | 'amber';
-}) {
-  const activeTone = tone === 'amber'
-    ? 'bg-amber-100 text-amber-900 border-amber-300'
-    : 'bg-blue-100 text-blue-900 border-blue-300';
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={hint}
-      className={`px-2.5 py-1.5 border-r last:border-r-0 transition ${
-        active ? `${activeTone} font-medium` : 'border-r-zinc-200 text-zinc-600 hover:bg-zinc-50'
-      }`}
-    >
-      <div className="text-[11px]">{label}</div>
-      <div className="text-[9px] opacity-70">{hint}</div>
-    </button>
   );
 }
 
