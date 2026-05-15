@@ -19,7 +19,7 @@ export function QuotePanel({ quote }: Props) {
   else if (py > 2_200_000) { grade = '↑ 고급'; gradeTone = 'text-amber-600 bg-amber-50'; }
 
   return (
-    <aside className="rounded-xl bg-white shadow-sm border border-zinc-200 overflow-hidden sticky top-4">
+    <aside className="rounded-xl bg-white shadow-sm border border-zinc-200 overflow-hidden">
       {/* 헤더 */}
       <div className="bg-gradient-to-br from-zinc-900 to-zinc-700 p-5 text-white">
         <div className="flex items-baseline justify-between mb-1">
