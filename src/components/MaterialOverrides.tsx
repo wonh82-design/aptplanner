@@ -23,19 +23,23 @@ const GRADE_META: Record<Grade, { color: string; bg: string; ring: string; label
 export function MaterialOverrides({ quote, value, onChange }: Props) {
   const [showAll, setShowAll] = useState(false);
 
-  // 견적에 등장하는 work_type. 등장 순서 기준(calculator 생성 순)으로 안정 정렬
-  // — 등급 변경 시 소계가 달라져도 행 순서가 흔들리지 않게.
+  // 견적에 등장하는 work_type. 등장 순서 기준(calculator 생성 순)으로 안정 정렬.
+  // qty 합계도 함께 캐시 — 등급별 '우리집 총공사비'를 계산할 때 사용.
   const workTypes = useMemo(() => {
-    const map = new Map<string, { sub: number; firstIdx: number }>();
+    const map = new Map<string, { sub: number; firstIdx: number; totalQty: number }>();
     quote.line_items.forEach((it, idx) => {
       if (!it.material_id) return;
       const prev = map.get(it.work_type);
-      if (prev) prev.sub += it.subtotal;
-      else map.set(it.work_type, { sub: it.subtotal, firstIdx: idx });
+      if (prev) {
+        prev.sub += it.subtotal;
+        prev.totalQty += it.qty;
+      } else {
+        map.set(it.work_type, { sub: it.subtotal, firstIdx: idx, totalQty: it.qty });
+      }
     });
     return Array.from(map.entries())
       .sort((a, b) => a[1].firstIdx - b[1].firstIdx)
-      .map(([wt, v]) => ({ wt, sub: v.sub, label: labelOf(wt) }));
+      .map(([wt, v]) => ({ wt, sub: v.sub, totalQty: v.totalQty, label: labelOf(wt) }));
   }, [quote.line_items]);
 
   const TOP_N = 5;
@@ -67,11 +71,11 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
         <span className="text-[11px] text-zinc-500">{workTypes.length}개 공종</span>
       </div>
       <p className="text-xs text-zinc-500 mb-4">
-        공종마다 가성비·표준·고급 등급의 <strong>주력 자재</strong>를 보고 직접 선택하세요. 등급별로 단가와 사양을 비교할 수 있습니다.
+        공종마다 가성비·표준·고급의 <strong>주력 자재</strong>와 <strong>우리집 총공사비</strong>를 한눈에 비교하고 선택하세요.
       </p>
 
       <div className="space-y-3">
-        {visible.map(({ wt, sub, label }) => {
+        {visible.map(({ wt, sub, totalQty, label }) => {
           const curGrade = effectiveGrade(wt);
           const hasOverride = value.overrides[wt] !== undefined;
           return (
@@ -87,7 +91,7 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
                   )}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[11px] text-zinc-500 tabular-nums">{fmtKRWShort(sub)}</span>
+                  <span className="text-[11px] text-zinc-500 tabular-nums">현재 {fmtKRWShort(sub)}</span>
                   {hasOverride && (
                     <button
                       onClick={() => clearOverride(wt)}
@@ -109,6 +113,7 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
                     grade={g}
                     material={getPrimaryMaterial(wt, g)}
                     selected={curGrade === g}
+                    totalQty={totalQty}
                     onSelect={() => setGrade(wt, g)}
                   />
                 ))}
@@ -131,16 +136,17 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
 }
 
 // =====================================================
-// 등급 한 행: 라디오 + 등급 배지 + 주력 자재명 + 단가
+// 등급 한 행: 라디오 + 등급 배지 + 주력 자재명 + 우리집 총공사비
 // =====================================================
 
 function GradeRow({
-  grade, material, selected, onSelect,
+  grade, material, selected, totalQty, onSelect,
 }: {
   workType: string;
   grade: Grade;
   material: Material | null;
   selected: boolean;
+  totalQty: number;        // 이 공종의 총 수량 (= 합계 qty)
   onSelect: () => void;
 }) {
   const meta = GRADE_META[grade];
@@ -157,7 +163,9 @@ function GradeRow({
     );
   }
 
-  const unit = (material.unit_type || 'per_ea').replace('per_', '');
+  // 이 등급의 주력 자재로 우리집 전체 시공 시 총공사비
+  const homeTotal = Math.round(totalQty * material.total_unit_price);
+
   return (
     <button
       type="button"
@@ -187,12 +195,12 @@ function GradeRow({
         </div>
       </div>
 
-      {/* 단가 */}
+      {/* 우리집 총공사비 */}
       <div className="flex-shrink-0 text-right">
-        <div className="text-sm font-semibold text-zinc-900 tabular-nums">
-          {fmtKRWShort(material.total_unit_price)}
+        <div className={`text-sm font-bold tabular-nums ${selected ? meta.color : 'text-zinc-900'}`}>
+          {fmtKRWShort(homeTotal)}
         </div>
-        <div className="text-[10px] text-zinc-500">/{unit}</div>
+        <div className="text-[10px] text-zinc-500">우리집 총공사비</div>
       </div>
     </button>
   );
