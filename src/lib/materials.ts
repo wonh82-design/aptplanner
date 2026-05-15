@@ -115,7 +115,7 @@ export const WORK_TYPE_LABEL: Record<string, string> = {
   plumbing_relocation: '배관 변경',
   plumbing_heating: '난방배관 교체',
   thermostat: '난방온도조절기',
-  silicon_labor: '실리콘 인건비',
+  silicon_labor: '실리콘',
   silicon_bio: '실리콘 바이오',
   silicon_modified: '실리콘 변성',
   기타: '기타',
