@@ -121,4 +121,38 @@ export const PRESETS: Preset[] = [
       };
     },
   },
+  {
+    id: 'finish-only',
+    icon: '🎨',
+    label: '철거 최소화 + 마감재만 교체',
+    desc: '전기·설비·조명 그대로, 도배·마루·주방·욕실만',
+    apply(p) {
+      return {
+        rooms: makeRoomMap(p, () => makeRoomScope({
+          // 마감재만: 마루(바닥재) + 도배. 몰딩·외창·에어컨·붙박이장·실링팬 X
+          flooring: true,
+          wallpaper: true,
+        })),
+        global: {
+          demolition: false,        // 철거 최소화
+          insulation: false,
+          heating_pipe: false,
+          common_bath_set: true,    // 욕실공사
+          master_bath_set: true,
+          kitchen_set: true,        // 주방가구
+          middoor: false,
+          entry_furniture: false,
+          lighting: false,          // 조명 그대로
+          balcony_floor_tile: false,
+          balcony_paint: false,
+          electrical_base: false,   // 전기·설비 그대로
+          switch_outlet: false,
+          induction_line: false,
+          thermostat: false,
+          silicon: true,            // 마감 디테일은 일반적으로 포함
+          expansion_report: false,
+        },
+      };
+    },
+  },
 ];
