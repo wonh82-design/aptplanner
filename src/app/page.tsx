@@ -16,9 +16,10 @@ export default function Landing() {
             <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold">a</span>
             <span className="font-bold tracking-tight">apt-planner</span>
           </Link>
-          <Link href="/calc" className="text-xs font-medium text-zinc-700 hover:text-zinc-900">
-            예산 산정 시작 →
-          </Link>
+          <nav className="flex items-center gap-5 text-xs font-medium text-zinc-600">
+            <Link href="/about" className="hover:text-zinc-900">소개</Link>
+            <Link href="/calc" className="hover:text-zinc-900">예산 산정 시작 →</Link>
+          </nav>
         </div>
       </header>
 

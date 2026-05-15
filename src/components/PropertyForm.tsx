@@ -123,7 +123,7 @@ export function PropertyForm({ value, onChange }: Props) {
       <dl className="mt-4 grid grid-cols-3 gap-2 text-xs text-zinc-600 bg-zinc-50 rounded-lg p-3">
         <Stat label="공급면적" value={`${supplyAreaM2(value.pyeong).toFixed(1)} ㎡`} />
         <Stat label="전용면적" value={`${exclusiveAreaM2(value.pyeong).toFixed(1)} ㎡`} />
-        <Stat label="외부창" value={`${outsideWindowArea(value.pyeong).toFixed(1)} ㎡`} />
+        <Stat label="외부창" value={`${outsideWindowArea(value.pyeong, value.bay).toFixed(1)} ㎡`} />
       </dl>
     </section>
   );

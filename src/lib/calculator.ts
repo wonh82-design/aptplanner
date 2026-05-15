@@ -84,7 +84,7 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
 
   const excArea = exclusiveAreaM2(p.pyeong);
   const supArea = supplyAreaM2(p.pyeong);
-  const windowArea = outsideWindowArea(p.pyeong);
+  const windowArea = outsideWindowArea(p.pyeong, p.bay);
 
   // ===== 1. 기본공사 (전체 단위) =====
   if (scope.global.demolition)
@@ -129,7 +129,7 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   for (const roomId of activeRooms(p)) {
     const rs = scope.rooms[roomId as keyof Scope['rooms']];
     if (!rs) continue;
-    const area = roomAreaForId(roomId, p.pyeong);
+    const area = roomAreaForId(roomId, p.pyeong, p.bay);
     const perim = roomPerimeterForId(roomId, p.pyeong);
 
     if (rs.flooring) push(lineItem('', roomId, 'flooring', area, grade, 'per_m2'));

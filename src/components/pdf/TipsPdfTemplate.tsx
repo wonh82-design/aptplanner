@@ -1,173 +1,445 @@
 'use client';
 
 /**
- * 유료 보너스: 인테리어 팁 PDF.
- * 정적 콘텐츠 — 인테리어 잘하는 법, 업체 고르는 법, 견적 요청·비교법.
+ * 유료 보너스: 인테리어 실전 가이드 PDF.
+ * 표지 + 본문 (공간별·공종별 상세 팁, 전문가 톤)
  */
 
-type Props = { innerRef?: React.Ref<HTMLDivElement> };
+import { PdfCover } from './PdfCover';
+import { RunningHeader } from './QuotePdfTemplate';
 
-export function TipsPdfTemplate({ innerRef }: Props) {
+type Props = {
+  coverRef?: React.Ref<HTMLDivElement>;
+  bodyRef?: React.Ref<HTMLDivElement>;
+};
+
+export function TipsPdfTemplate({ coverRef, bodyRef }: Props) {
+  const date = new Date().toISOString();
+
+  return (
+    <>
+      <div ref={coverRef}>
+        <PdfCover
+          category="인테리어 실전 가이드 · Premium"
+          title={`인테리어${'\n'}실전 가이드`}
+          subtitle={`현장 15년 · 건축사 · 건축시공기술사의 경험으로 정리한 공간별·공종별 핵심 팁. 인테리어 처음 하는 분들이 가장 자주 놓치는 부분만 모았습니다.`}
+          meta={['공간별 팁', '공종별 팁', '업체 선택법', '계약 체크리스트']}
+          issuedAt={date}
+          tagline="가장 흔한 하자의 80%는 시공 단계의 작은 차이에서 시작됩니다."
+        />
+      </div>
+
+      <TipsBody innerRef={bodyRef} />
+    </>
+  );
+}
+
+function TipsBody({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
+  const date = new Date().toLocaleDateString('ko-KR');
+
   return (
     <div
       ref={innerRef}
       style={{
         width: '760px',
-        padding: '40px',
+        padding: '48px 56px',
         background: '#ffffff',
-        color: '#111827',
+        color: '#1f2937',
         fontFamily: 'Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif',
         fontSize: '12px',
-        lineHeight: 1.6,
+        lineHeight: 1.7,
       }}
     >
-      {/* 표지 */}
-      <div style={{ textAlign: 'center', padding: '60px 0 40px', borderBottom: '1px solid #e5e7eb', marginBottom: '32px' }}>
-        <div style={{ fontSize: '11px', color: '#6b7280', letterSpacing: '0.08em' }}>apt-planner · 보너스 자료</div>
-        <h1 style={{ fontSize: '28px', fontWeight: 800, margin: '12px 0', letterSpacing: '-0.02em' }}>
-          인테리어 처음하는 분을 위한<br />실전 가이드
-        </h1>
-        <div style={{ fontSize: '13px', color: '#4b5563' }}>
-          잘하는 법 · 좋은 업체 고르는 법 · 견적 요청·비교법
-        </div>
-      </div>
+      <RunningHeader page="실전 가이드" date={date} />
 
-      {/* 1. 인테리어 잘하는 법 */}
-      <Section title="1. 인테리어 잘하는 법 — 후회 없는 진행 원칙">
-        <H3>1-1. 평면을 먼저, 자재는 나중에</H3>
-        <P>구조 변경(벽 철거, 확장)·동선·수납 같은 평면 의사결정을 먼저 끝내야 합니다. 자재는 평면이 확정된 뒤 골라야 어울리는 등급·색·재질을 효율적으로 결정할 수 있습니다.</P>
-
-        <H3>1-2. 등급은 공간별로 다르게</H3>
-        <P>거실·주방처럼 매일 보는 공간은 한 등급 위로, 작은방·다용도실처럼 활용도 낮은 공간은 가성비 등급으로 — 같은 예산으로 체감 만족도가 크게 올라갑니다.</P>
-
-        <H3>1-3. 비용 80%는 보이지 않는 곳에서 결정</H3>
-        <P>샷시 단열 등급, 단열재 두께, 배관·전기 노후 교체 같은 항목은 눈에 안 띄지만 향후 10년 비용을 크게 좌우합니다. 보이는 자재만 보고 결정하지 마세요.</P>
-
-        <H3>1-4. &lsquo;같이 하면 싸진다&rsquo;가 진짜인 경우</H3>
-        <P>철거·도배·바닥재처럼 동선이 겹치는 공사는 한 번에 묶는 게 효율적이지만, 욕실·주방 가구는 별도 발주가 더 쌀 때도 있습니다. 두 가지 모두 견적 받아 비교하세요.</P>
-
-        <H3>1-5. 잔공사·마감 디테일이 만족도를 가른다</H3>
-        <P>실리콘 마감, 몰딩 끝선, 도배 이음매 같은 작은 디테일이 완성도를 좌우합니다. 견적에 &ldquo;마감 디테일&rdquo; 항목이 명시되어 있는지 반드시 확인하세요.</P>
-      </Section>
-
-      {/* 2. 좋은 업체 고르는 법 */}
-      <Section title="2. 정직하고 실력있는 인테리어 업체 고르는 법">
-        <H3>2-1. 가장 중요한 한 가지: 견적서 형식</H3>
-        <P>좋은 업체는 자재 사양·수량·단가·소계를 항목별로 명시한 상세 견적서를 줍니다. 한 줄에 &ldquo;도배 공사 일체 ◯◯◯만원&rdquo;처럼 뭉뚱그린 견적은 위험 신호입니다.</P>
-
-        <H3>2-2. 3개 이상 업체에서 같은 조건으로 견적받기</H3>
-        <P>동일한 평면·동일한 사양으로 견적을 받아야 의미 있는 비교가 됩니다. apt-planner의 <strong>인테리어 계획서 PDF</strong>를 그대로 전달하면 누락 없이 비교 가능합니다.</P>
-
-        <H3>2-3. 사후 관리 체크리스트</H3>
-        <Bullet items={[
-          'A/S 보증 기간 (보통 1~2년, 3년 이상이면 우수)',
-          'A/S 대응 속도 — 최근 시공 고객에게 직접 확인 추천',
-          '계약서에 추가금 발생 시 사전 협의 조항이 있는지',
-          '폐기물 처리 책임, 운반 비용 포함 여부 명시 여부',
-        ]} />
-
-        <H3>2-4. 위험 신호 (이런 업체는 피하세요)</H3>
-        <Bullet items={[
-          '견적이 다른 곳 대비 30% 이상 저렴 → 자재 등급 다운그레이드 또는 추가금 폭탄 가능',
-          '계약 전 큰 비율(50% 이상) 선입금 요구',
-          '서면 계약서 없이 구두로만 진행하려는 곳',
-          '동일 자재 사양인데 가격을 합리적으로 설명하지 못하는 곳',
-          '시공 사례 사진을 제시하지 못하는 곳',
-        ]} />
-      </Section>
-
-      {/* 3. 견적 요청·비교법 */}
-      <Section title="3. apt-planner 계획서로 견적 요청·비교하는 법">
-        <H3>3-1. 계획서 활용 — 1·2·3단계</H3>
-        <ol style={{ margin: 0, paddingLeft: '20px', color: '#374151' }}>
-          <li style={{ marginBottom: '6px' }}><strong>업체에 계획서 PDF를 그대로 전달</strong>합니다. (이메일 또는 채팅)</li>
-          <li style={{ marginBottom: '6px' }}>업체에 <strong>&ldquo;단가만 산출해 회신&rdquo;</strong>이라고 요청합니다. 자재 임의 변경 시 명시 요구.</li>
-          <li style={{ marginBottom: '6px' }}>회수된 견적은 <strong>같은 항목끼리 가로로 나란히 비교</strong>합니다.</li>
-        </ol>
-
-        <H3>3-2. 비교할 때 봐야 할 4가지</H3>
-        <Bullet items={[
-          '항목 누락 — 모든 항목이 채워졌는지 (빈칸은 위험)',
-          '단가 분포 — 평균에서 크게 벗어난 항목은 추가 설명 요청',
-          '추가금 조항 — 발생 가능 항목과 사전 협의 절차 명시 여부',
-          '공기·보증 — 단순 비용 외에 시간·사후 관리도 비교 대상',
-        ]} />
-
-        <H3>3-3. 협상의 기술</H3>
-        <P>여러 견적을 받아 비교한 결과를 다른 업체에 공유하지 말고, &ldquo;A 항목은 ◯◯만원, B 항목은 ◯◯만원이 평균인데 이 부분 설명 가능하실까요?&rdquo;처럼 데이터 기반으로 질문하세요. 무리한 가격 압박보다 합리적 비교가 결과적으로 좋은 시공을 끌어냅니다.</P>
-
-        <H3>3-4. 마지막 체크 — 계약 직전</H3>
-        <Bullet items={[
-          '계약서에 자재 사양·수량·단가·소계가 모두 명시되어 있는가?',
-          '추가금 발생 시 사전 협의 조항이 있는가?',
-          'A/S 보증 기간과 범위가 명확한가?',
-          '잔금은 완공·하자보수 점검 이후로 설정되어 있는가?',
-        ]} />
-      </Section>
-
-      {/* 마무리 */}
+      {/* 인트로 */}
       <div style={{
-        marginTop: '32px',
-        padding: '16px 18px',
-        background: '#f0f9ff',
-        border: '1px solid #bae6fd',
-        borderRadius: '6px',
+        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+        color: '#ffffff',
+        padding: '20px 24px',
+        borderRadius: '10px',
+        marginBottom: '28px',
       }}>
-        <div style={{ fontSize: '12px', fontWeight: 700, color: '#075985', marginBottom: '6px' }}>
-          📌 핵심 한 줄
+        <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: '6px' }}>
+          이 가이드를 누가, 왜 썼는가
         </div>
-        <p style={{ margin: 0, fontSize: '12px', color: '#0c4a6e', lineHeight: 1.6 }}>
-          좋은 인테리어의 핵심은 좋은 업체를 만나는 게 아니라,
-          <strong> 정확한 정보로 무장한 소비자가 좋은 업체를 알아볼 수 있게 되는 것</strong>입니다.
-          apt-planner는 그 정보를 무료로 드립니다.
+        <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, color: '#e2e8f0' }}>
+          본 가이드는 <strong style={{ color: '#fff' }}>대형 건설사 15년 시공·CS 경험, 건축사·건축시공기술사 자격</strong>을 보유한
+          전문가가 수만세대 단지에서 직접 본 하자 패턴과 그 원인을 토대로 정리했습니다.
+          마케팅 카피가 아닌 <strong style={{ color: '#fff' }}>현장 데이터</strong> 기반입니다.
         </p>
       </div>
 
-      <div style={{ marginTop: '20px', fontSize: '10px', color: '#9ca3af', textAlign: 'center' }}>
-        © apt-planner · 본 자료는 어떤 인테리어 업체와도 제휴·수수료 관계가 없습니다.
+      {/* ===== PART 1. 공종별 핵심 팁 ===== */}
+      <PartHeader part="PART 1" title="공종별 핵심 팁" />
+
+      <TipBlock
+        icon="🪵"
+        title="바닥재 — 5년 뒤 가장 후회하지 않는 선택"
+        warning="하자 빈도: ★★★ (3위)"
+        body={[
+          '강마루는 일반 합판마루보다 단단해 반려동물·아이가 있는 집에 적합합니다. 단, 표면 코팅 등급이 낮으면 5년 안에 광택이 사라집니다. 코팅 7T 이상, 가능하면 9T 이상을 권장합니다.',
+          '강화마루는 가성비가 좋지만 들뜸·소음 이슈가 있습니다. 거실은 강마루, 작은방은 강화마루로 등급을 다르게 가는 게 일반적입니다.',
+          '장판은 가장 저렴하지만 10년 사용 시 매우 어색해 보입니다. 단기 거주(전세) 외엔 추천하지 않습니다.',
+        ]}
+        pro="시공 핵심: 바닥재 시공 전 평탄도 점검이 필수. 1~2mm 단차도 시공 후 들뜸의 원인이 됩니다. 견적에 '바닥 평탄 작업' 항목이 빠져 있다면 추가 요구하세요."
+      />
+
+      <TipBlock
+        icon="🧱"
+        title="도배 — 가장 만만해 보이지만 디테일이 모든 것"
+        warning="하자 빈도: ★★★★ (2위)"
+        body={[
+          '실크벽지는 합지보다 내구성·세척성이 좋지만, 통기성이 낮아 결로가 잘 생기는 외벽 쪽 안방에는 합지가 더 유리할 수 있습니다.',
+          '벽지 등급보다 더 중요한 건 바탕면 처리입니다. 기존 벽지를 떼지 않고 그 위에 새 벽지를 덧대는 시공은 들뜸·곰팡이 원인이 됩니다.',
+          '몰딩·문틀 주변 마감 처리가 만족도를 가릅니다. 시공 전 "마감 디테일 처리 방식"을 문서로 확인하세요.',
+        ]}
+        pro="시공 핵심: 도배는 반드시 24시간 자연 건조가 필요합니다. 공기를 단축하려고 보일러를 강하게 틀면 들뜸·찢어짐이 발생합니다. 견적에 '건조 기간' 명시 요구."
+      />
+
+      <TipBlock
+        icon="🪟"
+        title="샷시(외창) — 비용의 20%, 만족도의 50%"
+        warning="하자 빈도: ★★★★★ (1위)"
+        body={[
+          '샷시는 본체보다 시공이 더 중요합니다. 같은 LX·KCC 제품이라도 시공자에 따라 단열·소음 성능이 30% 이상 차이납니다.',
+          '단열은 PVC 프레임 깊이가 핵심입니다. 224mm 이상(이중창 기준), 가능하면 250mm를 권장. 단열재 충진 여부도 견적에 명시 요구.',
+          '소음이 걱정이라면 22mm 두께의 페어유리(복층유리) 이상이 필요합니다. 진공유리(슈퍼세이브 등)는 25% 비싸지만 효과 큽니다.',
+          '확장 시 새로 생기는 외창은 단열재가 충분히 들어가지 않으면 결로의 주범이 됩니다. 단열재 50T 이상 + 콘크리트 면 단열 시공 확인.',
+        ]}
+        pro="시공 핵심: 샷시 시공 후 외기 누설 테스트(촛불·연기 테스트)를 반드시 요구하세요. 견적 단계에서 'A/S 보증 3년 이상' 조항이 있는지 확인."
+      />
+
+      <TipBlock
+        icon="❄️"
+        title="단열 — 보이지 않는데 평생 만족도를 결정"
+        warning="하자 빈도: ★★★★ · 발견까지 평균 2년"
+        body={[
+          '단열재는 두께가 가장 중요합니다. 외벽 기준 50T 이상이 표준, 외기 직접 면(북향 외벽·확장부)은 75T 이상 권장.',
+          '단열재 종류는 EPS(흰색 스티로폼) < XPS(아이소핑크) < PF보드(페놀폼) 순으로 단열 성능이 좋아집니다. 가격도 비례.',
+          '단열재만 시공하고 기밀 시공(테이프 마감)을 빼면 효과가 50% 이상 떨어집니다. 견적에 "기밀 테이프 시공" 명시 요구.',
+        ]}
+        pro="시공 핵심: 단열재 시공 직후 단열재 위에 직접 손을 대 차가운 지점이 있는지 확인하세요(저녁 시간 권장). 차가운 부분은 단열재가 미충진된 곳입니다."
+      />
+
+      <TipBlock
+        icon="💧"
+        title="욕실 방수 — 한 번 빠뜨리면 평생 골칫거리"
+        warning="하자 빈도: ★★★★★ · 누수 시 아랫집 분쟁"
+        body={[
+          '욕실 방수는 액체방수(아덱스 등 탄성도막) 1회 + 시트방수를 함께 시공하는 게 표준입니다. 한 가지만 시공하면 5년 안에 누수 위험.',
+          '코너 부위·배수구 주변은 보강 방수가 별도로 필요합니다. 견적에 "코너 보강 방수" 항목 확인.',
+          '방수 후 24~48시간 담수 테스트가 필수입니다. 이 과정 없이 타일 시공하면 누수 발견이 늦어집니다.',
+        ]}
+        pro="시공 핵심: 방수 시공 사진을 단계별로 받으세요. 코너 보강·배수구 주변·시트 겹침 부위가 사진에 명확히 보여야 합니다. 추후 분쟁 시 증거가 됩니다."
+      />
+
+      <TipBlock
+        icon="🍽️"
+        title="주방가구 — 보이는 도어보다 보이지 않는 몸체"
+        warning="하자 빈도: ★★★ · 발견까지 평균 3~5년"
+        body={[
+          '주방가구의 핵심은 몸체(상·하부장 본체)입니다. 도어가 아무리 예뻐도 몸체가 일반 PB(파티클보드)면 습기에 약해 변형이 옵니다. MDF 또는 합판 본체를 권장.',
+          '상판(타) 등급이 만족도의 큰 부분을 차지합니다. 하이막스 < 인조대리석 < 천연석/세라믹 순. 단, 천연석은 산성 음식(레몬 등)에 약함을 인지하세요.',
+          '하드웨어(경첩·서랍 슬라이드)는 댐퍼 기능 있는 국산 또는 블룸(Blum) 같은 수입 제품 권장. 5년 이상 사용에서 만족도 차이가 큼.',
+          '후드는 흡입력이 핵심. 흡입력 m³/h 표기와 소음 dB 표기를 함께 비교. 950 m³/h 이상이 표준.',
+        ]}
+        pro="시공 핵심: 주방가구는 설치 후 수평·수직 확인이 중요. 도어 들어맞음(여닫이 간격)이 균일한지 시공 직후 확인하고, 불일치 시 즉시 보정 요구."
+      />
+
+      <TipBlock
+        icon="💡"
+        title="조명 — 분위기뿐 아니라 전기 부하 설계까지"
+        body={[
+          '거실 조명은 색온도 3000K(전구색)~4000K(주백색)이 가장 무난. 5000K 이상(주광색)은 사무실 느낌이라 추천하지 않음.',
+          '주방은 4000~5000K(주백색~주광색)로 밝게. 식기 색 구분이 잘 됩니다.',
+          '간접조명은 디머(밝기 조절) 기능을 함께 시공해야 만족도 큽니다. 다운라이트도 일부는 디머 권장.',
+          '매그네틱 레일 조명은 5년 이내 트렌드 변화 가능성 있으니, 거실 전체보다는 일부만 적용 권장.',
+        ]}
+        pro="시공 핵심: 조명 시공 전 분전반 용량 확인 필수. 다운라이트 다수 + 시스템에어컨 + 인덕션을 동시 사용하려면 분전반 차단기 용량 점검 후 필요 시 교체."
+      />
+
+      <TipBlock
+        icon="🔲"
+        title="몰딩·걸레받이 — 무몰딩이 정말 답일까?"
+        body={[
+          '무몰딩은 시각적으로 깔끔하지만, 천장과 벽이 직각으로 만나는 부위가 어긋나면 매우 어색해 보입니다. 시공 난이도가 훨씬 높음.',
+          '"무몰딩 + 무걸레받이" 조합은 시공자 실력에 크게 의존합니다. 시공 사례 사진을 반드시 확인하세요.',
+          '걸레받이는 PVC(가성비)·MDF(표준)·우드(고급) 순. 청소·내구성 면에서 PVC가 실용적입니다.',
+        ]}
+        pro="시공 핵심: 무몰딩은 천장·벽 마감 평탄도가 ±2mm 이내여야 합니다. 시공 전 평탄도 점검 항목이 견적에 있는지 확인."
+      />
+
+      {/* ===== PART 2. 공간별 핵심 팁 ===== */}
+      <PartHeader part="PART 2" title="공간별 핵심 팁" />
+
+      <TipBlock
+        icon="🛋️"
+        title="거실 — 가족이 가장 오래 머무는 공간"
+        body={[
+          '거실은 전체 인테리어 예산의 25~30%가 들어가는 공간. 이 공간만큼은 한 등급 위 자재를 권장합니다.',
+          '확장 여부가 가장 큰 결정 요소. 확장하면 거실이 약 30% 넓어지지만, 새 외창 단열 시공이 부실하면 결로의 주범이 됩니다.',
+          '조명 설계가 만족도를 가릅니다. 메인 + 간접 + 보조(스탠드) 3중 조명이 표준. 디머 설치 권장.',
+          'TV 벽면은 콘센트 위치를 미리 계산. 매립 시공이 깔끔하지만 추후 위치 변경 어려움.',
+        ]}
+        defect="자주 발생하는 하자: 확장부 결로(원인 70%가 단열재 미충진), TV 벽면 콘센트 위치 잘못 등."
+      />
+
+      <TipBlock
+        icon="🍳"
+        title="주방 — 동선이 모든 것"
+        body={[
+          '주방의 핵심은 싱크대-가스/인덕션-냉장고의 삼각형 동선. 이 거리가 너무 멀면 매일 불편함.',
+          '대면형 주방은 거실과의 연결성↑, 단 후드 흡입력 더 중요(소음 발생).',
+          '인덕션 사용 시 220V 전용선 신설 필수. 가스→인덕션 변경 가구는 분전반에서 별도 배선 필요.',
+          '주방 조명은 매그네틱 + 식탁 위 펜던트 조합이 트렌드. 단, 펜던트 위치를 식탁 정확한 위치에 맞춰야 함.',
+        ]}
+        defect="자주 발생하는 하자: 인덕션 전용선 누락(가장 흔함), 상판-싱크볼 결합부 실리콘 처리 불량으로 누수."
+      />
+
+      <TipBlock
+        icon="🛁"
+        title="욕실 — 가장 중요한 공간, 가장 자주 실수하는 공간"
+        body={[
+          '욕실 인테리어의 80%는 방수가 결정합니다. 타일이 아무리 예뻐도 방수가 부실하면 누수→아랫집 분쟁.',
+          '환풍기(벤트팬)는 흡입력이 큰 모델로. 100m³/h 이상 권장. 약하면 곰팡이 원인.',
+          '바닥 구배(경사)가 배수구로 잘 흘러가는지 시공 후 물을 부어 확인.',
+          '세면대 하부장은 습기에 약함. 도어 한 칸을 통풍 그릴로 두는 디자인이 위생적.',
+        ]}
+        defect="자주 발생하는 하자: ① 방수 부실 누수(1위) ② 바닥 구배 불량으로 물고임 ③ 줄눈 곰팡이(저급 줄눈재 사용 시) ④ 환풍 부족으로 곰팡이."
+      />
+
+      <TipBlock
+        icon="🛏️"
+        title="안방 — 수면 품질을 위한 공간"
+        body={[
+          '안방은 단열·소음 차단이 거실보다 더 중요. 외벽 면 단열재 75T 이상 권장.',
+          '안방 욕실(부부욕실)이 있다면 욕실 환풍기·문 틈 처리가 침실 습도에 영향.',
+          '붙박이장은 안방의 90%가 시공하는 항목. 슬라이딩 도어가 공간 활용 좋지만 단가 높음.',
+          '실링팬은 여름철 에어컨 보조로 효과 있지만 소음 대비 모델 확인 필수(30dB 이하 권장).',
+        ]}
+        defect="자주 발생하는 하자: 외벽 면 결로·곰팡이(단열 부실), 붙박이장 도어 슬라이딩 레일 변형(5년차 이후)."
+      />
+
+      <TipBlock
+        icon="📚"
+        title="작은방 — 등급은 가성비로, 기능만 챙기기"
+        body={[
+          '작은방은 거실·안방 대비 사용 빈도 낮음. 자재 등급을 한 단계 낮춰 예산 절약 가능.',
+          '단, 외벽 면 단열은 동일하게 — 결로·곰팡이는 자녀 건강에 영향.',
+          '붙박이장이나 책상 설치 위치에 콘센트가 충분한지 미리 계획.',
+          '추후 자녀 방으로 사용 시 필요한 인터넷·TV 단자 위치도 미리 시공.',
+        ]}
+        defect="자주 발생하는 하자: 외벽 면 곰팡이(단열 누락), 콘센트 부족으로 멀티탭 사용→화재 위험."
+      />
+
+      <TipBlock
+        icon="🚪"
+        title="현관·복도 — 인테리어의 첫인상"
+        body={[
+          '신발장은 한샘·리바트 등 기성 가구가 가성비 좋음. 사제 가구는 매우 비싸짐.',
+          '중문은 외풍 차단·소음·미관 3중 효과. 슬라이딩 3연동이 표준.',
+          '현관 타일은 미끄럼 방지 등급 R10 이상 필수. 비 오는 날 안전.',
+        ]}
+        defect="자주 발생하는 하자: 중문 슬라이딩 레일 변형(약체 모델 사용 시), 신발장 도어 처짐(저급 경첩 사용 시)."
+      />
+
+      <TipBlock
+        icon="🌿"
+        title="발코니·다용도실 — 가장 무시되지만 가장 손쉬운 업그레이드"
+        body={[
+          '확장하지 않는 발코니는 도장만 새로 해도 분위기가 크게 달라짐. 비용 대비 만족도 큼.',
+          '바닥 타일은 미끄럼 방지 + 청소 편의 위주로. 600각 타일이 청소·시공 모두 효율적.',
+          '다용도실은 환기·세탁기 진동·배수가 핵심. 환풍기 점검 + 세탁기 받침대(진동 흡수) 추천.',
+        ]}
+        defect="자주 발생하는 하자: 발코니 도장 박리(시공 전 청소·프라이머 누락 시), 다용도실 배수 막힘(이전 시공 잔재)."
+      />
+
+      {/* ===== PART 3. 업체 선택·견적 비교 ===== */}
+      <PartHeader part="PART 3" title="정직한 업체 고르고 견적 비교하기" />
+
+      <TipBlock
+        icon="✅"
+        title="좋은 업체의 특징"
+        body={[
+          '견적서에 자재 사양·수량·단가·소계를 항목별로 명시합니다. 한 줄에 "도배 일체 ◯◯만원"같이 뭉뚱그리지 않습니다.',
+          '추가금 발생 가능 항목을 견적 단계에서 미리 안내합니다.',
+          '시공 사례 사진과 시공 후 1년 이상 지난 고객의 추천을 받을 수 있습니다.',
+          'A/S 보증 기간이 2년 이상이고, 보증 범위가 계약서에 명문화되어 있습니다.',
+          '계약 시 선수금 비율이 30% 이하입니다.',
+        ]}
+      />
+
+      <TipBlock
+        icon="🚫"
+        title="피해야 할 위험 신호"
+        warning="다음 중 2개 이상 해당 시 재고 권장"
+        body={[
+          '견적이 다른 곳 대비 30% 이상 저렴 — 자재 다운그레이드 또는 추가금 폭탄 가능성.',
+          '계약 전 큰 비율(50% 이상) 선입금 요구.',
+          '서면 계약서 없이 구두로만 진행하려는 경우.',
+          '동일 자재 사양인데 가격을 합리적으로 설명하지 못함.',
+          '시공 사례 사진을 제시하지 못하거나, 다른 업체 사진을 가져옴.',
+          'A/S 조항이 모호하거나 "구두 약속" 수준에 머무름.',
+        ]}
+      />
+
+      <TipBlock
+        icon="📋"
+        title="apt-planner 계획서로 견적 비교하는 5단계"
+        body={[
+          '1단계 — 본 계획서 PDF를 3~5개 업체에 이메일/카톡으로 전달.',
+          '2단계 — 업체에게 "단가만 채워 회신" 명확히 요청. 자재 변경 시 명시 의무화.',
+          '3단계 — 회수된 견적을 같은 항목끼리 가로로 나란히 비교 (스프레드시트 추천).',
+          '4단계 — 평균에서 ±20% 벗어난 항목은 업체에 추가 설명 요청.',
+          '5단계 — 최종 후보 2~3곳에 현장 실측·미팅 요청 후 결정.',
+        ]}
+      />
+
+      <TipBlock
+        icon="📝"
+        title="계약 직전 마지막 체크리스트"
+        body={[
+          '자재 사양·수량·단가·소계가 모두 명시되어 있는가?',
+          '추가금 발생 시 사전 협의 조항이 있는가?',
+          'A/S 보증 기간(2년 이상) + 보증 범위가 명확한가?',
+          '잔금은 완공·하자보수 점검 이후로 설정되어 있는가?',
+          '폐기물 처리·운반비 등 부대비용 포함 여부가 명시되어 있는가?',
+          '시공 사진 단계별 공유 조건이 명시되어 있는가? (분쟁 시 증거)',
+          '구조 변경(가벽 철거 등) 시 구청 신고 책임 주체가 명확한가?',
+        ]}
+      />
+
+      {/* 마무리 */}
+      <div style={{
+        marginTop: '40px',
+        padding: '20px 24px',
+        background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%)',
+        border: '1px solid #86efac',
+        borderRadius: '10px',
+      }}>
+        <div style={{ fontSize: '13px', fontWeight: 800, color: '#14532d', marginBottom: '8px' }}>
+          📌 핵심 한 줄
+        </div>
+        <p style={{ margin: 0, fontSize: '13px', color: '#15803d', lineHeight: 1.7 }}>
+          좋은 인테리어의 핵심은 좋은 업체를 만나는 게 아니라,
+          <strong> 정확한 정보로 무장한 소비자가 좋은 업체를 알아볼 수 있게 되는 것</strong>입니다.
+          본 가이드와 인테리어 계획서가 그 출발점이 되기를 바랍니다.
+        </p>
+      </div>
+
+      <div style={{ marginTop: '24px', fontSize: '10px', color: '#9ca3af', textAlign: 'center', lineHeight: 1.6 }}>
+        © apt-planner — 본 자료는 어떤 인테리어 업체와도 제휴·수수료 관계가 없습니다.<br />
+        대형 건설사 15년 시공·CS 경험, 건축사·건축시공기술사가 직접 검증한 데이터를 기반으로 작성되었습니다.
       </div>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+// =====================================================
+// 보조 컴포넌트
+// =====================================================
+
+function PartHeader({ part, title }: { part: string; title: string }) {
   return (
-    <section style={{ marginBottom: '28px' }}>
-      <h2 style={{
-        fontSize: '16px',
-        fontWeight: 800,
-        color: '#111827',
-        marginBottom: '12px',
-        paddingBottom: '6px',
-        borderBottom: '2px solid #111827',
-      }}>
+    <div style={{ margin: '36px 0 20px', textAlign: 'center' }}>
+      <div style={{
+        display: 'inline-block',
+        padding: '4px 12px',
+        background: '#111827',
+        color: '#ffffff',
+        fontSize: '10px',
+        fontFamily: 'monospace',
+        letterSpacing: '0.08em',
+        borderRadius: '4px',
+        marginBottom: '8px',
+      }}>{part}</div>
+      <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
         {title}
       </h2>
-      {children}
-    </section>
+      <div style={{ width: '40px', height: '2px', background: '#60a5fa', margin: '10px auto 0' }} />
+    </div>
   );
 }
 
-function H3({ children }: { children: React.ReactNode }) {
+function TipBlock({
+  icon, title, body, pro, defect, warning,
+}: {
+  icon: string;
+  title: string;
+  body: string[];
+  pro?: string;
+  defect?: string;
+  warning?: string;
+}) {
   return (
-    <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#1f2937', margin: '14px 0 6px' }}>
-      {children}
-    </h3>
-  );
-}
+    <div style={{
+      marginBottom: '20px',
+      border: '1px solid #e5e7eb',
+      borderRadius: '10px',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        background: '#f9fafb',
+        padding: '12px 16px',
+        borderBottom: '1px solid #e5e7eb',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '20px' }}>{icon}</span>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', margin: 0 }}>{title}</h3>
+        </div>
+        {warning && (
+          <span style={{
+            fontSize: '10px',
+            padding: '3px 9px',
+            background: '#fef3c7',
+            color: '#92400e',
+            borderRadius: '999px',
+            fontWeight: 600,
+          }}>
+            ⚠️ {warning}
+          </span>
+        )}
+      </div>
 
-function P({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ margin: '0 0 8px', color: '#374151', fontSize: '12px', lineHeight: 1.65 }}>
-      {children}
-    </p>
-  );
-}
+      <div style={{ padding: '14px 16px' }}>
+        <ul style={{ margin: '0 0 0 16px', padding: 0, color: '#374151', fontSize: '11.5px', lineHeight: 1.7 }}>
+          {body.map((s, i) => <li key={i} style={{ marginBottom: '6px' }}>{s}</li>)}
+        </ul>
 
-function Bullet({ items }: { items: string[] }) {
-  return (
-    <ul style={{ margin: '0 0 8px', paddingLeft: '20px', color: '#374151' }}>
-      {items.map((s, i) => <li key={i} style={{ marginBottom: '4px' }}>{s}</li>)}
-    </ul>
+        {pro && (
+          <div style={{
+            marginTop: '12px',
+            padding: '10px 12px',
+            background: '#eff6ff',
+            borderLeft: '3px solid #3b82f6',
+            borderRadius: '4px',
+            fontSize: '11px',
+            color: '#1e40af',
+            lineHeight: 1.65,
+          }}>
+            <strong>전문가의 한마디:</strong> {pro}
+          </div>
+        )}
+
+        {defect && (
+          <div style={{
+            marginTop: '12px',
+            padding: '10px 12px',
+            background: '#fef2f2',
+            borderLeft: '3px solid #ef4444',
+            borderRadius: '4px',
+            fontSize: '11px',
+            color: '#991b1b',
+            lineHeight: 1.65,
+          }}>
+            <strong>⚠️ {defect}</strong>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

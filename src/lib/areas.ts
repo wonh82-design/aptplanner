@@ -8,6 +8,7 @@ import type { Property } from './types';
 const SA = areas as {
   pyeongs: number[];
   rooms: Record<string, Record<string, number>>;
+  rooms_by_bay: Record<string, Record<string, Record<string, number>>>;
   perimeters: Record<string, Record<string, number>>;
   balcony: Record<string, Record<string, number>>;
 };
@@ -26,8 +27,10 @@ function interp(table: Record<string, number>, pyeong: number): number {
   return 0;
 }
 
-export function roomArea(roomName: string, pyeong: number): number {
-  const t = SA.rooms[roomName];
+export function roomArea(roomName: string, pyeong: number, bay: number = 3): number {
+  // 베이별 표가 있으면 그걸 우선, 없으면 3베이 기본
+  const bayTable = SA.rooms_by_bay?.[String(bay)];
+  const t = bayTable?.[roomName] ?? SA.rooms[roomName];
   if (!t) return 0;
   return interp(t, pyeong);
 }
@@ -53,17 +56,17 @@ const ROOM_KEY: Record<string, string> = {
   '작은방2': '작방2',
 };
 
-export function roomAreaForId(roomId: string, pyeong: number): number {
-  return roomArea(ROOM_KEY[roomId] || roomId, pyeong);
+export function roomAreaForId(roomId: string, pyeong: number, bay: number = 3): number {
+  return roomArea(ROOM_KEY[roomId] || roomId, pyeong, bay);
 }
 
 export function roomPerimeterForId(roomId: string, pyeong: number): number {
   return roomPerimeter(ROOM_KEY[roomId] || roomId, pyeong);
 }
 
-/** 외부창 면적 (3베이 기준 보간). 우리집 시트의 자동값과 일치 */
-export function outsideWindowArea(pyeong: number): number {
-  return roomArea('외부창', pyeong);
+/** 외부창 면적 — 베이별로 다름 (v4: 2/3/4/5베이 각각 표) */
+export function outsideWindowArea(pyeong: number, bay: number = 3): number {
+  return roomArea('외부창', pyeong, bay);
 }
 
 /** 공급면적 (㎡) — 평 × 3.31 */

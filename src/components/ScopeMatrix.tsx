@@ -65,7 +65,7 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
             <RoomCard
               key={room}
               room={room}
-              area={roomAreaForId(room, property.pyeong)}
+              area={roomAreaForId(room, property.pyeong, property.bay)}
               perim={roomPerimeterForId(room, property.pyeong)}
               value={value.rooms[room]}
               onChange={(patch) => updateRoom(room, patch)}
