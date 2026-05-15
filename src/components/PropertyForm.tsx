@@ -18,21 +18,45 @@ export function PropertyForm({ value, onChange }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="평형 (공급평)">
-          <input
-            type="number"
-            min={10}
-            max={80}
-            value={value.pyeong}
-            onChange={(e) => {
-              const py = Number(e.target.value) || 0;
-              onChange({
-                ...value,
-                pyeong: py,
-                rooms: recommendedRoomCount(py),
-              });
-            }}
-            className="input"
-          />
+          <div className="flex gap-2 items-stretch">
+            <input
+              type="number"
+              min={10}
+              max={80}
+              value={value.pyeong || ''}
+              placeholder="예: 30"
+              onChange={(e) => {
+                const raw = e.target.value;
+                const py = raw === '' ? 0 : Number(raw);
+                onChange({
+                  ...value,
+                  pyeong: py,
+                  rooms: py > 0 ? recommendedRoomCount(py) : value.rooms,
+                });
+              }}
+              className="input flex-1 min-w-0"
+            />
+            <div className="inline-flex rounded-lg border border-zinc-300 bg-white overflow-hidden text-xs shadow-sm">
+              {[24, 34, 44].map(py => (
+                <button
+                  key={py}
+                  type="button"
+                  onClick={() => onChange({
+                    ...value,
+                    pyeong: py,
+                    rooms: recommendedRoomCount(py),
+                  })}
+                  className={`px-2.5 py-2 transition border-r last:border-r-0 border-r-zinc-200 ${
+                    value.pyeong === py
+                      ? 'bg-blue-100 text-blue-900 font-semibold'
+                      : 'bg-white text-zinc-600 hover:bg-zinc-50'
+                  }`}
+                >
+                  {py}평
+                </button>
+              ))}
+            </div>
+          </div>
         </Field>
 
         <Field label="베이 수">
