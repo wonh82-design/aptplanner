@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import type { Property, RoomScope, Scope, RoomId } from '@/lib/types';
-import { activeRooms } from '@/lib/areas';
+import { activeRooms, roomAreaForId, roomPerimeterForId } from '@/lib/areas';
+import { ROOM_WORK_META, ROOM_META, GLOBAL_GROUPS } from '@/lib/scope-meta';
+import { PRESETS } from '@/lib/scope-presets';
 
 type Props = {
   property: Property;
@@ -9,47 +12,14 @@ type Props = {
   onChange: (next: Scope) => void;
 };
 
-const EXPANSION_COLS: { key: keyof RoomScope; label: string; hint: string }[] = [
-  { key: 'expansion_current', label: '현재',   hint: '현재 확장된 상태' },
-  { key: 'expansion_after',   label: '확장후', hint: '확장 시공 의사' },
-];
-
-const ROOM_WORK_COLS: { key: keyof RoomScope; label: string }[] = [
-  { key: 'flooring',    label: '바닥재' },
-  { key: 'wallpaper',   label: '도배' },
-  { key: 'molding',     label: '몰딩' },
-  { key: 'sash',        label: '샷시' },
-  { key: 'aircon',      label: '에어컨' },
-  { key: 'closet',      label: '붙박이장' },
-  { key: 'ceiling_fan', label: '실링팬' },
-];
-
-const GLOBAL_TOGGLES: { key: keyof Scope['global']; label: string; hint?: string }[] = [
-  { key: 'demolition',         label: '철거공사',       hint: '전용면적 전체' },
-  { key: 'insulation',         label: '단열공사',       hint: '전용면적 전체' },
-  { key: 'heating_pipe',       label: '난방배관 교체',  hint: '공급평 × 30만' },
-  { key: 'common_bath_set',    label: '공용욕실 세트',  hint: '풀세트' },
-  { key: 'master_bath_set',    label: '부부욕실 세트',  hint: '풀세트' },
-  { key: 'kitchen_set',        label: '주방가구',       hint: '3.6m 환산' },
-  { key: 'middoor',            label: '중문',           hint: '1ea' },
-  { key: 'entry_furniture',    label: '현관 일반가구',  hint: '신발장 등' },
-  { key: 'lighting',           label: '조명 풀세트' },
-  { key: 'balcony_floor_tile', label: '발코니 바닥타일' },
-  { key: 'balcony_paint',      label: '발코니 도장' },
-  { key: 'electrical_base',    label: '전기·설비 기본' },
-  { key: 'switch_outlet',      label: '스위치/콘센트' },
-  { key: 'induction_line',     label: '인덕션 전용선',  hint: '220V' },
-  { key: 'thermostat',         label: '난방온도조절기' },
-  { key: 'silicon',            label: '실리콘 공사' },
-  { key: 'expansion_report',   label: '구청 신고',     hint: '확장 시 권장' },
-];
-
 export function ScopeMatrix({ property, value, onChange }: Props) {
   const rooms = activeRooms(property) as RoomId[];
 
-  const toggleRoom = (room: RoomId, key: keyof RoomScope) => {
-    const next = { ...value.rooms[room], [key]: !value.rooms[room][key] };
-    onChange({ ...value, rooms: { ...value.rooms, [room]: next } });
+  const updateRoom = (room: RoomId, patch: Partial<RoomScope>) => {
+    onChange({
+      ...value,
+      rooms: { ...value.rooms, [room]: { ...value.rooms[room], ...patch } },
+    });
   };
 
   const toggleGlobal = (key: keyof Scope['global']) => {
@@ -57,94 +27,260 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
   };
 
   return (
-    <section className="rounded-xl bg-white p-5 shadow-sm border border-zinc-200">
-      <h2 className="text-base font-semibold mb-4">2. 공사 범위</h2>
-
-      <div className="mb-5">
-        <h3 className="text-xs font-medium text-zinc-500 mb-2">공간별 공종 매트릭스</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-xs text-zinc-500 border-b border-zinc-200">
-                <th className="text-left py-2 pr-2 font-medium" rowSpan={2}>공간</th>
-                <th className="text-center py-1 font-medium bg-amber-50/60" colSpan={EXPANSION_COLS.length}>
-                  확장
-                </th>
-                <th className="text-center py-1 font-medium" colSpan={ROOM_WORK_COLS.length}>
-                  공종
-                </th>
-              </tr>
-              <tr className="text-[10px] text-zinc-500 border-b border-zinc-200">
-                {EXPANSION_COLS.map(col => (
-                  <th key={col.key} className="py-1 px-1 font-medium text-center bg-amber-50/40" title={col.hint}>
-                    {col.label}
-                  </th>
-                ))}
-                {ROOM_WORK_COLS.map(col => (
-                  <th key={col.key} className="py-1 px-1 font-medium text-center">{col.label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rooms.map(room => (
-                <tr key={room} className="border-b border-zinc-100 last:border-0">
-                  <td className="py-2 pr-2 font-medium">{room}</td>
-                  {EXPANSION_COLS.map(col => (
-                    <td key={col.key} className="py-2 px-1 text-center bg-amber-50/30">
-                      <input
-                        type="checkbox"
-                        checked={value.rooms[room][col.key] as boolean}
-                        onChange={() => toggleRoom(room, col.key)}
-                        className="cb"
-                      />
-                    </td>
-                  ))}
-                  {ROOM_WORK_COLS.map(col => (
-                    <td key={col.key} className="py-2 px-1 text-center">
-                      <input
-                        type="checkbox"
-                        checked={value.rooms[room][col.key] as boolean}
-                        onChange={() => toggleRoom(room, col.key)}
-                        className="cb"
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 text-[11px] text-zinc-500">
-          현재N + 확장후Y 인 공간이 있으면 <b>확장공사·새 외창·구청 신고·터닝도어</b>가 자동 추가됩니다.
+    <section className="rounded-xl bg-white p-5 shadow-sm border border-zinc-200 space-y-6">
+      <header>
+        <h2 className="text-base font-semibold">2. 공사 범위</h2>
+        <p className="text-xs text-zinc-500 mt-1">
+          ① 빠른 프리셋으로 시작하고 → ② 공간별 세부 조정 → ③ 집 전체 공사 항목 확인
         </p>
+      </header>
+
+      {/* ===== ① 빠른 프리셋 ===== */}
+      <div>
+        <div className="flex items-baseline justify-between mb-2">
+          <h3 className="text-xs font-semibold text-zinc-700">① 빠른 시작</h3>
+          <span className="text-[10px] text-zinc-400">대표 시나리오로 한 번에 설정</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {PRESETS.map(preset => (
+            <button
+              key={preset.id}
+              onClick={() => onChange(preset.apply(property))}
+              className="flex flex-col items-start gap-0.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left
+                         hover:border-blue-400 hover:bg-blue-50/30 active:scale-[0.98] transition-all"
+            >
+              <span className="text-lg leading-none">{preset.icon}</span>
+              <span className="text-xs font-semibold text-zinc-900">{preset.label}</span>
+              <span className="text-[10px] text-zinc-500 leading-tight">{preset.desc}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* ===== ② 공간별 카드 ===== */}
       <div>
-        <h3 className="text-xs font-medium text-zinc-500 mb-2">전체 공종 토글</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {GLOBAL_TOGGLES.map(t => (
-            <label
-              key={t.key}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm transition-colors ${
-                value.global[t.key]
-                  ? 'border-blue-500 bg-blue-50 text-blue-900'
-                  : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={value.global[t.key]}
-                onChange={() => toggleGlobal(t.key)}
-                className="cb"
-              />
-              <span className="flex-1 truncate">
-                <span className="font-medium">{t.label}</span>
-                {t.hint && <span className="ml-1 text-[10px] text-zinc-400">· {t.hint}</span>}
-              </span>
-            </label>
+        <h3 className="text-xs font-semibold text-zinc-700 mb-2">② 공간별로 무엇을 시공할까요?</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {rooms.map(room => (
+            <RoomCard
+              key={room}
+              room={room}
+              area={roomAreaForId(room, property.pyeong)}
+              perim={roomPerimeterForId(room, property.pyeong)}
+              value={value.rooms[room]}
+              onChange={(patch) => updateRoom(room, patch)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ===== ③ 전체 공종 그룹 ===== */}
+      <div>
+        <h3 className="text-xs font-semibold text-zinc-700 mb-2">③ 집 전체에 공통으로 하는 공사</h3>
+        <div className="space-y-3">
+          {GLOBAL_GROUPS.map(group => (
+            <GlobalGroupCard
+              key={group.title}
+              group={group}
+              value={value.global}
+              onToggle={toggleGlobal}
+            />
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+// =====================================================
+// 공간 카드
+// =====================================================
+
+function RoomCard({
+  room, area, perim, value, onChange,
+}: {
+  room: RoomId;
+  area: number;
+  perim: number;
+  value: RoomScope;
+  onChange: (patch: Partial<RoomScope>) => void;
+}) {
+  const meta = ROOM_META[room] || { icon: '📐', label: room };
+  // 확장 3-상태 도출
+  const expansion: 'none' | 'plan' | 'done' =
+    value.expansion_current ? 'done' :
+    value.expansion_after   ? 'plan' :
+    'none';
+
+  const setExpansion = (s: 'none' | 'plan' | 'done') => {
+    if (s === 'none') onChange({ expansion_current: false, expansion_after: false });
+    if (s === 'plan') onChange({ expansion_current: false, expansion_after: true });
+    if (s === 'done') onChange({ expansion_current: true,  expansion_after: true });
+  };
+
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-zinc-50/40 p-3 space-y-3">
+      <div className="flex items-baseline justify-between">
+        <div className="flex items-center gap-1.5">
+          <span className="text-lg">{meta.icon}</span>
+          <span className="font-semibold text-sm">{meta.label}</span>
+        </div>
+        <span className="text-[10px] text-zinc-500 font-mono">
+          {area.toFixed(1)}㎡ · 둘레 {perim.toFixed(1)}m
+        </span>
+      </div>
+
+      {/* 확장 상태 (라디오) */}
+      <div>
+        <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-1">발코니 확장</div>
+        <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs">
+          <ExpansionRadio active={expansion === 'none'} onClick={() => setExpansion('none')} label="그대로" hint="발코니 유지" />
+          <ExpansionRadio active={expansion === 'plan'} onClick={() => setExpansion('plan')} label="확장 시공" hint="이번에 확장" tone="amber" />
+          <ExpansionRadio active={expansion === 'done'} onClick={() => setExpansion('done')} label="이미 확장됨" hint="기존부터 확장" />
+        </div>
+      </div>
+
+      {/* 공종 칩 */}
+      <div>
+        <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-1.5">시공 항목</div>
+        <div className="flex flex-wrap gap-1.5">
+          {ROOM_WORK_META.map(w => (
+            <Chip
+              key={w.key}
+              active={Boolean(value[w.key])}
+              icon={w.icon}
+              label={w.label}
+              title={w.desc}
+              onClick={() => onChange({ [w.key]: !value[w.key] } as Partial<RoomScope>)}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExpansionRadio({
+  active, onClick, label, hint, tone = 'blue',
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  hint: string;
+  tone?: 'blue' | 'amber';
+}) {
+  const activeTone = tone === 'amber'
+    ? 'bg-amber-100 text-amber-900 border-amber-300'
+    : 'bg-blue-100 text-blue-900 border-blue-300';
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={hint}
+      className={`px-2.5 py-1.5 border-r last:border-r-0 transition ${
+        active ? `${activeTone} font-medium` : 'border-r-zinc-200 text-zinc-600 hover:bg-zinc-50'
+      }`}
+    >
+      <div className="text-[11px]">{label}</div>
+      <div className="text-[9px] opacity-70">{hint}</div>
+    </button>
+  );
+}
+
+function Chip({
+  active, icon, label, title, onClick,
+}: {
+  active: boolean;
+  icon: string;
+  label: string;
+  title: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs transition-all
+        ${active
+          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+          : 'bg-white text-zinc-600 border-zinc-300 hover:border-blue-400 hover:text-blue-700'}`}
+    >
+      <span className="text-sm leading-none">{icon}</span>
+      <span>{label}</span>
+    </button>
+  );
+}
+
+// =====================================================
+// 전체 공종 그룹 카드
+// =====================================================
+
+function GlobalGroupCard({
+  group, value, onToggle,
+}: {
+  group: typeof GLOBAL_GROUPS[number];
+  value: Scope['global'];
+  onToggle: (key: keyof Scope['global']) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const activeCount = group.items.filter(it => value[it.key]).length;
+  const allOn = activeCount === group.items.length;
+  const allOff = activeCount === 0;
+
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setExpanded(e => !e)}
+        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 transition text-left"
+      >
+        <span className="text-xl leading-none">{group.icon}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2">
+            <span className="text-sm font-semibold text-zinc-900">{group.title}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+              allOff ? 'bg-zinc-100 text-zinc-500'
+              : allOn ? 'bg-emerald-100 text-emerald-700'
+              : 'bg-blue-100 text-blue-700'
+            }`}>
+              {activeCount}/{group.items.length}
+            </span>
+          </div>
+          <p className="text-[11px] text-zinc-500 truncate">{group.desc}</p>
+        </div>
+        <span className={`text-zinc-400 text-xs transition-transform ${expanded ? 'rotate-180' : ''}`}>▼</span>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-zinc-100 px-3 py-2 space-y-1.5 bg-zinc-50/30">
+          {group.items.map(item => (
+            <label
+              key={item.key}
+              className={`flex items-start gap-3 rounded-md px-2 py-2 cursor-pointer transition
+                ${value[item.key] ? 'bg-blue-50' : 'bg-white hover:bg-zinc-50'}`}
+            >
+              <input
+                type="checkbox"
+                checked={value[item.key]}
+                onChange={() => onToggle(item.key)}
+                className="cb mt-0.5 flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-zinc-900">{item.label}</span>
+                  {item.warning && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
+                      ⚠️ {item.warning}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-0.5">{item.desc}</p>
+              </div>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
