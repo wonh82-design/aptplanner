@@ -110,7 +110,7 @@ export function ServicesPricing({
           recommended={recommended === 'consult'}
           icon={SERVICE_CONSULT.icon}
           name={SERVICE_CONSULT.name}
-          subBadge="🔥 출시 1달 한정 50% 할인"
+          subBadge="🔥 5월 한정 50% 할인"
           priceMain="₩150,000"
           priceOriginal="₩300,000"
           discountLabel="-50%"

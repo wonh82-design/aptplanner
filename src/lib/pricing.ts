@@ -2,7 +2,7 @@
  * 서비스 가격·기능 상수.
  * 1) 무료 - 예상 공사비 상세 PDF
  * 2) 2.9만 - 인테리어 계획 스펙북 + 꿀팁
- * 3) 30만 → 15만 (출시 1달 50% 할인) - 전문가 컨설팅
+ * 3) 30만 → 15만 (5월 한정 50% 할인) - 전문가 컨설팅
  */
 
 export const SERVICE_FREE = {
@@ -78,7 +78,7 @@ export const SERVICE_CONSULT = {
   cta: '컨설팅 신청',
   valueAnchor: '컨설팅 한 번으로 평균 500~3,000만원 절감',
   savingsLabel: '예상 절감: 500~3,000만원',
-  promotionLabel: '출시 1달간 50% 할인 + 견적 비교 서비스 무료',
+  promotionLabel: '5월 한정 50% 할인 + 견적 비교 서비스 무료',
 } as const;
 
 export const SERVICES = [SERVICE_FREE, SERVICE_SPEC, SERVICE_CONSULT] as const;

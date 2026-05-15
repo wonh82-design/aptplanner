@@ -177,7 +177,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-xs font-medium mb-4">
-              🔥 출시 기념 컨설팅 50% 할인 (1달 한정)
+              🔥 출시 기념 컨설팅 50% 할인 (5월 한정)
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-4">
               3가지 방식으로 <span className="text-blue-700">정확한 견적</span>을 만드세요
