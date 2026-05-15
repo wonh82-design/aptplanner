@@ -90,16 +90,14 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           </select>
         </Field>
 
-        <Field label="방 개수">
+        <Field label="방 개수 (거실 제외)">
           <select
             value={value.rooms}
             onChange={(e) => setField('rooms', Number(e.target.value) as 2 | 3 | 4 | 5)}
             className="input"
           >
-            <option value={2}>2개</option>
-            <option value={3}>3개</option>
-            <option value={4}>4개</option>
-            <option value={5}>5개</option>
+            <option value={2}>2개 (안방 + 작은방1)</option>
+            <option value={3}>3개 (안방 + 작은방1·2)</option>
           </select>
         </Field>
 

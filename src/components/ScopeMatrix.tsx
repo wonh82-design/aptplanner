@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import type { Property, RoomScope, Scope, RoomId } from '@/lib/types';
-import { activeRooms, roomAreaForId, roomPerimeterForId } from '@/lib/areas';
-import { ROOM_WORK_META, ROOM_META, GLOBAL_GROUPS } from '@/lib/scope-meta';
+import { activeRooms } from '@/lib/areas';
+import { ROOM_WORK_META, GLOBAL_GROUPS } from '@/lib/scope-meta';
 import { PRESETS } from '@/lib/scope-presets';
 
 type Props = {
@@ -15,11 +15,28 @@ type Props = {
 export function ScopeMatrix({ property, value, onChange }: Props) {
   const rooms = activeRooms(property) as RoomId[];
 
-  const updateRoom = (room: RoomId, patch: Partial<RoomScope>) => {
-    onChange({
-      ...value,
-      rooms: { ...value.rooms, [room]: { ...value.rooms[room], ...patch } },
-    });
+  /**
+   * 공종(RoomScope key) 상태:
+   *  - 'all'    : 활성 공간 모두 ON
+   *  - 'none'   : 모두 OFF
+   *  - 'mixed'  : 일부만 ON (프리셋·이전 상태에서 일부 ON 되어 있을 때)
+   */
+  const workTypeStatus = (key: keyof RoomScope): 'all' | 'none' | 'mixed' => {
+    const flags = rooms.map(r => Boolean(value.rooms[r]?.[key]));
+    if (flags.every(x => x)) return 'all';
+    if (flags.every(x => !x)) return 'none';
+    return 'mixed';
+  };
+
+  /** 공종 토글: 활성 공간 전체 일괄 ON/OFF */
+  const toggleWorkType = (key: keyof RoomScope) => {
+    const cur = workTypeStatus(key);
+    const next = cur === 'all' ? false : true; // mixed/none → ON, all → OFF
+    const newRooms = { ...value.rooms };
+    for (const r of rooms) {
+      newRooms[r] = { ...newRooms[r], [key]: next };
+    }
+    onChange({ ...value, rooms: newRooms });
   };
 
   const toggleGlobal = (key: keyof Scope['global']) => {
@@ -31,7 +48,7 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
       <header>
         <h2 className="text-base font-semibold">2. 공사 범위</h2>
         <p className="text-xs text-zinc-500 mt-1">
-          ① 빠른 프리셋으로 시작하고 → ② 공간별 세부 조정 → ③ 집 전체 공사 항목 확인
+          ① 빠른 프리셋으로 시작 → ② 공종별 시공 여부 조정 → ③ 집 전체 공사 항목 확인
         </p>
       </header>
 
@@ -57,20 +74,39 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
         </div>
       </div>
 
-      {/* ===== ② 공간별 카드 ===== */}
+      {/* ===== ② 공종별 시공 여부 ===== */}
       <div>
-        <h3 className="text-xs font-semibold text-zinc-700 mb-2">② 공간별로 무엇을 시공할까요?</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {rooms.map(room => (
-            <RoomCard
-              key={room}
-              room={room}
-              area={roomAreaForId(room, property.pyeong, property.bay)}
-              perim={roomPerimeterForId(room, property.pyeong)}
-              value={value.rooms[room]}
-              onChange={(patch) => updateRoom(room, patch)}
-            />
-          ))}
+        <div className="flex items-baseline justify-between mb-2">
+          <h3 className="text-xs font-semibold text-zinc-700">② 공종별 시공 여부</h3>
+          <span className="text-[10px] text-zinc-400">활성 공간 {rooms.length}곳에 일괄 적용</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {ROOM_WORK_META.map(w => {
+            const status = workTypeStatus(w.key);
+            const isOn = status !== 'none';
+            return (
+              <button
+                key={w.key}
+                onClick={() => toggleWorkType(w.key)}
+                title={w.desc}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-left text-sm transition
+                  ${isOn
+                    ? (status === 'mixed'
+                        ? 'border-amber-300 bg-amber-50 text-amber-900'
+                        : 'border-blue-500 bg-blue-50 text-blue-900')
+                    : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'}`}
+              >
+                <span className="text-base leading-none">{w.icon}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="block font-semibold truncate">{w.label}</span>
+                  <span className="block text-[10px] text-zinc-500 truncate">{w.desc.split('.')[0]}</span>
+                </span>
+                {status === 'mixed' && (
+                  <span className="text-[9px] font-mono bg-amber-200 text-amber-900 px-1 rounded">일부</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -89,78 +125,6 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
         </div>
       </div>
     </section>
-  );
-}
-
-// =====================================================
-// 공간 카드
-// =====================================================
-
-function RoomCard({
-  room, area, perim, value, onChange,
-}: {
-  room: RoomId;
-  area: number;
-  perim: number;
-  value: RoomScope;
-  onChange: (patch: Partial<RoomScope>) => void;
-}) {
-  const meta = ROOM_META[room] || { icon: '📐', label: room };
-
-  return (
-    <div className="rounded-lg border border-zinc-200 bg-zinc-50/40 p-3 space-y-3">
-      <div className="flex items-baseline justify-between">
-        <div className="flex items-center gap-1.5">
-          <span className="text-lg">{meta.icon}</span>
-          <span className="font-semibold text-sm">{meta.label}</span>
-        </div>
-        <span className="text-[10px] text-zinc-500 font-mono">
-          {area.toFixed(1)}㎡ · 둘레 {perim.toFixed(1)}m
-        </span>
-      </div>
-
-      {/* 공종 칩 */}
-      <div>
-        <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-1.5">시공 항목</div>
-        <div className="flex flex-wrap gap-1.5">
-          {ROOM_WORK_META.map(w => (
-            <Chip
-              key={w.key}
-              active={Boolean(value[w.key])}
-              icon={w.icon}
-              label={w.label}
-              title={w.desc}
-              onClick={() => onChange({ [w.key]: !value[w.key] } as Partial<RoomScope>)}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Chip({
-  active, icon, label, title, onClick,
-}: {
-  active: boolean;
-  icon: string;
-  label: string;
-  title: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs transition-all
-        ${active
-          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-          : 'bg-white text-zinc-600 border-zinc-300 hover:border-blue-400 hover:text-blue-700'}`}
-    >
-      <span className="text-sm leading-none">{icon}</span>
-      <span>{label}</span>
-    </button>
   );
 }
 

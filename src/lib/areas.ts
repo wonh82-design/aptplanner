@@ -79,12 +79,11 @@ export function exclusiveAreaM2(pyeong: number): number {
   return supplyAreaM2(pyeong) * 0.75;
 }
 
-/** 평형 기반 방 개수 권장값 */
+/** 평형 기반 방 개수(거실 제외) 권장값 */
 export function recommendedRoomCount(pyeong: number): 2 | 3 | 4 | 5 {
+  // 거실 외 침실 수. 20평대 보통 2룸(안방+작방1), 30평대+ 3룸(안방+작방1+작방2)
   if (pyeong < 22) return 2;
-  if (pyeong < 32) return 3;
-  if (pyeong < 45) return 4;
-  return 5;
+  return 3;
 }
 
 /** 우리집 시트의 "스위치/콘센트 평형별 자동 산출" 룩업 */
@@ -101,11 +100,11 @@ export function doorCount(pyeong: number): number {
   return 9;
 }
 
-/** 활성 공간 ID 목록 (방 개수에 따라 작방2 등 빠짐) */
+/** 활성 공간 ID 목록. p.rooms는 거실 제외한 방 개수 (안방+작방들) */
 export function activeRooms(p: Property): string[] {
-  const rooms = ['거실', '주방', '안방'];
-  if (p.rooms >= 3) rooms.push('작은방1');
-  if (p.rooms >= 4) rooms.push('작은방2');
+  const rooms = ['거실', '주방', '안방'];   // 거실·주방은 항상, 안방은 방1
+  if (p.rooms >= 2) rooms.push('작은방1');
+  if (p.rooms >= 3) rooms.push('작은방2');
   return rooms;
 }
 

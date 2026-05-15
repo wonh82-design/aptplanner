@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import type { Grade, GradeSelection, Material, Quote } from '@/lib/types';
-import { ALL_MATERIALS, getMaterialById, getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
+import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { fmtKRWShort } from '@/lib/calculator';
 
 type Props = {
@@ -13,59 +13,47 @@ type Props = {
 
 const GRADES: Grade[] = ['가성비', '표준', '고급'];
 
+const GRADE_META: Record<Grade, { color: string; bg: string; ring: string; label: string }> = {
+  '가성비':   { color: 'text-emerald-700', bg: 'bg-emerald-50',  ring: 'ring-emerald-300',  label: '실속·경제형' },
+  '표준':     { color: 'text-blue-700',    bg: 'bg-blue-50',     ring: 'ring-blue-300',     label: '주류·균형형' },
+  '고급':     { color: 'text-amber-700',   bg: 'bg-amber-50',    ring: 'ring-amber-300',    label: '프리미엄' },
+  '단일등급': { color: 'text-zinc-700',    bg: 'bg-zinc-50',     ring: 'ring-zinc-300',     label: '단일' },
+};
+
 export function MaterialOverrides({ quote, value, onChange }: Props) {
   const [showAll, setShowAll] = useState(false);
 
-  // 현재 견적에 쓰인 work_type만 + 소계 큰 순
+  // 견적에 등장하는 work_type만, 소계 큰 순
   const workTypes = useMemo(() => {
     const subtotalByWT = new Map<string, number>();
-    const labelByWT = new Map<string, string>();
     for (const it of quote.line_items) {
-      if (!it.material_id) continue;  // 자재마스터에 없는 고정 라인(터닝도어/구청신고) 제외
+      if (!it.material_id) continue;
       subtotalByWT.set(it.work_type, (subtotalByWT.get(it.work_type) || 0) + it.subtotal);
-      labelByWT.set(it.work_type, it.category);
     }
     return Array.from(subtotalByWT.entries())
       .sort((a, b) => b[1] - a[1])
-      .map(([wt, sub]) => ({ wt, sub, label: labelByWT.get(wt) || labelOf(wt) }));
+      .map(([wt, sub]) => ({ wt, sub, label: labelOf(wt) }));
   }, [quote.line_items]);
 
   const visible = showAll ? workTypes : workTypes.slice(0, 10);
 
-  function effectiveGrade(wt: string): Grade {
-    return (value.overrides[wt] as Grade) ?? value.default;
-  }
-
-  function currentMaterial(wt: string): Material | null {
-    const overrideId = value.material_overrides[wt];
-    if (overrideId) {
-      const m = getMaterialById(overrideId);
-      if (m && m.work_type === wt) return m;
-    }
-    return getPrimaryMaterial(wt, effectiveGrade(wt));
-  }
+  const effectiveGrade = (wt: string): Grade =>
+    (value.overrides[wt] as Grade) ?? value.default;
 
   function setGrade(wt: string, g: Grade) {
     const overrides = { ...value.overrides, [wt]: g };
-    // 등급이 바뀌면 해당 공종의 자재 override는 해제 (다른 등급의 자재일 수 있으므로)
+    // 등급이 바뀌면 그 공종의 자재 override 해제
     const matOv = { ...value.material_overrides };
     delete matOv[wt];
     onChange({ ...value, overrides, material_overrides: matOv });
   }
 
-  function clearGradeOverride(wt: string) {
+  function clearOverride(wt: string) {
     const overrides = { ...value.overrides };
     delete overrides[wt];
     const matOv = { ...value.material_overrides };
     delete matOv[wt];
     onChange({ ...value, overrides, material_overrides: matOv });
-  }
-
-  function setMaterial(wt: string, materialId: string) {
-    onChange({
-      ...value,
-      material_overrides: { ...value.material_overrides, [wt]: materialId },
-    });
   }
 
   return (
@@ -75,76 +63,52 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
         <span className="text-[11px] text-zinc-500">{workTypes.length}개 공종</span>
       </div>
       <p className="text-xs text-zinc-500 mb-4">
-        공종별로 등급을 다르게 가져가거나, 같은 등급 내에서 다른 브랜드·제품으로 바꿀 수 있습니다.
+        공종마다 가성비·표준·고급 등급의 <strong>주력 자재</strong>를 보고 직접 선택하세요. 등급별로 단가와 사양을 비교할 수 있습니다.
       </p>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {visible.map(({ wt, sub, label }) => {
-          const g = effectiveGrade(wt);
-          const mat = currentMaterial(wt);
-          const hasOverride = value.overrides[wt] !== undefined || value.material_overrides[wt] !== undefined;
-          // 같은 등급이거나 단일등급, 그리고 현재 line의 단위와 호환되는 자재만
-          const curUnit = mat?.unit_type;
-          const matOptions = materialsFor(wt).filter(m =>
-            (m.primary_grade === g || m.primary_grade === '단일등급') &&
-            (!curUnit || m.unit_type === curUnit)
-          );
-
+          const curGrade = effectiveGrade(wt);
+          const hasOverride = value.overrides[wt] !== undefined;
           return (
-            <div key={wt} className={`rounded-lg border p-3 ${hasOverride ? 'border-blue-300 bg-blue-50/30' : 'border-zinc-200'}`}>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-sm font-medium flex-1 min-w-0 truncate">{label}</span>
-                <span className="text-[11px] text-zinc-500 tabular-nums">{fmtKRWShort(sub)}</span>
-                {hasOverride && (
-                  <button
-                    onClick={() => clearGradeOverride(wt)}
-                    className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2"
-                    title="기본값(전체 일괄 등급)으로 되돌립니다"
-                  >
-                    초기화
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* 등급 트리거 */}
-                <div className="inline-flex rounded-md border border-zinc-200 overflow-hidden text-xs">
-                  {GRADES.map(gr => (
+            <div key={wt} className={`rounded-lg border ${hasOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
+              {/* 공종 헤더 */}
+              <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-zinc-900">{label}</span>
+                  {hasOverride && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">
+                      개별 설정
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-zinc-500 tabular-nums">{fmtKRWShort(sub)}</span>
+                  {hasOverride && (
                     <button
-                      key={gr}
-                      onClick={() => setGrade(wt, gr)}
-                      className={`px-2.5 py-1 transition ${
-                        g === gr
-                          ? gradeTone(gr) + ' font-medium'
-                          : 'bg-white text-zinc-600 hover:bg-zinc-50'
-                      }`}
+                      onClick={() => clearOverride(wt)}
+                      className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2"
+                      title="전체 일괄 등급으로 되돌립니다"
                     >
-                      {gr}
+                      초기화
                     </button>
-                  ))}
+                  )}
                 </div>
-
-                {/* 자재 셀렉트 */}
-                <select
-                  value={mat?.material_id ?? ''}
-                  onChange={(e) => setMaterial(wt, e.target.value)}
-                  className="flex-1 min-w-0 text-xs rounded-md border border-zinc-300 bg-white py-1 px-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                >
-                  {matOptions.length === 0 && <option>선택 가능한 자재 없음</option>}
-                  {matOptions.map(m => (
-                    <option key={m.material_id} value={m.material_id}>
-                      {m.sub_category ? `[${m.sub_category}] ` : ''}
-                      {m.brand} {m.product_line} · {fmtKRWShort(m.total_unit_price)}/{m.unit_type.replace('per_', '')}
-                    </option>
-                  ))}
-                </select>
               </div>
 
-              {mat && (
-                <div className="mt-1.5 text-[11px] text-zinc-500 truncate" title={mat.installer_spec ?? ''}>
-                  {mat.installer_spec ?? `${mat.brand} ${mat.product_line}`}
-                </div>
-              )}
+              {/* 등급별 3행 */}
+              <div className="divide-y divide-zinc-100">
+                {GRADES.map(g => (
+                  <GradeRow
+                    key={g}
+                    workType={wt}
+                    grade={g}
+                    material={getPrimaryMaterial(wt, g)}
+                    selected={curGrade === g}
+                    onSelect={() => setGrade(wt, g)}
+                  />
+                ))}
+              </div>
             </div>
           );
         })}
@@ -162,14 +126,70 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
   );
 }
 
-function gradeTone(g: Grade): string {
-  switch (g) {
-    case '가성비': return 'bg-emerald-50 text-emerald-900';
-    case '표준':   return 'bg-blue-50 text-blue-900';
-    case '고급':   return 'bg-amber-50 text-amber-900';
-    default:        return 'bg-zinc-100 text-zinc-900';
-  }
-}
+// =====================================================
+// 등급 한 행: 라디오 + 등급 배지 + 주력 자재명 + 단가
+// =====================================================
 
-// ALL_MATERIALS는 import 사용처가 없어도 트리쉐이킹 방지 위해 유지
-void ALL_MATERIALS;
+function GradeRow({
+  grade, material, selected, onSelect,
+}: {
+  workType: string;
+  grade: Grade;
+  material: Material | null;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const meta = GRADE_META[grade];
+
+  if (!material) {
+    return (
+      <div className="flex items-center gap-3 px-3 py-2.5 opacity-50">
+        <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 border-zinc-300`}>
+          {selected && <span className="w-2 h-2 rounded-full bg-zinc-400" />}
+        </span>
+        <span className={`text-xs font-semibold px-2 py-0.5 rounded ${meta.bg} ${meta.color}`}>{grade}</span>
+        <span className="text-xs text-zinc-400 italic">등록된 자재 없음</span>
+      </div>
+    );
+  }
+
+  const unit = (material.unit_type || 'per_ea').replace('per_', '');
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition
+        ${selected ? `${meta.bg} ring-2 ring-inset ${meta.ring}` : 'bg-white hover:bg-zinc-50'}`}
+    >
+      {/* 라디오 인디케이터 */}
+      <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 transition flex-shrink-0
+        ${selected ? `border-current ${meta.color}` : 'border-zinc-300'}`}>
+        {selected && <span className={`w-2 h-2 rounded-full bg-current ${meta.color}`} />}
+      </span>
+
+      {/* 등급 배지 + 소설명 */}
+      <div className="flex-shrink-0 min-w-[80px]">
+        <div className={`text-xs font-bold ${meta.color}`}>{grade}</div>
+        <div className="text-[10px] text-zinc-500 leading-tight">{meta.label}</div>
+      </div>
+
+      {/* 주력 자재 (브랜드 + 제품) */}
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium text-zinc-900 truncate">
+          {material.brand} {material.product_line}
+        </div>
+        <div className="text-[11px] text-zinc-500 truncate" title={material.installer_spec || ''}>
+          {material.installer_spec || `${material.category}${material.sub_category ? ' · ' + material.sub_category : ''}`}
+        </div>
+      </div>
+
+      {/* 단가 */}
+      <div className="flex-shrink-0 text-right">
+        <div className="text-sm font-semibold text-zinc-900 tabular-nums">
+          {fmtKRWShort(material.total_unit_price)}
+        </div>
+        <div className="text-[10px] text-zinc-500">/{unit}</div>
+      </div>
+    </button>
+  );
+}
