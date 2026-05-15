@@ -1,10 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import type { Property, RoomScope, Scope, RoomId } from '@/lib/types';
 import {
   recommendedRoomCount, exclusiveAreaM2, supplyAreaM2, outsideWindowArea, activeRooms,
 } from '@/lib/areas';
 import { ROOM_META } from '@/lib/scope-meta';
+
+/** 공급평 ↔ 전용 m² 변환 계수 (공급평 × 3.31 × 0.75) */
+const PYEONG_TO_EX_M2 = 2.4825;
+
+/** 자주 사용하는 평형↔전용㎡ 페어 */
+const PRESET_PAIRS = [
+  { pyeong: 24, m2: 59 },
+  { pyeong: 34, m2: 84 },
+  { pyeong: 44, m2: 110 },
+];
+
+type InputMode = 'pyeong' | 'm2';
 
 type Props = {
   value: Property;
@@ -15,10 +28,47 @@ type Props = {
 };
 
 export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
+  const [inputMode, setInputMode] = useState<InputMode>('pyeong');
+
   const setField = <K extends keyof Property>(k: K, v: Property[K]) =>
     onChange({ ...value, [k]: v });
 
   const visibleRooms = activeRooms(value) as RoomId[];
+
+  // 표시값: 공급평 모드는 정수 평, 전용㎡ 모드는 정수 ㎡
+  const displayValue = value.pyeong > 0
+    ? (inputMode === 'pyeong'
+        ? Math.round(value.pyeong)
+        : Math.round(value.pyeong * PYEONG_TO_EX_M2))
+    : '';
+
+  const handleInput = (raw: string) => {
+    if (raw === '') {
+      onChange({ ...value, pyeong: 0 });
+      return;
+    }
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n <= 0) return;
+    const py = inputMode === 'pyeong' ? n : n / PYEONG_TO_EX_M2;
+    onChange({
+      ...value,
+      pyeong: py,
+      rooms: recommendedRoomCount(py),
+    });
+  };
+
+  const handlePreset = (pair: typeof PRESET_PAIRS[number]) => {
+    onChange({
+      ...value,
+      pyeong: pair.pyeong,
+      rooms: recommendedRoomCount(pair.pyeong),
+    });
+  };
+
+  /** 현재 값이 어떤 프리셋과 일치하는지 (1평/㎡ 오차 허용) */
+  const matchedPreset = PRESET_PAIRS.find(p =>
+    Math.abs(p.pyeong - value.pyeong) < 0.5
+  );
 
   const updateExpansion = (roomId: RoomId, state: 'none' | 'plan' | 'done') => {
     const prev = rooms[roomId];
@@ -33,50 +83,86 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
     <section className="rounded-xl bg-white p-5 shadow-sm border border-zinc-200">
       <h2 className="text-base font-semibold mb-4">1. 우리집 현황</h2>
 
-      {/* ===== 기본 정보 ===== */}
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="평형 (공급평)">
-          <div className="flex gap-2 items-stretch">
+      {/* ===== 평형 입력 (공급평 / 전용㎡ 토글) ===== */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs font-medium text-zinc-600">평형</span>
+          {/* 모드 토글 */}
+          <div className="inline-flex rounded-md border border-zinc-300 bg-zinc-50 overflow-hidden text-[11px]">
+            <button
+              type="button"
+              onClick={() => setInputMode('pyeong')}
+              className={`px-2.5 py-1 transition ${
+                inputMode === 'pyeong'
+                  ? 'bg-blue-600 text-white font-semibold'
+                  : 'bg-transparent text-zinc-600 hover:bg-zinc-100'
+              }`}
+            >
+              공급평
+            </button>
+            <button
+              type="button"
+              onClick={() => setInputMode('m2')}
+              className={`px-2.5 py-1 transition ${
+                inputMode === 'm2'
+                  ? 'bg-blue-600 text-white font-semibold'
+                  : 'bg-transparent text-zinc-600 hover:bg-zinc-100'
+              }`}
+            >
+              전용 m²
+            </button>
+          </div>
+        </div>
+
+        <div className="flex gap-2 items-stretch">
+          <div className="flex-1 min-w-0 relative">
             <input
               type="number"
-              min={10}
-              max={80}
-              value={value.pyeong || ''}
-              placeholder="예: 30"
-              onChange={(e) => {
-                const raw = e.target.value;
-                const py = raw === '' ? 0 : Number(raw);
-                onChange({
-                  ...value,
-                  pyeong: py,
-                  rooms: py > 0 ? recommendedRoomCount(py) : value.rooms,
-                });
-              }}
-              className="input flex-1 min-w-0"
+              min={inputMode === 'pyeong' ? 10 : 25}
+              max={inputMode === 'pyeong' ? 80 : 200}
+              value={displayValue}
+              placeholder={inputMode === 'pyeong' ? '예: 30' : '예: 75'}
+              onChange={(e) => handleInput(e.target.value)}
+              className="input w-full pr-12"
             />
-            <div className="inline-flex rounded-lg border border-zinc-300 bg-white overflow-hidden text-xs shadow-sm">
-              {[24, 34, 44].map(py => (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 pointer-events-none">
+              {inputMode === 'pyeong' ? '평' : 'm²'}
+            </span>
+          </div>
+          <div className="inline-flex rounded-lg border border-zinc-300 bg-white overflow-hidden text-xs shadow-sm">
+            {PRESET_PAIRS.map(p => {
+              const selected = matchedPreset?.pyeong === p.pyeong;
+              return (
                 <button
-                  key={py}
+                  key={p.pyeong}
                   type="button"
-                  onClick={() => onChange({
-                    ...value,
-                    pyeong: py,
-                    rooms: recommendedRoomCount(py),
-                  })}
+                  onClick={() => handlePreset(p)}
                   className={`px-2.5 py-2 transition border-r last:border-r-0 border-r-zinc-200 ${
-                    value.pyeong === py
+                    selected
                       ? 'bg-blue-100 text-blue-900 font-semibold'
                       : 'bg-white text-zinc-600 hover:bg-zinc-50'
                   }`}
                 >
-                  {py}평
+                  {inputMode === 'pyeong' ? `${p.pyeong}평` : `${p.m2}㎡`}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        </Field>
+        </div>
+        <p className="mt-1.5 text-[10px] text-zinc-500">
+          공급평형(24평·34평) 또는 전용면적(59㎡·84㎡) 중 알고 있는 쪽으로 입력하세요.
+          {value.pyeong > 0 && (
+            <span className="ml-2 text-zinc-600">
+              · {inputMode === 'pyeong'
+                  ? `전용 ${Math.round(value.pyeong * PYEONG_TO_EX_M2)}㎡`
+                  : `공급 ${Math.round(value.pyeong)}평`}
+            </span>
+          )}
+        </p>
+      </div>
 
+      {/* ===== 기본 정보 ===== */}
+      <div className="grid grid-cols-2 gap-4">
         <Field label="베이 수">
           <select
             value={value.bay}
