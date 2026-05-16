@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import type { Grade, GradeSelection, Material, Quote } from '@/lib/types';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { fmtKRWShort } from '@/lib/calculator';
@@ -19,6 +19,19 @@ const GRADE_META: Record<Grade, { color: string; bg: string; ring: string; label
   '표준':     { color: 'text-blue-700',    bg: 'bg-blue-50',     ring: 'ring-blue-300',     label: '주류·균형형' },
   '고급':     { color: 'text-amber-700',   bg: 'bg-amber-50',    ring: 'ring-amber-300',    label: '프리미엄' },
   '단일등급': { color: 'text-zinc-700',    bg: 'bg-zinc-50',     ring: 'ring-zinc-300',     label: '단일' },
+};
+
+/**
+ * '커스텀 구성' 행을 노출하는 번들 ID 화이트리스트.
+ * 사용자가 세트 안의 개별 자재 등급을 변경해 등급이 섞이면(mixed),
+ * 이 번들들에 한해 가성비 위에 '커스텀 구성' 행이 표시되고 현재 우리집 총공사비를 노출한다.
+ */
+const CUSTOM_ROW_BUNDLES = new Set<string>(['kitchen', 'bath']);
+const CUSTOM_META = {
+  color: 'text-purple-700',
+  bg: 'bg-purple-50',
+  ring: 'ring-purple-300',
+  label: '사용자 맞춤',
 };
 
 /** 한 work_type의 집계 정보 */
@@ -119,10 +132,10 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
   }
 
   return (
-    <section className="rounded-xl bg-white p-5 shadow-sm border border-zinc-200">
-      <div className="flex items-baseline justify-between mb-3">
+    <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">
+      <div className="flex items-baseline justify-between mb-3 gap-2">
         <h2 className="text-base font-semibold">4. 자재 세부 조정</h2>
-        <span className="text-[11px] text-zinc-500">{displayItems.length}개 항목</span>
+        <span className="text-[11px] text-zinc-500 flex-shrink-0">{displayItems.length}개 항목</span>
       </div>
       <p className="text-xs text-zinc-500 mb-4">
         공종마다 가성비·표준·고급의 <strong>주력 자재</strong>와 <strong>우리집 총공사비</strong>를 한눈에 비교하고 선택하세요.
@@ -248,71 +261,118 @@ function BundleCard({
     gradeSelection.material_overrides[w.wt] !== undefined
   );
 
-  // 각 등급별 세트 합계
-  function bundleTotalAtGrade(g: Grade): number {
-    let total = 0;
-    for (const w of works) {
-      const mat = getPrimaryMaterial(w.wt, g);
-      if (!mat) continue;
-      total += w.totalQty * mat.total_unit_price;
+  // 각 등급별 세트 합계 — works가 바뀌지 않는 한 캐시
+  const totalsByGrade = useMemo(() => {
+    const out: Record<Grade, number> = { '가성비': 0, '표준': 0, '고급': 0, '단일등급': 0 };
+    for (const g of GRADES) {
+      let t = 0;
+      for (const w of works) {
+        const mat = getPrimaryMaterial(w.wt, g);
+        if (mat) t += w.totalQty * mat.total_unit_price;
+      }
+      out[g] = Math.round(t);
     }
-    return Math.round(total);
-  }
+    return out;
+  }, [works]);
+  const bundleTotalAtGrade = (g: Grade) => totalsByGrade[g];
 
   return (
     <div className={`rounded-lg border ${hasAnyOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
-      {/* 헤더 */}
-      <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70 gap-2">
+      {/* 헤더 — 모바일: 2단 / sm+: 1단 */}
+      <div className="px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70
+                      flex flex-col gap-2
+                      sm:flex-row sm:items-center sm:justify-between sm:gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold text-zinc-900">{bundle.label}</span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium">
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">
               세트 · {works.length}개 자재
             </span>
             {hasAnyOverride && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium whitespace-nowrap">
                 개별 설정
               </span>
             )}
             {bundleGrade === 'mixed' && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
-                등급 혼합
-              </span>
+              CUSTOM_ROW_BUNDLES.has(bundle.id) ? (
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-medium whitespace-nowrap">
+                  커스텀 구성
+                </span>
+              ) : (
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium whitespace-nowrap">
+                  등급 혼합
+                </span>
+              )
             )}
           </div>
           {bundle.desc && (
             <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{bundle.desc}</p>
           )}
         </div>
-        <div className="flex-shrink-0 flex items-center gap-2">
+        <div className="flex-shrink-0 flex items-center justify-between sm:justify-end gap-2 flex-wrap">
           <span className="text-[11px] text-zinc-500 tabular-nums whitespace-nowrap">
             현재 {fmtKRWShort(totalSub)}
           </span>
-          <button
-            onClick={() => setShowComponents(s => !s)}
-            className={`text-[10px] font-semibold px-2 py-1 rounded border transition whitespace-nowrap ${
-              showComponents
-                ? 'bg-zinc-800 text-white border-zinc-800'
-                : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500'
-            }`}
-            title="세트 안의 개별 자재를 다른 등급으로 변경"
-          >
-            구성 자재 변경하기 {showComponents ? '▲' : '▼'}
-          </button>
-          {hasAnyOverride && (
+          <div className="flex items-center gap-2 flex-wrap">
             <button
-              onClick={onClearBundle}
-              className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 whitespace-nowrap"
-              title="세트 전체를 기본값으로 되돌립니다"
+              onClick={() => setShowComponents(s => !s)}
+              className={`text-[10px] font-semibold px-2 py-1 rounded border transition whitespace-nowrap ${
+                showComponents
+                  ? 'bg-zinc-800 text-white border-zinc-800'
+                  : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500'
+              }`}
+              title="세트 안의 개별 자재를 다른 등급으로 변경"
             >
-              초기화
+              <span className="hidden sm:inline">구성 자재 변경하기 </span>
+              <span className="sm:hidden">구성 자재 </span>
+              {showComponents ? '▲' : '▼'}
             </button>
-          )}
+            {hasAnyOverride && (
+              <button
+                onClick={onClearBundle}
+                className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 whitespace-nowrap"
+                title="세트 전체를 기본값으로 되돌립니다"
+              >
+                초기화
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 등급별 3행 — 세트 합계 */}
+      {/* 등급별 행 — 세트 합계 */}
       <div className="divide-y divide-zinc-100">
+        {/*
+         * 커스텀 구성 행 (가성비 위 위치)
+         * - 주방·욕실 풀세트에서만 노출
+         * - 사용자가 개별 자재 등급을 바꿔 등급이 섞인(mixed) 상태일 때만 노출
+         * - 클릭 불가 (현재 상태 표시 전용). 다른 등급 행을 클릭하면 전체 일괄로 돌아간다.
+         */}
+        {CUSTOM_ROW_BUNDLES.has(bundle.id) && bundleGrade === 'mixed' && (
+          <div
+            aria-current="true"
+            className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 ${CUSTOM_META.bg} ring-2 ring-inset ${CUSTOM_META.ring}`}
+          >
+            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 flex-shrink-0 border-current ${CUSTOM_META.color}`}>
+              <span className={`w-2 h-2 rounded-full bg-current ${CUSTOM_META.color}`} />
+            </span>
+            <div className="flex-shrink-0 sm:min-w-[80px]">
+              <div className={`text-xs font-bold ${CUSTOM_META.color}`}>커스텀 구성</div>
+              <div className="text-[10px] text-zinc-500 leading-tight hidden sm:block">{CUSTOM_META.label}</div>
+            </div>
+            <div className="flex-1 min-w-0 hidden sm:block">
+              <div className="text-[11px] text-zinc-500 truncate">
+                {works.length}개 자재 개별 설정 — {bundle.label}
+              </div>
+            </div>
+            <div className="flex-shrink-0 text-right ml-auto">
+              <div className={`text-sm font-bold tabular-nums ${CUSTOM_META.color}`}>
+                {fmtKRWShort(totalSub)}
+              </div>
+              <div className="text-[10px] text-zinc-500">우리집 총공사비</div>
+            </div>
+          </div>
+        )}
         {GRADES.map(g => {
           const total = bundleTotalAtGrade(g);
           const selected = bundleGrade === g;
@@ -322,23 +382,23 @@ function BundleCard({
               key={g}
               type="button"
               onClick={() => onSelectBundleGrade(g)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition
+              className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 text-left transition
                 ${selected ? `${meta.bg} ring-2 ring-inset ${meta.ring}` : 'bg-white hover:bg-zinc-50'}`}
             >
               <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 transition flex-shrink-0
                 ${selected ? `border-current ${meta.color}` : 'border-zinc-300'}`}>
                 {selected && <span className={`w-2 h-2 rounded-full bg-current ${meta.color}`} />}
               </span>
-              <div className="flex-shrink-0 min-w-[80px]">
+              <div className="flex-shrink-0 sm:min-w-[80px]">
                 <div className={`text-xs font-bold ${meta.color}`}>{g} 세트</div>
-                <div className="text-[10px] text-zinc-500 leading-tight">{meta.label}</div>
+                <div className="text-[10px] text-zinc-500 leading-tight hidden sm:block">{meta.label}</div>
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 hidden sm:block">
                 <div className="text-[11px] text-zinc-500 truncate">
                   {works.length}개 자재 일괄 적용 — {bundle.label}
                 </div>
               </div>
-              <div className="flex-shrink-0 text-right">
+              <div className="flex-shrink-0 text-right ml-auto">
                 <div className={`text-sm font-bold tabular-nums ${selected ? meta.color : 'text-zinc-900'}`}>
                   {fmtKRWShort(total)}
                 </div>
@@ -419,10 +479,10 @@ function ComponentRow({
 }
 
 // =====================================================
-// GradeRow — SingleCard의 등급 행 (이전과 동일)
+// GradeRow — SingleCard의 등급 행. memo: 같은 props 시 리렌더 회피
 // =====================================================
 
-function GradeRow({
+const GradeRow = memo(function GradeRow({
   grade, material, selected, totalQty, onSelect,
 }: {
   grade: Grade;
@@ -451,34 +511,34 @@ function GradeRow({
     <button
       type="button"
       onClick={onSelect}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition
+      className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 text-left transition
         ${selected ? `${meta.bg} ring-2 ring-inset ${meta.ring}` : 'bg-white hover:bg-zinc-50'}`}
     >
       <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 transition flex-shrink-0
         ${selected ? `border-current ${meta.color}` : 'border-zinc-300'}`}>
         {selected && <span className={`w-2 h-2 rounded-full bg-current ${meta.color}`} />}
       </span>
-      <div className="flex-shrink-0 min-w-[80px]">
+      <div className="flex-shrink-0 sm:min-w-[80px]">
         <div className={`text-xs font-bold ${meta.color}`}>{grade}</div>
-        <div className="text-[10px] text-zinc-500 leading-tight">{meta.label}</div>
+        <div className="text-[10px] text-zinc-500 leading-tight hidden sm:block">{meta.label}</div>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-zinc-900 truncate">
+        <div className="text-xs sm:text-sm font-medium text-zinc-900 truncate">
           {material.brand} {material.product_line}
         </div>
-        <div className="text-[11px] text-zinc-500 truncate" title={material.installer_spec || ''}>
+        <div className="text-[10px] sm:text-[11px] text-zinc-500 truncate" title={material.installer_spec || ''}>
           {material.installer_spec || `${material.category}${material.sub_category ? ' · ' + material.sub_category : ''}`}
         </div>
       </div>
       <div className="flex-shrink-0 text-right">
-        <div className={`text-sm font-bold tabular-nums ${selected ? meta.color : 'text-zinc-900'}`}>
+        <div className={`text-xs sm:text-sm font-bold tabular-nums ${selected ? meta.color : 'text-zinc-900'}`}>
           {fmtKRWShort(homeTotal)}
         </div>
-        <div className="text-[10px] text-zinc-500">우리집 총공사비</div>
+        <div className="text-[10px] text-zinc-500 whitespace-nowrap">우리집 총공사비</div>
       </div>
     </button>
   );
-}
+});
 
 // 미사용 import 회피 (Quote 타입은 props에서 사용)
 void WORK_BUNDLES;

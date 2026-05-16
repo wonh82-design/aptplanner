@@ -19,7 +19,7 @@ const STEPS: { id: Step; label: string; sub: string }[] = [
 export function StepIndicator({ current, maxReached, onStepClick }: Props) {
   return (
     <nav aria-label="진행 단계" className="bg-white border-b border-zinc-200">
-      <ol className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-2 sm:gap-4">
+      <ol className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-1 sm:gap-4">
         {STEPS.map((s, idx) => {
           const reachable = s.id <= maxReached;
           const isCurrent = s.id === current;

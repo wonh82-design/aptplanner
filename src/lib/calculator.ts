@@ -17,7 +17,7 @@
  * 확장·가벽 신설·구청 신고·문틀교체 등 조건부 항목은 후속 단계에서 추가.
  */
 import type {
-  Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade, RoomScope,
+  Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade,
   RegionId, AgeId,
 } from './types';
 import {
@@ -194,7 +194,8 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     'bath_ceiling', 'bath_basin', 'bath_faucet', 'bath_toilet', 'bath_accessory',
   ];
   const bathAreas = { '공용욕실': 5, '부부욕실': 5 };
-  const bathPerims = { '공용욕실': 7.6, '부부욕실': 7.6 };
+  // 욕실 둘레는 현재 산식에 사용하지 않음 — 면적 × 4.65로 벽 도면적을 환산 중.
+  // 향후 정밀화 시 bathPerims = { '공용욕실': 7.6, '부부욕실': 7.6 } 사용 예정.
 
   for (const bath of activeBathrooms(p)) {
     const enabled = bath === '공용욕실' ? scope.global.common_bath_set : scope.global.master_bath_set;
@@ -343,13 +344,37 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   return items;
 }
 
+/**
+ * 자재마스터에 등록되지 않은 특수 라인의 카테고리 매핑.
+ * (예: 구청 신고 / 터닝도어는 둘 다 발코니 확장 시 발생 → '확장' 카테고리로 묶는다)
+ */
+const SPECIAL_WORK_TYPE_CATEGORY: Record<string, string> = {
+  expansion_report: '확장',
+  turning_door: '확장',
+};
+
+/**
+ * LineItem을 어떤 CATEGORY로 묶을지 결정.
+ * 우선순위: Material.category (자재마스터 등록 시) → 특수 매핑 → 기존 work_type 라벨 → '기타'.
+ */
+function categoryOf(it: LineItem): string {
+  if (it.material_id) {
+    const mat = getMaterialById(it.material_id);
+    if (mat?.category) return mat.category;
+  }
+  return SPECIAL_WORK_TYPE_CATEGORY[it.work_type] || it.category || '기타';
+}
+
 /** 합계 집계 + 지역/연식 보정 + 10만원 단위 반올림 */
 export function aggregateTotals(items: LineItem[], property: Property): Totals {
   const by_work_type: Record<string, number> = {};
+  const by_category: Record<string, number> = {};
   const by_room: Record<string, number> = {};
   let raw = 0;
   for (const it of items) {
     by_work_type[it.category] = (by_work_type[it.category] || 0) + it.subtotal;
+    const cat = categoryOf(it);
+    by_category[cat] = (by_category[cat] || 0) + it.subtotal;
     by_room[it.room] = (by_room[it.room] || 0) + it.subtotal;
     raw += it.subtotal;
   }
@@ -364,6 +389,7 @@ export function aggregateTotals(items: LineItem[], property: Property): Totals {
   const vat = Math.round(grand * VAT_RATE);
   return {
     by_work_type,
+    by_category,
     by_room,
     grand_total_raw: Math.round(raw),
     adjustment_multiplier: adj,

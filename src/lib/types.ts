@@ -119,7 +119,10 @@ export type LineItem = {
 
 /** 견적 합계 */
 export type Totals = {
+  /** work_type 라벨 단위(granular) — 예: 바닥재, 도배, 세면대… */
   by_work_type: Record<string, number>;
+  /** Material.category 단위(grouped) — 예: 마루, 도배, 타일, 욕실, 전기… */
+  by_category: Record<string, number>;
   by_room: Record<string, number>;
   /** 보정 전 원시 합계 (부가세 별도) */
   grand_total_raw: number;

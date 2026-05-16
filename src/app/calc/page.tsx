@@ -9,6 +9,9 @@ import { MaterialOverrides } from '@/components/MaterialOverrides';
 import { QuotePanel } from '@/components/QuotePanel';
 import { StepIndicator } from '@/components/StepIndicator';
 import { ServicesPricing } from '@/components/ServicesPricing';
+import { LivePricePreview } from '@/components/LivePricePreview';
+import { MobileConversionBar } from '@/components/MobileConversionBar';
+import { Testimonials } from '@/components/Testimonials';
 import { ConsultRequestModal } from '@/components/ConsultRequestModal';
 import { QuotePdfTemplate } from '@/components/pdf/QuotePdfTemplate';
 import { PlanPdfTemplate } from '@/components/pdf/PlanPdfTemplate';
@@ -72,17 +75,17 @@ export default function CalcPage() {
   return (
     <div className="flex-1 w-full">
       <header className="border-b border-zinc-200 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold">a</span>
-            <div>
-              <div className="text-sm font-bold tracking-tight">apt-planner</div>
-              <div className="text-[10px] text-zinc-500">우리집 인테리어 공사비 산정</div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+          <Link href="/" className="flex items-center gap-2 min-w-0">
+            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold flex-shrink-0">a</span>
+            <div className="min-w-0">
+              <div className="text-sm font-bold tracking-tight truncate">apt-planner</div>
+              <div className="text-[10px] text-zinc-500 truncate hidden sm:block">우리집 인테리어 공사비 산정</div>
             </div>
           </Link>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 sm:gap-5 flex-shrink-0">
             <Link href="/about" className="text-xs font-medium text-zinc-600 hover:text-zinc-900">소개</Link>
-            <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
+            <span className="hidden sm:inline text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
               {quote.quote_id}
             </span>
           </div>
@@ -91,9 +94,10 @@ export default function CalcPage() {
 
       <StepIndicator current={step} maxReached={maxReached} onStepClick={goTo} />
 
-      <main className="max-w-7xl mx-auto px-6 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
         {step === 1 && (
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
+            <LivePricePreview quote={quote} step={1} />
             <PropertyForm
               value={property}
               onChange={setProperty}
@@ -105,7 +109,7 @@ export default function CalcPage() {
             <StepNav
               right={
                 <button onClick={() => goTo(2)} className="btn-primary">
-                  다음: 자재 등급 선택 →
+                  자재 등급 선택 →
                 </button>
               }
             />
@@ -114,16 +118,17 @@ export default function CalcPage() {
 
         {step === 2 && (
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
+            <LivePricePreview quote={quote} step={2} />
             <GradeSelector value={grade} onChange={setGrade} />
             <MaterialOverrides quote={quote} value={grade} onChange={setGrade} />
 
             <StepNav
               left={
-                <button onClick={() => goTo(1)} className="btn-secondary">← 이전</button>
+                <button onClick={() => goTo(1)} className="btn-secondary">← 현황 수정</button>
               }
               right={
                 <button onClick={() => goTo(3)} className="btn-primary">
-                  공사비 계산하기 →
+                  최종 결과 보기 →
                 </button>
               }
             />
@@ -134,7 +139,10 @@ export default function CalcPage() {
           <div className="max-w-5xl mx-auto flex flex-col gap-5">
             <ResultBanner quote={quote} gradeLabel={grade.default} />
 
-            {/* 3종 서비스 가격 카드 — 결과 보자마자 노출 */}
+            {/* 견적 상세 내역 — 총공사비 바로 아래 항상 펼침 */}
+            <QuotePanel quote={quote} />
+
+            {/* 3종 서비스 가격 카드 */}
             <ServicesPricing
               pyeong={property.pyeong}
               onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
@@ -147,26 +155,15 @@ export default function CalcPage() {
             {/* 신뢰 nudge — 누가 만들었나 */}
             <TrustNudge />
 
-            {/* 견적 상세 (접기 가능) */}
-            <details className="rounded-xl bg-white border border-zinc-200 group">
-              <summary className="cursor-pointer px-5 py-3 flex items-center justify-between hover:bg-zinc-50 rounded-xl">
-                <div>
-                  <div className="text-sm font-semibold text-zinc-900">견적 상세 내역 보기</div>
-                  <div className="text-[11px] text-zinc-500">공종별·공간별 합계 + 상세 라인 {quote.line_items.length}건</div>
-                </div>
-                <span className="text-zinc-400 text-xs transition-transform group-open:rotate-180">▼</span>
-              </summary>
-              <div className="px-5 pb-5">
-                <QuotePanel quote={quote} />
-              </div>
-            </details>
+            {/* 소셜 프루프 — 실제 사용자 사례 */}
+            <Testimonials />
 
             {/* 마무리 nudge */}
             <FinalNudge />
 
             <StepNav
               left={
-                <button onClick={() => goTo(2)} className="btn-secondary">← 이전: 등급 수정</button>
+                <button onClick={() => goTo(2)} className="btn-secondary">← 등급 수정</button>
               }
               right={
                 <button onClick={reset} className="btn-secondary">새로 시작</button>
@@ -176,8 +173,17 @@ export default function CalcPage() {
         )}
       </main>
 
-      <footer className="border-t border-zinc-200 bg-white mt-12">
-        <div className="max-w-7xl mx-auto px-6 py-4 text-xs text-zinc-500 flex justify-between">
+      {/* 모바일 하단 전환 바 — Step 3에서만 노출 */}
+      {step === 3 && (
+        <MobileConversionBar
+          onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
+          onApplySpec={() => setPremiumOpen(true)}
+          downloading={downloading === 'quote'}
+        />
+      )}
+
+      <footer className="border-t border-zinc-200 bg-white mt-12 pb-16 sm:pb-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-[11px] sm:text-xs text-zinc-500 flex flex-col sm:flex-row gap-1 sm:justify-between leading-relaxed">
           <span>※ 본 견적은 표준 자재가 기준의 예상치이며, 실제 시공·견적은 업체 협의가 필요합니다.</span>
           <span>업체 수수료·제휴 0건</span>
         </div>
@@ -223,9 +229,9 @@ export default function CalcPage() {
 
 function StepNav({ left, right }: { left?: React.ReactNode; right?: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between mt-2 pt-4 border-t border-zinc-200">
+    <div className="flex items-center justify-between mt-2 pt-4 border-t border-zinc-200 gap-3 flex-wrap">
       <div>{left}</div>
-      <div>{right}</div>
+      <div className="ml-auto">{right}</div>
     </div>
   );
 }
@@ -256,9 +262,7 @@ function ResultBanner({
           </span>
         </div>
         <div className="text-[11px] text-zinc-600 mt-2">
-          보정 계수 <strong>{totals.adjustment_multiplier.toFixed(2)}×</strong>
-          {' '}· 지역 {REGION_LABEL[property.region]} · 연식 {AGE_LABEL[property.age]}
-          {' '}· 10만원 단위 반올림 · ±5% 범위
+          지역·연식 반영 · 10만원 단위 반올림 · ±5% 범위
         </div>
       </div>
 

@@ -4,13 +4,12 @@
  * 3종 서비스 가격 카드 비교 컴포넌트.
  * 결과 페이지·랜딩 페이지에서 공통 사용.
  *
- * 2차 개선:
- *  - 추천 카드(스펙북) 시각 강조 강화 (그라데이션 헤더, 큰 배지)
- *  - 컨설팅 50% 할인 시각 강조 (원가 strike + 큰 할인 배지)
- *  - 절감 anchor를 가격 카드 안에 통합 ("○○만원 절감 = 가격의 0.1%")
- *  - 카드 크기 키움
+ * 사용처별 동작:
+ *  - 결과 페이지(/calc Step 3): onClick 콜백 전달 → 다운로드/모달 오픈
+ *  - 랜딩 페이지(/): onClick 미전달 → 자동으로 /calc 로 이동(Link)
  */
 
+import Link from 'next/link';
 import {
   SERVICE_FREE, SERVICE_SPEC, SERVICE_CONSULT, estimateSavings, fmtSaving,
 } from '@/lib/pricing';
@@ -40,13 +39,13 @@ export function ServicesPricing({
     <div className="space-y-5">
       {/* ===== 절감 가치 ANCHOR — 평형 기반 ===== */}
       {savings && (
-        <div className="rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-2 border-amber-300 p-6 sm:p-7 relative overflow-hidden">
+        <div className="rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-2 border-amber-300 p-5 sm:p-7 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-200/40 to-transparent rounded-full -translate-y-1/3 translate-x-1/3" />
           <div className="relative">
-            <div className="text-[11px] font-bold uppercase tracking-widest text-amber-700 mb-1">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-amber-700 mb-1">
               {pyeong}평 기준 · 추가금 분쟁 방지 시 절감 가능액
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold text-zinc-900 leading-tight">
+            <div className="text-2xl sm:text-4xl font-extrabold text-zinc-900 leading-tight">
               <span className="text-amber-700">{fmtSaving(savings.min)} ~ {fmtSaving(savings.max)}</span>
             </div>
             <p className="text-sm text-zinc-700 mt-2 leading-relaxed">
@@ -164,7 +163,7 @@ function PricingCard({
       )}
 
       {/* 헤더 */}
-      <div className={`px-6 pt-6 pb-4 ${styles.gradientHeader} border-b border-zinc-200/50`}>
+      <div className={`px-5 sm:px-6 pt-5 sm:pt-6 pb-4 ${styles.gradientHeader} border-b border-zinc-200/50`}>
         <div className="mb-3">
           <div className={`inline-block text-[10px] font-bold uppercase tracking-wider ${styles.text} ${styles.subBadgeBg} px-2 py-0.5 rounded mb-1.5`}>
             {subBadge}
@@ -191,7 +190,7 @@ function PricingCard({
       </div>
 
       {/* 본문 */}
-      <div className="px-6 py-5 flex-1 flex flex-col">
+      <div className="px-5 sm:px-6 py-5 flex-1 flex flex-col">
         <p className="text-xs text-zinc-600 leading-relaxed mb-4">{description}</p>
 
         <ul className="space-y-2 text-xs text-zinc-700 mb-4">
@@ -226,19 +225,48 @@ function PricingCard({
           </div>
         )}
 
-        <button
-          onClick={onClick}
+        <CardCta
+          tone={tone}
+          styles={styles}
+          text={ctaText}
           disabled={ctaDisabled}
-          className={`mt-auto w-full py-3 rounded-lg text-sm font-bold transition active:scale-[0.98]
-            ${tone === 'free'
-              ? 'border-2 border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50'
-              : `${styles.bgBadge} text-white hover:opacity-90 shadow-md`}
-            disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-          {ctaText}
-        </button>
+          onClick={onClick}
+        />
       </div>
     </div>
+  );
+}
+
+/**
+ * onClick 있으면 button, 없으면 /calc 로 Link.
+ * 랜딩 페이지에서도 카드 클릭이 자연스러운 행동을 만들도록.
+ */
+function CardCta({
+  tone, styles, text, disabled, onClick,
+}: {
+  tone: Tone;
+  styles: typeof TONE_STYLES[Tone];
+  text: string;
+  disabled?: boolean;
+  onClick?: () => void;
+}) {
+  const cls = `mt-auto w-full text-center py-3 rounded-lg text-sm font-bold transition active:scale-[0.98]
+    ${tone === 'free'
+      ? 'border-2 border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50'
+      : `${styles.bgBadge} text-white hover:opacity-90 shadow-md`}
+    disabled:opacity-50 disabled:cursor-not-allowed`;
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} disabled={disabled} className={cls}>
+        {text}
+      </button>
+    );
+  }
+  return (
+    <Link href="/calc" className={cls + ' inline-flex items-center justify-center'}>
+      {text}
+    </Link>
   );
 }
 

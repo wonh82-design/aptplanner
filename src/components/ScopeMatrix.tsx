@@ -1,6 +1,6 @@
 'use client';
 
-import type { Property, RoomScope, Scope, RoomId } from '@/lib/types';
+import type { Property, Scope, RoomId } from '@/lib/types';
 import { activeRooms } from '@/lib/areas';
 import {
   ROOM_WORK_GROUPS, GLOBAL_GROUPS, defaultRoomsForWork,
@@ -16,11 +16,9 @@ type Props = {
 export function ScopeMatrix({ property, value, onChange }: Props) {
   const visibleRooms = activeRooms(property) as RoomId[];
 
-  // 모든 활성 공간이 이미 확장되어 있으면 '전체 확장' 프리셋 숨김
-  const allAlreadyExpanded = visibleRooms.every(r => Boolean(value.rooms[r]?.expansion_current));
-  const visiblePresets = PRESETS.filter(p =>
-    !(p.id === 'full-expand-sash' && allAlreadyExpanded),
-  );
+  // 확장 관련 범위는 우리집 현황 → 발코니 확장 현황에서만 다룬다.
+  // 빠른 시작 프리셋에서는 확장에 영향을 주지 않는다.
+  const visiblePresets = PRESETS;
 
   // ===== 공간별 공종 그룹 (Room work) — 그룹 전체 토글 =====
   const roomWorkGroupState = (group: typeof ROOM_WORK_GROUPS[number]): 'off' | 'mixed' | 'on' => {
@@ -70,7 +68,7 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
   };
 
   return (
-    <section className="rounded-xl bg-white p-5 shadow-sm border border-zinc-200 space-y-5">
+    <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200 space-y-5">
       <header>
         <h2 className="text-base font-semibold">2. 공사 범위</h2>
         <p className="text-xs text-zinc-500 mt-1">
@@ -85,15 +83,11 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
           <h3 className="text-xs font-semibold text-zinc-700">① 빠른 시작</h3>
           <span className="text-[10px] text-zinc-400">대표 시나리오로 한 번에 설정</span>
         </div>
-        <div className={`grid grid-cols-1 gap-2 ${
-          visiblePresets.length <= 2 ? 'sm:grid-cols-2' :
-          visiblePresets.length === 3 ? 'sm:grid-cols-3' :
-          'sm:grid-cols-2 lg:grid-cols-4'
-        }`}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {visiblePresets.map((preset, idx) => (
             <button
               key={preset.id}
-              onClick={() => onChange(preset.apply(property))}
+              onClick={() => onChange(preset.apply(property, value))}
               className="flex flex-col items-start gap-0.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left
                          hover:border-blue-400 hover:bg-blue-50/30 active:scale-[0.98] transition-all"
             >

@@ -6,7 +6,7 @@ import {
   recommendedRoomCount, exclusiveAreaM2, supplyAreaM2, outsideWindowArea, activeRooms,
 } from '@/lib/areas';
 import { ROOM_META } from '@/lib/scope-meta';
-import { REGION_LABEL, AGE_LABEL, REGION_MULTIPLIER, AGE_MULTIPLIER } from '@/lib/calculator';
+import { REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 
 /** 공급평 ↔ 전용 m² 변환 계수 (공급평 × 3.31 × 0.75) */
 const PYEONG_TO_EX_M2 = 2.4825;
@@ -91,7 +91,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
   };
 
   return (
-    <section className="rounded-xl bg-white p-5 shadow-sm border border-zinc-200">
+    <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">
       <h2 className="text-base font-semibold mb-4">1. 우리집 현황</h2>
 
       {/* ===== 평형 입력 (공급평 / 전용㎡ 토글) ===== */}
@@ -172,8 +172,8 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
         </p>
       </div>
 
-      {/* ===== 기본 정보 ===== */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* ===== 기본 정보 — 데스크톱 3열 / 모바일 2열 ===== */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         <Field label="베이 수">
           <select
             value={value.bay}
@@ -187,14 +187,14 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           </select>
         </Field>
 
-        <Field label="방 개수 (거실 제외)">
+        <Field label="방 (거실 제외)">
           <select
             value={value.rooms}
             onChange={(e) => setField('rooms', Number(e.target.value) as 2 | 3 | 4 | 5)}
             className="input"
           >
-            <option value={2}>2개 (안방 + 작은방1)</option>
-            <option value={3}>3개 (안방 + 작은방1·2)</option>
+            <option value={2}>2개 (안방+작은방1)</option>
+            <option value={3}>3개 (안방+작은방1·2)</option>
           </select>
         </Field>
 
@@ -228,7 +228,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           >
             {(Object.keys(REGION_LABEL) as RegionId[]).map(k => (
               <option key={k} value={k}>
-                {REGION_LABEL[k]} ({REGION_MULTIPLIER[k].toFixed(2)}×)
+                {REGION_LABEL[k]}
               </option>
             ))}
           </select>
@@ -242,13 +242,26 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           >
             {(Object.keys(AGE_LABEL) as AgeId[]).map(k => (
               <option key={k} value={k}>
-                {AGE_LABEL[k]} ({AGE_MULTIPLIER[k].toFixed(2)}×)
+                {AGE_LABEL[k]}
               </option>
             ))}
           </select>
         </Field>
+      </div>
 
-        <Field label="발코니 깊이 (m)">
+      {/* 면적 요약 + 발코니 깊이 — 한 줄로 통합. 발코니 깊이는 advanced 토글 */}
+      <details className="mt-3 group">
+        <summary className="cursor-pointer flex items-center justify-between bg-zinc-50 rounded-lg px-3 py-2 list-none">
+          <div className="flex items-center gap-4 text-xs text-zinc-600 flex-wrap min-w-0">
+            <MiniStat label="공급" value={`${supplyAreaM2(value.pyeong).toFixed(1)}㎡`} />
+            <MiniStat label="전용" value={`${exclusiveAreaM2(value.pyeong).toFixed(1)}㎡`} />
+            <MiniStat label="외부창" value={`${outsideWindowArea(value.pyeong, value.bay).toFixed(1)}㎡`} />
+            <MiniStat label="발코니 깊이" value={`${value.balcony_depth_m.toFixed(1)}m`} />
+          </div>
+          <span className="text-[10px] text-zinc-400 group-open:rotate-180 transition flex-shrink-0">▾</span>
+        </summary>
+        <div className="mt-2 px-3 py-2.5 bg-zinc-50 rounded-lg flex items-center gap-3 flex-wrap">
+          <label className="text-xs text-zinc-700 font-medium whitespace-nowrap">발코니 깊이 (m)</label>
           <input
             type="number"
             step={0.1}
@@ -256,46 +269,46 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             max={3}
             value={value.balcony_depth_m}
             onChange={(e) => setField('balcony_depth_m', Number(e.target.value) || 0)}
-            className="input"
+            className="input max-w-[120px]"
           />
-        </Field>
-      </div>
-
-      <dl className="mt-4 grid grid-cols-3 gap-2 text-xs text-zinc-600 bg-zinc-50 rounded-lg p-3">
-        <Stat label="공급면적" value={`${supplyAreaM2(value.pyeong).toFixed(1)} ㎡`} />
-        <Stat label="전용면적" value={`${exclusiveAreaM2(value.pyeong).toFixed(1)} ㎡`} />
-        <Stat label="외부창" value={`${outsideWindowArea(value.pyeong, value.bay).toFixed(1)} ㎡`} />
-      </dl>
+          <span className="text-[11px] text-zinc-500">기본값 1.5m — 발코니 폭이 다른 경우만 조정</span>
+        </div>
+      </details>
 
       {/* ===== 공간별 확장 현황 ===== */}
       <div className="mt-6 pt-5 border-t border-zinc-200">
-        <div className="flex items-baseline justify-between mb-3">
+        <div className="flex items-baseline justify-between mb-3 flex-wrap gap-x-3 gap-y-1">
           <h3 className="text-sm font-semibold text-zinc-800">발코니 확장 현황</h3>
           <span className="text-[10px] text-zinc-500">현재 상태·공사 후를 따로 선택</span>
         </div>
 
-        {/* 컬럼 헤더 */}
-        <div className="grid grid-cols-12 gap-3 mb-1 text-[10px] uppercase tracking-wide text-zinc-500 font-semibold">
+        {/* 데스크톱 컬럼 헤더 — 모바일에선 숨김 */}
+        <div className="hidden sm:grid grid-cols-12 gap-3 mb-1 text-[10px] uppercase tracking-wide text-zinc-500 font-semibold">
           <div className="col-span-3">공간</div>
           <div className="col-span-4">현재 상태</div>
           <div className="col-span-5">공사 후</div>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2 sm:space-y-1.5">
           {visibleRooms.map(room => {
             const meta = ROOM_META[room] || { label: room };
             const rs = rooms[room];
             const already = rs.expansion_current;
             return (
-              <div key={room} className="grid grid-cols-12 gap-3 items-center py-1">
+              <div
+                key={room}
+                className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50/40 p-2.5
+                           sm:bg-transparent sm:border-0 sm:p-0 sm:grid sm:grid-cols-12 sm:gap-3 sm:items-center sm:py-1"
+              >
                 {/* 공간 라벨 */}
-                <span className="col-span-3 text-sm flex items-center gap-2 min-w-0">
-                  <span className="inline-block w-1 h-4 rounded-sm bg-zinc-300 flex-shrink-0" />
+                <span className="sm:col-span-3 text-sm flex items-center gap-2 min-w-0">
+                  <span className="inline-block w-1 h-4 rounded-sm bg-zinc-400 sm:bg-zinc-300 flex-shrink-0" />
                   <span className="font-medium truncate">{meta.label}</span>
                 </span>
 
                 {/* 현재 상태 */}
-                <div className="col-span-4">
+                <div className="sm:col-span-4">
+                  <div className="sm:hidden text-[10px] uppercase tracking-wide text-zinc-500 font-semibold mb-1">현재 상태</div>
                   <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs w-full">
                     <ExpBtn
                       active={!already}
@@ -313,9 +326,10 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
                 </div>
 
                 {/* 공사 후 — 이미 확장된 공간은 숨김 */}
-                <div className="col-span-5">
+                <div className="sm:col-span-5">
+                  <div className="sm:hidden text-[10px] uppercase tracking-wide text-zinc-500 font-semibold mb-1">공사 후</div>
                   {already ? (
-                    <div className="text-[11px] text-zinc-400 italic px-2">
+                    <div className="text-[11px] text-zinc-400 italic px-2 py-1.5">
                       추가 확장공사 불필요
                     </div>
                   ) : (
@@ -340,7 +354,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             );
           })}
         </div>
-        <p className="mt-2 text-[11px] text-zinc-500">
+        <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed">
           ‘확장 시공’ 공간이 있으면 확장공사·새 외창·구청 신고·터닝도어가 자동 추가됩니다.
         </p>
       </div>
@@ -357,12 +371,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col">
-      <dt className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</dt>
-      <dd className="font-mono font-medium text-zinc-900">{value}</dd>
-    </div>
+    <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+      <span className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</span>
+      <span className="font-mono font-semibold text-zinc-900 text-[11px]">{value}</span>
+    </span>
   );
 }
 

@@ -10,7 +10,10 @@ import { PdfCover } from './PdfCover';
 import {
   BodyPage, Section, KeyValGrid, Footer, tdL, tdR, unitShort, Table,
 } from './QuotePdfTemplate';
+import { PdfShareQr } from './PdfShareQr';
 import { REGION_LABEL, AGE_LABEL, fmtKRW } from '@/lib/calculator';
+
+const SHARE_URL = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SITE_URL) || 'https://apt-planner.kr';
 
 type Props = {
   quote: Quote;
@@ -73,7 +76,6 @@ export function PlanPdfTemplate({ quote, gradeLabel, rootRef }: Props) {
             { k: '방 개수', v: `${quote.property.rooms}개` },
             { k: '욕실', v: `공용 ${quote.property.common_bath} / 부부 ${quote.property.master_bath ? '있음' : '없음'}` },
             { k: '자재 등급', v: gradeLabel },
-            { k: '보정 계수', v: `${quote.totals.adjustment_multiplier.toFixed(2)}×` },
             { k: '예상 공사비 범위', v: `${fmtKRW(quote.totals.grand_total_low)} ~ ${fmtKRW(quote.totals.grand_total_high)}` },
           ]} />
         </Section>
@@ -121,6 +123,12 @@ export function PlanPdfTemplate({ quote, gradeLabel, rootRef }: Props) {
             '발생할 수 있는 추가금의 종류와 사전 협의 절차를 안내해주세요.',
           ]} />
         </Section>
+        <div style={{ marginTop: '12px' }}>
+          <PdfShareQr
+            url={SHARE_URL}
+            caption="apt-planner로 같은 사양의 견적을 다른 업체에도 요청할 수 있어요"
+          />
+        </div>
         <Footer />
       </BodyPage>
     </div>

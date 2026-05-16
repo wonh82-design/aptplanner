@@ -12,21 +12,24 @@ export default function Landing() {
     <div className="flex-1 w-full bg-white">
       {/* ===== Top bar ===== */}
       <header className="border-b border-zinc-200 bg-white/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold">a</span>
-            <span className="font-bold tracking-tight">apt-planner</span>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+          <Link href="/" className="flex items-center gap-2 min-w-0">
+            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold flex-shrink-0">a</span>
+            <span className="font-bold tracking-tight truncate">apt-planner</span>
           </Link>
-          <nav className="flex items-center gap-5 text-xs font-medium text-zinc-600">
+          <nav className="flex items-center gap-3 sm:gap-5 text-xs font-medium text-zinc-600 flex-shrink-0">
             <Link href="/about" className="hover:text-zinc-900">소개</Link>
-            <Link href="/calc" className="hover:text-zinc-900">예산 산정 시작 →</Link>
+            <Link href="/calc" className="hover:text-zinc-900">
+              <span className="hidden sm:inline">예산 산정 시작 →</span>
+              <span className="sm:hidden">시작 →</span>
+            </Link>
           </nav>
         </div>
       </header>
 
       {/* ===== Hero ===== */}
       <section className="relative overflow-hidden">
-        <div className="max-w-4xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-14 pb-12 sm:pt-28 sm:pb-24 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             인테리어 처음하는 분들을 위한 도구 · 100% 소비자 편의
@@ -61,18 +64,18 @@ export default function Landing() {
             </span>
           </div>
 
-          {/* Hero stats */}
+          {/* Hero stats — 혜택 중심 */}
           <div className="mt-14 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
-            <Stat n="224" l="실제 시장가 자재" />
-            <Stat n="60+" l="세부 공종 산출" />
-            <Stat n="₩0" l="업체 수수료" highlight />
+            <Stat n="30초" l="결과까지 걸리는 시간" />
+            <Stat n="₩0" l="가입·수수료" highlight />
+            <Stat n="±20%" l="시장가 정확도" />
           </div>
         </div>
       </section>
 
       {/* ===== Differentiator ===== */}
       <section className="border-t border-zinc-200 bg-zinc-50">
-        <div className="max-w-5xl mx-auto px-6 py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <div className="text-center mb-12">
             <div className="text-xs font-semibold uppercase tracking-widest text-emerald-700 mb-3">
               왜 apt-planner인가
@@ -123,7 +126,7 @@ export default function Landing() {
 
       {/* ===== Problem ===== */}
       <section className="border-t border-zinc-200 bg-white">
-        <div className="max-w-5xl mx-auto px-6 py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 text-center mb-3">
             인테리어 처음하는 분들의 흔한 고민
           </h2>
@@ -151,7 +154,7 @@ export default function Landing() {
 
       {/* ===== How it works ===== */}
       <section className="border-t border-zinc-200 bg-zinc-50">
-        <div className="max-w-5xl mx-auto px-6 py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <div className="text-center mb-12">
             <div className="text-xs font-semibold uppercase tracking-widest text-blue-700 mb-3">
               How it works
@@ -171,7 +174,7 @@ export default function Landing() {
 
       {/* ===== Pricing — 3종 서비스 ===== */}
       <section id="pricing" className="border-t border-zinc-200 bg-gradient-to-br from-blue-50/40 via-white to-emerald-50/40">
-        <div className="max-w-6xl mx-auto px-6 py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-xs font-medium mb-4">
               출시 기념 컨설팅 50% 할인 (5월 한정)
@@ -186,7 +189,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <ServicesPricing />
+          <ServicesPricing pyeong={30} recommended="spec" />
 
           <div className="text-center mt-10">
             <Link
@@ -195,14 +198,24 @@ export default function Landing() {
             >
               먼저 무료 산정부터 시작하기 →
             </Link>
-            <p className="text-xs text-zinc-500 mt-3">가입 없이 30초 안에 결과를 받아보세요</p>
+            <p className="text-xs text-zinc-500 mt-3">가입 없이 30초 안에 결과를 받아보세요 · 30평 기준 절감액 예시</p>
           </div>
         </div>
       </section>
 
+      {/* ===== Mobile Sticky CTA ===== */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-zinc-200 px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        <Link
+          href="/calc"
+          className="flex items-center justify-center gap-2 rounded-lg bg-zinc-900 hover:bg-black px-4 py-3 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98] w-full"
+        >
+          무료로 예상 공사비 산정하기 →
+        </Link>
+      </div>
+
       {/* ===== Footer ===== */}
-      <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300">
-        <div className="max-w-5xl mx-auto px-6 py-12">
+      <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300 pb-20 sm:pb-0">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
           <div className="flex flex-col sm:flex-row items-start gap-8">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">

@@ -1,9 +1,12 @@
 /**
- * 공사 범위 프리셋 — 가장 자주 발생하는 3가지 시나리오.
+ * 공사 범위 프리셋 — 가장 자주 발생하는 시나리오.
  *
  * "올수리" 정의: 바닥/도배/몰딩 (전 공간) + 욕실 풀세트 + 주방 + 중문/신발장
  *                + 조명 + 전기·설비 + 발코니 정리 + 마감 디테일까지 일체.
- * 차이점: 1) 확장 여부  2) 샷시 교체 여부
+ * 차이점: 샷시 교체 여부 / 철거 범위.
+ *
+ * ⚠️ 발코니 확장 관련 필드(expansion_current, expansion_after, expansion_report)는
+ *    프리셋에서 절대 건드리지 않는다. 우리집 현황의 '발코니 확장 현황'에서만 변경 가능.
  */
 import type { Property, RoomScope, Scope, RoomId } from './types';
 import { activeRooms } from './areas';
@@ -13,7 +16,8 @@ type Preset = {
   icon: string;
   label: string;
   desc: string;
-  apply(p: Property): Scope;
+  /** 현재 scope를 받아 확장 관련 필드는 보존, 나머지만 교체 */
+  apply(p: Property, current: Scope): Scope;
 };
 
 function makeRoomScope(opts: Partial<RoomScope> = {}): RoomScope {
@@ -31,14 +35,13 @@ function makeRoomScope(opts: Partial<RoomScope> = {}): RoomScope {
   };
 }
 
-/** 올수리 공통: 모든 공간 바닥/도배/몰딩 ON + 등급 표준 배치 */
-function fullRenovateRoom(roomId: RoomId, opts: { sash: boolean; expand: boolean } = { sash: false, expand: false }): RoomScope {
+/** 올수리 공통: 모든 공간 바닥/도배/몰딩 ON + 등급 표준 배치. 확장 필드는 건드리지 않음. */
+function fullRenovateRoom(roomId: RoomId, opts: { sash: boolean } = { sash: false }): RoomScope {
   const base = makeRoomScope({
     flooring: true,
     wallpaper: true,
     molding: true,
     sash: opts.sash,
-    expansion_after: opts.expand,
   });
   if (roomId === '거실')    return { ...base, aircon: true, ceiling_fan: true };
   if (roomId === '주방')    return { ...base };
@@ -48,18 +51,42 @@ function fullRenovateRoom(roomId: RoomId, opts: { sash: boolean; expand: boolean
   return base;
 }
 
-function makeRoomMap(p: Property, factory: (roomId: RoomId) => RoomScope): Scope['rooms'] {
+/**
+ * 공간별 scope 맵 생성기.
+ * 확장 필드(expansion_current, expansion_after)는 무조건 기존 값 유지.
+ */
+function makeRoomMap(
+  p: Property,
+  current: Scope,
+  factory: (roomId: RoomId) => RoomScope,
+): Scope['rooms'] {
   const visible = activeRooms(p) as RoomId[];
   const all: RoomId[] = ['거실', '주방', '안방', '작은방1', '작은방2'];
   const map: Partial<Record<RoomId, RoomScope>> = {};
   for (const r of all) {
-    map[r] = visible.includes(r) ? factory(r) : makeRoomScope();
+    const cur = current.rooms[r];
+    const preserved = {
+      expansion_current: cur?.expansion_current ?? false,
+      expansion_after:   cur?.expansion_after   ?? false,
+    };
+    if (visible.includes(r)) {
+      map[r] = { ...factory(r), ...preserved };
+    } else {
+      map[r] = makeRoomScope(preserved);
+    }
   }
   return map as Scope['rooms'];
 }
 
-/** 올수리 글로벌 토글 풀세트 */
-function fullRenovateGlobal(opts: { expand: boolean }): Scope['global'] {
+/** 현재 확장 시공 계획이 하나라도 있으면 신고 ON (그 외에는 기존 값 유지) */
+function needsExpansionReport(current: Scope): boolean {
+  return Object.values(current.rooms).some(
+    rs => !!rs && rs.expansion_after && !rs.expansion_current,
+  );
+}
+
+/** 올수리 글로벌 풀세트 — expansion_report는 현재 방 상태로부터 도출 */
+function fullRenovateGlobal(current: Scope): Scope['global'] {
   return {
     demolition: true,
     insulation: true,
@@ -77,35 +104,20 @@ function fullRenovateGlobal(opts: { expand: boolean }): Scope['global'] {
     induction_line: true,
     thermostat: true,
     silicon: true,
-    expansion_report: opts.expand, // 확장 시에만 신고
+    expansion_report: needsExpansionReport(current),
   };
 }
 
 export const PRESETS: Preset[] = [
   {
-    id: 'full-expand-sash',
-    icon: '🏗️',
-    label: '전체 철거 + 전체 확장 + 샷시 + 올수리',
-    desc: '가장 큰 공사 — 발코니 모두 확장 + 외창 교체',
-    apply(p) {
-      return {
-        rooms: makeRoomMap(p, (room) => {
-          // 안방까지 포함 모든 공간 확장+샷시 ON
-          return fullRenovateRoom(room, { sash: true, expand: true });
-        }),
-        global: fullRenovateGlobal({ expand: true }),
-      };
-    },
-  },
-  {
     id: 'full-sash',
     icon: '🪟',
     label: '전체 철거 + 샷시 + 올수리',
-    desc: '확장은 없지만 외창은 모두 새로',
-    apply(p) {
+    desc: '내부 전체 새로 + 외창 교체',
+    apply(p, current) {
       return {
-        rooms: makeRoomMap(p, (room) => fullRenovateRoom(room, { sash: true, expand: false })),
-        global: fullRenovateGlobal({ expand: false }),
+        rooms: makeRoomMap(p, current, (room) => fullRenovateRoom(room, { sash: true })),
+        global: fullRenovateGlobal(current),
       };
     },
   },
@@ -113,11 +125,11 @@ export const PRESETS: Preset[] = [
     id: 'full-only',
     icon: '🧰',
     label: '전체 철거 + 올수리',
-    desc: '확장·샷시 없이 내부만 새로',
-    apply(p) {
+    desc: '샷시 없이 내부만 새로',
+    apply(p, current) {
       return {
-        rooms: makeRoomMap(p, (room) => fullRenovateRoom(room, { sash: false, expand: false })),
-        global: fullRenovateGlobal({ expand: false }),
+        rooms: makeRoomMap(p, current, (room) => fullRenovateRoom(room, { sash: false })),
+        global: fullRenovateGlobal(current),
       };
     },
   },
@@ -126,9 +138,9 @@ export const PRESETS: Preset[] = [
     icon: '🎨',
     label: '철거 최소화 + 마감재만 교체',
     desc: '전기·설비·조명 그대로, 도배·마루·주방·욕실만',
-    apply(p) {
+    apply(p, current) {
       return {
-        rooms: makeRoomMap(p, () => makeRoomScope({
+        rooms: makeRoomMap(p, current, () => makeRoomScope({
           // 마감재만: 마루(바닥재) + 도배. 몰딩·외창·에어컨·붙박이장·실링팬 X
           flooring: true,
           wallpaper: true,
@@ -150,7 +162,7 @@ export const PRESETS: Preset[] = [
           induction_line: false,
           thermostat: false,
           silicon: true,            // 마감 디테일은 일반적으로 포함
-          expansion_report: false,
+          expansion_report: needsExpansionReport(current),
         },
       };
     },

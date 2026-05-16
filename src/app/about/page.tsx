@@ -11,21 +11,24 @@ export default function About() {
     <div className="flex-1 w-full bg-white">
       {/* ===== Top bar ===== */}
       <header className="border-b border-zinc-200 bg-white/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold">a</span>
-            <span className="font-bold tracking-tight">apt-planner</span>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+          <Link href="/" className="flex items-center gap-2 min-w-0">
+            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold flex-shrink-0">a</span>
+            <span className="font-bold tracking-tight truncate">apt-planner</span>
           </Link>
-          <nav className="flex gap-5 text-xs font-medium text-zinc-600">
+          <nav className="flex gap-3 sm:gap-5 text-xs font-medium text-zinc-600 flex-shrink-0">
             <Link href="/about" className="text-zinc-900">소개</Link>
-            <Link href="/calc" className="hover:text-zinc-900">예산 산정 시작 →</Link>
+            <Link href="/calc" className="hover:text-zinc-900">
+              <span className="hidden sm:inline">예산 산정 시작 →</span>
+              <span className="sm:hidden">시작 →</span>
+            </Link>
           </nav>
         </div>
       </header>
 
       {/* ===== Intro hero ===== */}
       <section className="border-b border-zinc-100">
-        <div className="max-w-3xl mx-auto px-6 pt-20 pb-12 text-center">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-10 sm:pt-20 sm:pb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-zinc-700 text-xs font-medium mb-6">
             만든 사람 · 만든 이유
           </div>
@@ -42,9 +45,9 @@ export default function About() {
 
       {/* ===== Profile card ===== */}
       <section className="border-b border-zinc-100 bg-zinc-50">
-        <div className="max-w-4xl mx-auto px-6 py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-            <div className="md:col-span-1">
+            <div className="md:col-span-1 max-w-xs mx-auto md:mx-0 w-full">
               <div className="aspect-square rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 flex flex-col items-center justify-center text-white p-6">
                 <div className="text-3xl font-extrabold tracking-tight mb-3">15년</div>
                 <div className="text-[11px] uppercase tracking-widest opacity-70">건설사 시공·CS</div>
@@ -81,7 +84,7 @@ export default function About() {
 
       {/* ===== Story ===== */}
       <section className="border-b border-zinc-100 bg-white">
-        <div className="max-w-3xl mx-auto px-6 py-20">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <div className="text-xs font-semibold uppercase tracking-widest text-emerald-700 mb-3 text-center">
             왜 만들었나
           </div>
@@ -134,7 +137,7 @@ export default function About() {
 
       {/* ===== Pillars ===== */}
       <section className="border-b border-zinc-100 bg-zinc-50">
-        <div className="max-w-5xl mx-auto px-6 py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <div className="text-xs font-semibold uppercase tracking-widest text-zinc-600 mb-3 text-center">
             apt-planner의 약속
           </div>
@@ -164,7 +167,7 @@ export default function About() {
 
       {/* ===== CTA ===== */}
       <section className="bg-gradient-to-br from-blue-50 via-white to-emerald-50">
-        <div className="max-w-3xl mx-auto px-6 py-20 text-center">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-20 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-4">
             이제 직접 써보실 차례입니다
           </h2>
@@ -182,7 +185,7 @@ export default function About() {
       </section>
 
       <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300">
-        <div className="max-w-5xl mx-auto px-6 py-10 text-xs text-zinc-400 flex flex-col sm:flex-row justify-between gap-3">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 text-xs text-zinc-400 flex flex-col sm:flex-row justify-between gap-3">
           <span>© apt-planner — All rights reserved</span>
           <span>본 서비스는 어떤 인테리어 업체와도 제휴·수수료 관계가 없습니다.</span>
         </div>
@@ -207,13 +210,13 @@ function Cred({ title, desc }: { title: string; desc: string }) {
 
 function StoryBlock({ n, title, body }: { n: string; title: string; body: string[] }) {
   return (
-    <div className="flex gap-5">
+    <div className="flex gap-3 sm:gap-5">
       <div className="flex-shrink-0">
-        <div className="font-mono text-3xl font-bold text-zinc-300">{n}</div>
+        <div className="font-mono text-2xl sm:text-3xl font-bold text-zinc-300">{n}</div>
       </div>
-      <div className="flex-1 pt-1">
-        <h3 className="text-lg font-bold text-zinc-900 mb-3">{title}</h3>
-        <div className="space-y-3">
+      <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
+        <h3 className="text-base sm:text-lg font-bold text-zinc-900 mb-2 sm:mb-3">{title}</h3>
+        <div className="space-y-3 text-sm sm:text-[15px]">
           {body.map((p, i) => <p key={i}>{p}</p>)}
         </div>
       </div>
