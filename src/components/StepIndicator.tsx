@@ -18,67 +18,86 @@ const STEPS: { id: Step; label: string; short: string; sub: string }[] = [
 ];
 
 export function StepIndicator({ current, maxReached, onStepClick }: Props) {
+  const currentStep = STEPS.find(s => s.id === current);
   return (
     <nav aria-label="진행 단계" className="bg-white border-b border-zinc-200 sticky top-14 sm:top-16 z-20">
-      <ol className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center">
-        {STEPS.map((s, idx) => {
-          const reachable = s.id <= maxReached;
-          const isCurrent = s.id === current;
-          const isDone = s.id < current;
-          // 진행도 — 현재 단계까지의 연결선은 채워짐
-          const connectorFilled = s.id < current;
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-4">
+        {/* 모바일 — 현재 단계 명시 라인 ('2단계 / 4단계 · 공사 범위') */}
+        {currentStep && (
+          <div className="sm:hidden flex items-baseline justify-center gap-2 mb-2">
+            <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
+              {currentStep.id} / {STEPS.length}
+            </span>
+            <span className="text-sm font-bold text-blue-900">
+              {currentStep.label}
+            </span>
+            <span className="text-[10px] text-zinc-500 truncate">
+              · {currentStep.sub}
+            </span>
+          </div>
+        )}
 
-          return (
-            <li key={s.id} className="flex items-center flex-1 min-w-0 last:flex-none">
-              <button
-                type="button"
-                disabled={!reachable}
-                onClick={() => reachable && onStepClick(s.id)}
-                aria-current={isCurrent ? 'step' : undefined}
-                className={`flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2 py-1.5 rounded-md text-left min-w-0 transition
-                  ${isCurrent ? 'bg-blue-50' : ''}
-                  ${reachable && !isCurrent ? 'hover:bg-zinc-50 cursor-pointer' : ''}
-                  ${!reachable ? 'opacity-40 cursor-not-allowed' : ''}`}
-              >
-                {/* 번호 원형 — 현재 단계는 ring으로 강조 */}
-                <span
-                  className={`flex items-center justify-center w-8 h-8 sm:w-8 sm:h-8 rounded-full text-sm font-bold transition flex-shrink-0
-                    ${isCurrent ? 'bg-blue-600 text-white ring-4 ring-blue-100'
-                      : isDone ? 'bg-emerald-500 text-white'
-                      : 'bg-zinc-200 text-zinc-500'}`}
+        {/* 4단계 원형 + 단축 라벨 */}
+        <ol className="flex items-center">
+          {STEPS.map((s, idx) => {
+            const reachable = s.id <= maxReached;
+            const isCurrent = s.id === current;
+            const isDone = s.id < current;
+            const connectorFilled = s.id < current;
+
+            return (
+              <li key={s.id} className="flex items-center flex-1 min-w-0 last:flex-none">
+                <button
+                  type="button"
+                  disabled={!reachable}
+                  onClick={() => reachable && onStepClick(s.id)}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  aria-label={`${s.id}단계: ${s.label}`}
+                  className={`flex items-center gap-1.5 sm:gap-2.5 px-1 sm:px-2 py-1 sm:py-1.5 rounded-md text-left min-w-0 transition
+                    ${isCurrent ? 'sm:bg-blue-50' : ''}
+                    ${reachable && !isCurrent ? 'hover:bg-zinc-50 cursor-pointer' : ''}
+                    ${!reachable ? 'opacity-40 cursor-not-allowed' : ''}`}
                 >
-                  {isDone ? (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  ) : s.id}
-                </span>
-                {/* 라벨 — 모바일은 short, 데스크톱은 full+sub */}
-                <div className="hidden sm:block min-w-0">
-                  <div className={`text-xs font-bold truncate leading-tight ${isCurrent ? 'text-blue-900' : isDone ? 'text-zinc-900' : 'text-zinc-500'}`}>
-                    {s.label}
+                  {/* 번호 원형 — 현재 단계는 ring으로 강조 */}
+                  <span
+                    className={`flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full text-xs sm:text-sm font-bold transition flex-shrink-0
+                      ${isCurrent ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                        : isDone ? 'bg-emerald-500 text-white'
+                        : 'bg-zinc-200 text-zinc-500'}`}
+                  >
+                    {isDone ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : s.id}
+                  </span>
+                  {/* 라벨 — 모바일은 short(2글자) / 데스크톱은 풀+sub */}
+                  <div className="hidden sm:block min-w-0">
+                    <div className={`text-xs font-bold truncate leading-tight ${isCurrent ? 'text-blue-900' : isDone ? 'text-zinc-900' : 'text-zinc-500'}`}>
+                      {s.label}
+                    </div>
+                    <div className="text-[10px] text-zinc-500 truncate leading-tight mt-0.5">{s.sub}</div>
                   </div>
-                  <div className="text-[10px] text-zinc-500 truncate leading-tight mt-0.5">{s.sub}</div>
-                </div>
-                <div className="sm:hidden min-w-0">
-                  <div className={`text-[11px] font-bold truncate ${isCurrent ? 'text-blue-900' : isDone ? 'text-emerald-700' : 'text-zinc-500'}`}>
-                    {isCurrent ? s.label : s.short}
+                  <div className="sm:hidden">
+                    <div className={`text-[11px] font-bold whitespace-nowrap ${isCurrent ? 'text-blue-900' : isDone ? 'text-emerald-700' : 'text-zinc-500'}`}>
+                      {s.short}
+                    </div>
                   </div>
-                </div>
-              </button>
-              {/* 연결선 — 현재 단계 직전까지 채워짐 */}
-              {idx < STEPS.length - 1 && (
-                <span
-                  className={`flex-shrink-0 mx-1 sm:mx-2 h-[2px] w-4 sm:w-8 rounded-full transition-colors ${
-                    connectorFilled ? 'bg-emerald-500' : 'bg-zinc-200'
-                  }`}
-                  aria-hidden
-                />
-              )}
-            </li>
-          );
-        })}
-      </ol>
+                </button>
+                {/* 연결선 — 현재 단계 직전까지 채워짐 */}
+                {idx < STEPS.length - 1 && (
+                  <span
+                    className={`flex-shrink-0 mx-1 sm:mx-2 h-[2px] w-3 sm:w-8 rounded-full transition-colors ${
+                      connectorFilled ? 'bg-emerald-500' : 'bg-zinc-200'
+                    }`}
+                    aria-hidden
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </nav>
   );
 }

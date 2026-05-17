@@ -240,7 +240,7 @@ function BigGroupCard({
       aria-pressed={active}
       className={`flex flex-col items-start gap-2 rounded-lg border-2 p-3 text-left transition-all active:scale-[0.98] ${styles}`}
     >
-      {/* 헤더 — 인디케이터 + 제목 */}
+      {/* 헤더 — 인디케이터 + 제목 (이모지 제거, 텍스트만) */}
       <div className="flex items-center gap-2 w-full">
         <span
           className={`flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-md border-2 transition ${indicatorStyles}`}
@@ -251,7 +251,6 @@ function BigGroupCard({
             </svg>
           )}
         </span>
-        <span className="text-base leading-none">{group.icon}</span>
         <span className="text-sm font-bold text-zinc-900 truncate flex-1">{group.title}</span>
       </div>
 

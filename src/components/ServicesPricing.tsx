@@ -10,9 +10,11 @@
  */
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   SERVICE_FREE, SERVICE_SPEC, SERVICE_CONSULT, estimateSavings, fmtSaving,
 } from '@/lib/pricing';
+import { PaidGuidanceModal } from './PaidGuidanceModal';
 
 type Props = {
   pyeong?: number;
@@ -34,6 +36,11 @@ export function ServicesPricing({
   // 절감액 대비 가격 비율 (anchoring)
   const specSavingMax = savings?.max ? Math.floor((SERVICE_SPEC.price / savings.max) * 1000) / 10 : null;
   const consultSavingMax = savings?.max ? Math.floor((SERVICE_CONSULT.price / savings.max) * 1000) / 10 : null;
+
+  // 콜백이 없는 상태(=랜딩에서 사용 / 무료 산정 미완료)에서 유료 신청 버튼 클릭 시 안내 모달
+  const [showGuidance, setShowGuidance] = useState(false);
+  const handleSpecClick = onApplySpec ?? (() => setShowGuidance(true));
+  const handleConsultClick = onApplyConsult ?? (() => setShowGuidance(true));
 
   return (
     <div className="space-y-5">
@@ -94,7 +101,7 @@ export function ServicesPricing({
             ratio: specSavingMax ? `절감액의 단 ${specSavingMax}%만 투자` : undefined,
           } : undefined}
           ctaText={SERVICE_SPEC.cta + ' →'}
-          onClick={onApplySpec}
+          onClick={handleSpecClick}
         />
 
         {/* 컨설팅 */}
@@ -115,10 +122,13 @@ export function ServicesPricing({
             ratio: consultSavingMax ? `절감액의 단 ${consultSavingMax}%만 투자` : undefined,
           } : undefined}
           ctaText={SERVICE_CONSULT.cta + ' →'}
-          onClick={onApplyConsult}
+          onClick={handleConsultClick}
           credential="건축사 · 건축시공기술사가 직접 진단"
         />
       </div>
+
+      {/* 안내 모달 — 무료 산정 미완료 상태에서 유료 신청 시도 시 */}
+      {showGuidance && <PaidGuidanceModal onClose={() => setShowGuidance(false)} />}
     </div>
   );
 }
