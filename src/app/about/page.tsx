@@ -20,7 +20,7 @@ export default function About() {
             만든 사람 · 만든 이유
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 leading-[1.2] mb-5">
-            현장에서 15년, <span className="text-blue-700">소비자 편으로 돌아섰습니다</span>
+            <span className="text-blue-700">인테리어 초보자</span>를 위해 만들었습니다
           </h1>
           <p className="text-base sm:text-lg text-zinc-600 leading-relaxed">
             건설사에서 수만세대를 짓고 관리해온 전문가가
