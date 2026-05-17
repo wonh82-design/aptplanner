@@ -278,7 +278,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
         </div>
       </details>
 
-      {/* ===== 공간별 확장 현황 ===== */}
+      {/* ===== 공간별 확장 현황 — '현재 상태' / '공사 후' 2개 블럭으로 통합 ===== */}
       <div className="mt-6 pt-5 border-t border-zinc-200">
         <h3 className="text-sm font-semibold text-zinc-800 mb-1">발코니 확장 현황</h3>
         <p className="text-xs text-zinc-600 leading-relaxed mb-3">
@@ -286,123 +286,110 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           공사 후에는 <strong className="text-zinc-900">어떻게 만들고 싶은지</strong> 공간별로 알려주세요.
         </p>
 
-        {/* 개념 안내 카드 — 2개 컬럼의 의미를 시각적으로 보여줌 */}
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-3 items-stretch mb-4 rounded-lg bg-gradient-to-r from-zinc-50 via-white to-blue-50/50 border border-zinc-200 p-3">
-          <ConceptLegend
-            tone="zinc"
-            icon="🏠"
-            title="현재 상태"
-            subtitle="지금 우리집 모습"
-            examples={['발코니 있음 (확장 안 됨)', '이미 확장됨']}
-          />
-          <div className="hidden sm:flex items-center justify-center text-zinc-400">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
-          </div>
-          <div className="sm:hidden flex items-center justify-center text-zinc-400 -my-1">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <polyline points="19 12 12 19 5 12" />
-            </svg>
-          </div>
-          <ConceptLegend
-            tone="blue"
-            icon="🔨"
-            title="공사 후"
-            subtitle="인테리어 끝난 모습"
-            examples={['확장 안 함 (그대로 유지)', '새로 확장 시공']}
-          />
-        </div>
-
-        {/* 데스크톱 컬럼 헤더 — 모바일에선 숨김 */}
-        <div className="hidden sm:grid grid-cols-12 gap-3 mb-2 items-center">
-          <div className="col-span-3 text-[11px] uppercase tracking-wider text-zinc-500 font-bold">공간</div>
-          <div className="col-span-4 flex items-center gap-1.5">
-            <span className="text-xs">🏠</span>
-            <span className="text-[11px] uppercase tracking-wider text-zinc-700 font-bold">현재 상태</span>
-          </div>
-          <div className="col-span-5 flex items-center gap-1.5">
-            <span className="text-xs">🔨</span>
-            <span className="text-[11px] uppercase tracking-wider text-blue-700 font-bold">공사 후</span>
-          </div>
-        </div>
-
-        <div className="space-y-2 sm:space-y-1.5">
-          {visibleRooms.map(room => {
-            const meta = ROOM_META[room] || { label: room };
-            const rs = rooms[room];
-            const already = rs.expansion_current;
-            return (
-              <div
-                key={room}
-                className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50/40 p-2.5
-                           sm:bg-transparent sm:border-0 sm:p-0 sm:grid sm:grid-cols-12 sm:gap-3 sm:items-center sm:py-1"
-              >
-                {/* 공간 라벨 */}
-                <span className="sm:col-span-3 text-sm flex items-center gap-2 min-w-0">
-                  <span className="inline-block w-1 h-4 rounded-sm bg-zinc-400 sm:bg-zinc-300 flex-shrink-0" />
-                  <span className="font-medium truncate">{meta.label}</span>
-                </span>
-
-                {/* 현재 상태 */}
-                <div className="sm:col-span-4">
-                  <div className="sm:hidden text-[11px] text-zinc-700 font-bold mb-1 flex items-center gap-1.5">
-                    <span>🏠</span><span>현재 상태</span>
-                    <span className="text-[10px] font-normal text-zinc-500">— 지금 어떤가요?</span>
-                  </div>
-                  <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs w-full">
-                    <ExpBtn
-                      active={!already}
-                      onClick={() => setExpansionCurrent(room, false)}
-                      label="발코니 있음"
-                      hint="확장 안됨"
-                    />
-                    <ExpBtn
-                      active={already}
-                      onClick={() => setExpansionCurrent(room, true)}
-                      label="이미 확장됨"
-                      hint="기존부터 확장"
-                    />
-                  </div>
-                </div>
-
-                {/* 공사 후 — 이미 확장된 공간은 숨김 */}
-                <div className="sm:col-span-5">
-                  <div className="sm:hidden text-[11px] text-blue-700 font-bold mb-1 flex items-center gap-1.5">
-                    <span>🔨</span><span>공사 후</span>
-                    <span className="text-[10px] font-normal text-zinc-500">— 어떻게 만들까요?</span>
-                  </div>
-                  {already ? (
-                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 italic px-2 py-1.5 bg-zinc-50 rounded-md border border-dashed border-zinc-200">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      <span>이미 확장된 상태 — 추가 공사 불필요</span>
-                    </div>
-                  ) : (
-                    <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs w-full">
-                      <ExpBtn
-                        active={!rs.expansion_after}
-                        onClick={() => setExpansionAfter(room, false)}
-                        label="확장 안 함"
-                        hint="발코니 유지"
-                      />
-                      <ExpBtn
-                        active={rs.expansion_after}
-                        onClick={() => setExpansionAfter(room, true)}
-                        label="확장 시공"
-                        hint="이번에 확장"
-                        tone="amber"
-                      />
-                    </div>
-                  )}
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* ===== 현재 상태 블럭 ===== */}
+          <div className="rounded-lg border border-zinc-200 bg-white p-3">
+            {/* 헤더 (설명) */}
+            <div className="pb-3 border-b border-zinc-100 mb-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-base leading-none">🏠</span>
+                <span className="text-xs font-bold text-zinc-900">현재 상태</span>
               </div>
-            );
-          })}
+              <div className="text-[10px] text-zinc-600 font-medium mb-1.5">지금 우리집 모습은 어떤가요?</div>
+              <ul className="space-y-0.5 text-[10px] text-zinc-700 leading-snug">
+                <li className="flex items-start gap-1"><span className="inline-block w-1 h-1 rounded-full bg-zinc-500 mt-1 flex-shrink-0" /><span>발코니 있음 (확장 안 됨)</span></li>
+                <li className="flex items-start gap-1"><span className="inline-block w-1 h-1 rounded-full bg-zinc-500 mt-1 flex-shrink-0" /><span>이미 확장됨</span></li>
+              </ul>
+            </div>
+            {/* 공간별 행 */}
+            <div className="space-y-1.5">
+              {visibleRooms.map(room => {
+                const meta = ROOM_META[room] || { label: room };
+                const rs = rooms[room];
+                const already = rs.expansion_current;
+                return (
+                  <div key={room} className="flex items-center gap-2">
+                    <span className="flex-shrink-0 w-14 text-xs font-medium text-zinc-800 flex items-center gap-1.5 min-w-0">
+                      <span className="inline-block w-1 h-4 rounded-sm bg-zinc-300 flex-shrink-0" />
+                      <span className="truncate">{meta.label}</span>
+                    </span>
+                    <div className="inline-flex flex-1 rounded-md border border-zinc-200 bg-white overflow-hidden text-xs">
+                      <ExpBtn
+                        active={!already}
+                        onClick={() => setExpansionCurrent(room, false)}
+                        label="발코니 있음"
+                        hint="확장 안됨"
+                      />
+                      <ExpBtn
+                        active={already}
+                        onClick={() => setExpansionCurrent(room, true)}
+                        label="이미 확장됨"
+                        hint="기존부터 확장"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ===== 공사 후 블럭 ===== */}
+          <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
+            {/* 헤더 (설명) */}
+            <div className="pb-3 border-b border-blue-100 mb-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-base leading-none">🔨</span>
+                <span className="text-xs font-bold text-blue-900">공사 후</span>
+              </div>
+              <div className="text-[10px] text-blue-700 font-medium mb-1.5">인테리어 후 어떻게 만들까요?</div>
+              <ul className="space-y-0.5 text-[10px] text-zinc-700 leading-snug">
+                <li className="flex items-start gap-1"><span className="inline-block w-1 h-1 rounded-full bg-blue-500 mt-1 flex-shrink-0" /><span>확장 안 함 (그대로 유지)</span></li>
+                <li className="flex items-start gap-1"><span className="inline-block w-1 h-1 rounded-full bg-blue-500 mt-1 flex-shrink-0" /><span>새로 확장 시공</span></li>
+              </ul>
+            </div>
+            {/* 공간별 행 */}
+            <div className="space-y-1.5">
+              {visibleRooms.map(room => {
+                const meta = ROOM_META[room] || { label: room };
+                const rs = rooms[room];
+                const already = rs.expansion_current;
+                return (
+                  <div key={room} className="flex items-center gap-2">
+                    <span className="flex-shrink-0 w-14 text-xs font-medium text-zinc-800 flex items-center gap-1.5 min-w-0">
+                      <span className="inline-block w-1 h-4 rounded-sm bg-blue-300 flex-shrink-0" />
+                      <span className="truncate">{meta.label}</span>
+                    </span>
+                    {already ? (
+                      <div className="flex-1 flex items-center gap-1 text-[10px] text-zinc-500 italic px-2 py-1.5 bg-white/60 rounded-md border border-dashed border-zinc-200">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span>추가 공사 불필요</span>
+                      </div>
+                    ) : (
+                      <div className="inline-flex flex-1 rounded-md border border-zinc-200 bg-white overflow-hidden text-xs">
+                        <ExpBtn
+                          active={!rs.expansion_after}
+                          onClick={() => setExpansionAfter(room, false)}
+                          label="확장 안 함"
+                          hint="발코니 유지"
+                        />
+                        <ExpBtn
+                          active={rs.expansion_after}
+                          onClick={() => setExpansionAfter(room, true)}
+                          label="확장 시공"
+                          hint="이번에 확장"
+                          tone="amber"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
+
         <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed flex items-start gap-1.5">
           <span className="text-amber-600 flex-shrink-0 mt-px">💡</span>
           <span>‘확장 시공’ 공간이 있으면 확장공사·새 외창·구청 신고·터닝도어 비용이 자동으로 추가됩니다.</span>
@@ -427,41 +414,6 @@ function MiniStat({ label, value }: { label: string; value: string }) {
       <span className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</span>
       <span className="font-mono font-semibold text-zinc-900 text-[11px]">{value}</span>
     </span>
-  );
-}
-
-/**
- * 발코니 확장 현황 상단의 개념 안내 카드 (현재 상태 / 공사 후).
- * 사용자가 두 컬럼의 의미를 한눈에 파악하도록 시각적 범례 역할.
- */
-function ConceptLegend({
-  tone, icon, title, subtitle, examples,
-}: {
-  tone: 'zinc' | 'blue';
-  icon: string;
-  title: string;
-  subtitle: string;
-  examples: string[];
-}) {
-  const styles = tone === 'blue'
-    ? { bg: 'bg-blue-50/70', border: 'border-blue-200', title: 'text-blue-900', subtitle: 'text-blue-700', dot: 'bg-blue-500' }
-    : { bg: 'bg-white',       border: 'border-zinc-200', title: 'text-zinc-900', subtitle: 'text-zinc-600', dot: 'bg-zinc-500' };
-  return (
-    <div className={`rounded-md ${styles.bg} ${styles.border} border p-2.5`}>
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <span className="text-base leading-none">{icon}</span>
-        <span className={`text-xs font-bold ${styles.title}`}>{title}</span>
-      </div>
-      <div className={`text-[10px] ${styles.subtitle} font-medium mb-1.5`}>{subtitle}</div>
-      <ul className="space-y-0.5">
-        {examples.map((ex, i) => (
-          <li key={i} className="flex items-start gap-1 text-[10px] text-zinc-700 leading-snug">
-            <span className={`inline-block w-1 h-1 rounded-full ${styles.dot} mt-1 flex-shrink-0`} />
-            <span>{ex}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
 

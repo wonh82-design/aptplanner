@@ -30,6 +30,20 @@ const GRADE_META: Record<Grade, { color: string; bg: string; ring: string; label
  * 이 번들들에 한해 가성비 위에 '커스텀 구성' 행이 표시되고 현재 우리집 총공사비를 노출한다.
  */
 const CUSTOM_ROW_BUNDLES = new Set<string>(['kitchen', 'bath']);
+
+/**
+ * '구성 자재 변경하기' 버튼·기능을 숨기는 번들 ID 목록.
+ * 등급(가성비/표준/고급) 토글만 노출하고, 구성 자재 세부 조정은 제공 안 함.
+ * 단순 단일 자재 묶음이거나 등급 외 세부 옵션이 의미 없는 번들에 적용.
+ */
+const HIDE_COMPONENTS_BUNDLES = new Set<string>([
+  'aircon',       // 시스템 에어컨
+  'electrical',   // 전기 공사
+  'plumbing',     // 설비 공사
+  'balcony',      // 발코니 마감
+  'closet',       // 붙박이장
+  'ceiling_fan',  // 실링팬
+]);
 const CUSTOM_META = {
   color: 'text-purple-700',
   bg: 'bg-purple-50',
@@ -346,19 +360,21 @@ function BundleCard({
             현재 {fmtKRWShort(totalSub)}
           </span>
           <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => setShowComponents(s => !s)}
-              className={`text-[10px] font-semibold px-2 py-1 rounded border transition whitespace-nowrap ${
-                showComponents
-                  ? 'bg-zinc-800 text-white border-zinc-800'
-                  : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500'
-              }`}
-              title="세트 안의 개별 자재를 다른 등급으로 변경"
-            >
-              <span className="hidden sm:inline">구성 자재 변경하기 </span>
-              <span className="sm:hidden">구성 자재 </span>
-              {showComponents ? '▲' : '▼'}
-            </button>
+            {!HIDE_COMPONENTS_BUNDLES.has(bundle.id) && (
+              <button
+                onClick={() => setShowComponents(s => !s)}
+                className={`text-[10px] font-semibold px-2 py-1 rounded border transition whitespace-nowrap ${
+                  showComponents
+                    ? 'bg-zinc-800 text-white border-zinc-800'
+                    : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500'
+                }`}
+                title="세트 안의 개별 자재를 다른 등급으로 변경"
+              >
+                <span className="hidden sm:inline">구성 자재 변경하기 </span>
+                <span className="sm:hidden">구성 자재 </span>
+                {showComponents ? '▲' : '▼'}
+              </button>
+            )}
             {hasAnyOverride && (
               <button
                 onClick={onClearBundle}
@@ -442,8 +458,9 @@ function BundleCard({
         })}
       </div>
 
-      {/* 구성 자재 영역 (펼침 시) — carpentry는 sub-work 토글, 그 외 bundle은 등급 토글 */}
-      {showComponents && (
+      {/* 구성 자재 영역 (펼침 시) — carpentry는 sub-work 토글, 그 외 bundle은 등급 토글.
+          HIDE_COMPONENTS_BUNDLES에 속한 번들은 펼침 자체 비활성. */}
+      {showComponents && !HIDE_COMPONENTS_BUNDLES.has(bundle.id) && (
         bundle.id === 'carpentry' && scope && onScopeChange ? (
           <CarpentryScopePanel scope={scope} onScopeChange={onScopeChange} />
         ) : (
