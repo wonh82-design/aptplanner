@@ -41,42 +41,35 @@ export function WizardSidebar({
   onJumpToStep, onPrev, onNext, prevLabel, nextLabel,
 }: Props) {
   return (
-    <aside className="hidden lg:flex flex-col gap-3 w-72 flex-shrink-0 sticky top-[148px] self-start max-h-[calc(100vh-164px)] overflow-y-auto pb-2">
+    <aside className="hidden lg:flex flex-col gap-3 w-72 flex-shrink-0 lg:h-full overflow-y-auto pb-2">
       {/*
-       * 총 예상 공사비 카드 — Step 2 이상에서만 노출.
-       * Step 1은 사용자가 아직 공사 범위를 결정하지 않은 상태이므로 가격을 보여주지 않는다.
+       * 총 예상 공사비 카드 — 단계 전환 시 카드 크기가 변하지 않도록 외형 통일.
+       * Step 1: 가격 자리에 '—' placeholder + 안내 텍스트
+       * Step 2+: 실제 가격 + 평당 + 범위
        */}
-      {step >= 2 ? (
-        <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-4">
-          <div className="flex items-baseline justify-between mb-1">
-            <span className="text-[11px] text-zinc-500 uppercase tracking-wide">총 예상 공사비</span>
-            <span className="text-[11px] text-zinc-500">{property.pyeong}평</span>
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-extrabold text-blue-700 tabular-nums tracking-tight">
-              {fmtKRWShort(quote.totals.grand_total)}
-            </span>
-          </div>
-          <div className="text-[11px] text-zinc-500 mt-0.5">
-            평당 약 {fmtKRWShort(quote.totals.per_pyeong)}
-          </div>
-          <div className="text-[10px] text-zinc-400 mt-2 pt-2 border-t border-zinc-100 leading-relaxed">
-            범위 {fmtKRWShort(quote.totals.grand_total_low)} ~ {fmtKRWShort(quote.totals.grand_total_high)}
-          </div>
+      <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-4">
+        <div className="flex items-baseline justify-between mb-1">
+          <span className="text-[11px] text-zinc-500 uppercase tracking-wide">총 예상 공사비</span>
+          <span className="text-[11px] text-zinc-500">{property.pyeong}평</span>
         </div>
-      ) : (
-        // Step 1 — 가격 대신 진행 안내 placeholder
-        <div className="rounded-xl bg-gradient-to-br from-blue-50 to-emerald-50 border border-blue-200 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">1</span>
-            <span className="text-[11px] text-blue-700 uppercase tracking-wide font-bold">진행 안내</span>
-          </div>
-          <p className="text-xs text-zinc-700 leading-relaxed">
-            <strong className="text-zinc-900">우리집 현황을 먼저 입력</strong>해주세요.
-            다음 단계에서 공사 범위를 선택하면 예상 공사비가 여기 표시됩니다.
-          </p>
+        <div className="flex items-baseline gap-1">
+          <span className={`text-2xl font-extrabold tabular-nums tracking-tight ${
+            step >= 2 ? 'text-blue-700' : 'text-zinc-300'
+          }`}>
+            {step >= 2 ? fmtKRWShort(quote.totals.grand_total) : '—'}
+          </span>
         </div>
-      )}
+        <div className="text-[11px] text-zinc-500 mt-0.5">
+          {step >= 2
+            ? `평당 약 ${fmtKRWShort(quote.totals.per_pyeong)}`
+            : '공사 범위 선택 후 산정'}
+        </div>
+        <div className="text-[10px] text-zinc-400 mt-2 pt-2 border-t border-zinc-100 leading-relaxed">
+          {step >= 2
+            ? `범위 ${fmtKRWShort(quote.totals.grand_total_low)} ~ ${fmtKRWShort(quote.totals.grand_total_high)}`
+            : '우리집 현황을 먼저 입력해주세요'}
+        </div>
+      </div>
 
       {/* === 우리집 현황 — 모든 단계에서 노출. Step 1에서는 열어둠 === */}
       <SidebarSection
