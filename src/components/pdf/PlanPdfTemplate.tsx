@@ -34,11 +34,11 @@ export function PlanPdfTemplate({ quote, gradeLabel, rootRef }: Props) {
 
   return (
     <div ref={rootRef}>
-      {/* === 표지 === */}
+      {/* === 표지 (skill §5.1: \n은 JS expression으로 / §5.3: 톤 통일 [유료성]·[문서종류]) === */}
       <div data-pdf-page="cover">
         <PdfCover
-          category="인테리어 계획서 · Premium"
-          title="우리집\n인테리어 계획서"
+          category="유료 · 인테리어 계획서"
+          title={'우리집\n인테리어 계획서'}
           subtitle="여러 인테리어 업체에 같은 조건으로 비교 견적을 받기 위한 문서. 자재 사양·수량은 확정됐고, 업체는 단가만 산출해 회신합니다."
           meta={[
             `${quote.property.pyeong}평`,

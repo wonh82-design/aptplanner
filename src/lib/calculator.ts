@@ -23,7 +23,7 @@ import type {
 import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
-  bayWidthForRoom, balconyAreaForRoom,
+  bayWidthForRoom, balconyAreaForRoom, doorCount,
 } from './areas';
 import { getPrimaryMaterial, getMaterialById, labelOf } from './materials';
 
@@ -175,37 +175,35 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     if (rs.flooring) push(lineItem('', roomId, 'flooring', area, grade, 'per_m2'));
     if (rs.wallpaper) push(lineItem('', roomId, 'wallpaper', area * WALL_RATIO, grade, 'per_m2'));
     if (rs.molding) {
-      push(lineItem('', roomId, 'molding', perim, grade, 'per_m'));
-      // 고급 등급 = 무몰딩 시공: 몰딩 자재가는 0원이지만 천장 목공사·도배 추가비용이 발생
-      if (effectiveGrade('molding', grade) === '고급') {
+      if (scope.global.no_molding) {
+        // 무몰딩 — molding 자재 대신 천장-벽 접점 목공+도배 마감
         push(lineItem('', roomId, 'molding_carpentry', area, grade, 'per_m2'));
         push(lineItem('', roomId, 'molding_wallpaper', area, grade, 'per_m2'));
+      } else {
+        push(lineItem('', roomId, 'molding', perim, grade, 'per_m'));
       }
     }
   }
 
-  // ===== 4. 걸레받이 (전체) =====
-  // 도배 받은 공간들의 둘레 합산 × 0.343 (시트 v4 환산)
+  // ===== 4. 걸레받이 (전체) — 도배 받은 공간들의 둘레 합산 × 0.343 (시트 v4 환산) =====
   const wallpaperRooms = activeRooms(p).filter(r => scope.rooms[r as keyof Scope['rooms']]?.wallpaper);
   if (wallpaperRooms.length > 0) {
     const totalPerim = wallpaperRooms.reduce((s, r) => s + roomPerimeterForId(r, p.pyeong), 0);
     const baseboardArea = totalPerim * BASEBOARD_HEIGHT;
-    push(lineItem('', '전체', 'baseboard', baseboardArea, grade, 'per_m2'));
-    // 고급 등급 = 무걸레받이: 벽-바닥 접점 목공사·도배 추가비용
-    if (effectiveGrade('baseboard', grade) === '고급') {
+    if (scope.global.no_baseboard) {
+      // 무걸레받이 — baseboard 자재 대신 벽-바닥 접점 목공+도배 마감
       push(lineItem('', '전체', 'baseboard_carpentry', baseboardArea, grade, 'per_m2'));
       push(lineItem('', '전체', 'baseboard_wallpaper', baseboardArea, grade, 'per_m2'));
+    } else {
+      push(lineItem('', '전체', 'baseboard', baseboardArea, grade, 'per_m2'));
     }
   }
 
-  // ===== 4.5. 목공사 — 기본 목공 셋업 + 천장 평탄화 + 가벽 신설 =====
-  // 인테리어 시공 시 거의 필수적인 목공 공정. 카테고리는 모두 '목공사'.
-  if (scope.global.demolition) {
-    // 기본 목공 세팅 — 철거 후 문틀·문선·기본 보강 작업 (per_set, 약 100만원)
+  // ===== 4.5. 목공사 — scope.global의 6가지 sub-work 명시 토글로 emit =====
+  if (scope.global.carpentry_base) {
     push(lineItem('', '전체', 'carpentry_base', 1, grade, 'per_set'));
   }
-  if (scope.global.lighting) {
-    // 천장 평탄화 — 거실·주방 천장 매입조명·간접조명 시공을 위한 목공
+  if (scope.global.carpentry_ceiling) {
     const ceilingArea =
       roomAreaForId('거실', p.pyeong, p.bay) +
       roomAreaForId('주방', p.pyeong, p.bay);
@@ -213,9 +211,28 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
       push(lineItem('', '거실/주방', 'carpentry_ceiling', ceilingArea, grade, 'per_m2'));
     }
   }
-  // 가벽 신설 — 발코니 신규 확장 시 새 벽체·구조변경 필요. 확장 면적의 약 25%로 추정.
-  if (totalExpansion > 0) {
-    push(lineItem('', '전체', 'carpentry_partition', totalExpansion * 0.25, grade, 'per_m2'));
+  if (scope.global.partition_length > 0) {
+    // 가벽 1m당 약 2.3㎡ 목공사 (높이 2.3m 기준 양면 마감)
+    push(lineItem('', '전체', 'carpentry_partition', scope.global.partition_length * 2.3, grade, 'per_m2'));
+  }
+  if (scope.global.no_door_frame) {
+    // 무문선 — 문짝당 매입 보강 + 마감 도배 (각 50K)
+    const cnt = doorCount(p.pyeong);
+    if (cnt > 0) {
+      push({
+        id: '',
+        room: '전체',
+        work_type: 'door_no_frame',
+        category: '목공사',
+        unit_type: 'per_ea',
+        qty: cnt,
+        grade: grade.default,
+        material_id: null,
+        material_label: '현장시공 무문선 매입보강 + 마감도배',
+        unit_price: 100000,
+        subtotal: cnt * 100000,
+      });
+    }
   }
 
   // ===== 5. 욕실 컴포넌트 (per 욕실) =====
@@ -385,6 +402,7 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
 const SPECIAL_WORK_TYPE_CATEGORY: Record<string, string> = {
   expansion_report: '확장',
   turning_door: '확장',
+  door_no_frame: '목공사',
 };
 
 /**

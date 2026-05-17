@@ -41,11 +41,11 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
 
   return (
     <div ref={rootRef}>
-      {/* === 표지 === */}
+      {/* === 표지 (skill §5.2: 타이틀-태그 중복 제거 / §5.3: [유료성]·[문서종류] 톤 통일) === */}
       <div data-pdf-page="cover">
         <PdfCover
           category="무료 · 예상 공사비 보고서"
-          title={`${quote.property.pyeong}평  ·  우리집\n예상 공사비`}
+          title={'우리집\n예상 공사비'}
           subtitle="실제 시장가 기반 224개 자재·60+ 공종 산출. 광고비·수수료·제휴 0건의 중립적인 인테리어 예산 도구가 우리집 사양을 분석해 만든 보고서입니다."
           meta={[
             `${quote.property.pyeong}평`,
@@ -126,6 +126,12 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
 // 페이지 컨테이너 — 가로 A4 (1060×720)
 // =====================================================
 
+/**
+ * PDF 본문 페이지 컨테이너 (A4 가로, 1060×720).
+ * - **고정 크기 + overflow: hidden**: 콘텐츠가 페이지 박스를 넘지 못하도록 클립.
+ *   apt-planner-pdf skill §0, §2.2 — "1 React 컴포넌트 = 1 PDF 페이지" 원칙.
+ *   콘텐츠가 길어질 가능성이 있으면 호출부에서 chunk로 분할 (skill §4).
+ */
 export function BodyPage({
   children, docNo, date, pageLabel,
 }: {
@@ -139,7 +145,8 @@ export function BodyPage({
       data-pdf-page=""
       style={{
         width: '1060px',
-        minHeight: '720px',
+        height: '720px',
+        overflow: 'hidden',
         padding: '36px 56px',
         background: '#ffffff',
         color: '#1f2937',

@@ -71,17 +71,16 @@ export const WORK_BUNDLES: WorkBundle[] = [
     ],
   },
   {
-    id: 'molding_baseboard',
-    label: '몰딩·걸레받이',
-    desc: '천장 몰딩 + 벽-바닥 걸레받이 (고급 = 무몰딩/무걸레받이 시공)',
-    // 고급 등급 시 무몰딩·무걸레받이 변환을 위한 부속 work_type 포함
+    id: 'carpentry',
+    label: '목공사',
+    desc: '기본·천정 목공 + 가벽 + 몰딩·걸레받이 (무몰딩/무문선/무걸레받이 옵션 포함)',
+    // 목공사 카테고리에 속하는 모든 work_type + 무X 처리용 자재
     workTypes: [
-      'molding',
-      'baseboard',
-      'molding_carpentry',
-      'molding_wallpaper',
-      'baseboard_carpentry',
-      'baseboard_wallpaper',
+      'molding', 'baseboard',
+      'carpentry_base', 'carpentry_ceiling', 'carpentry_partition',
+      'molding_carpentry', 'molding_wallpaper',
+      'baseboard_carpentry', 'baseboard_wallpaper',
+      'door_no_frame',
     ],
     displayOrder: 100,  // 주방 풀세트 다음에 노출되도록 후순위로 강제
   },

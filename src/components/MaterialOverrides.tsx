@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useMemo, useState } from 'react';
-import type { Grade, GradeSelection, Material, Quote } from '@/lib/types';
+import type { Grade, GradeSelection, Material, Quote, Scope } from '@/lib/types';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { fmtKRWShort } from '@/lib/calculator';
 import { WORK_BUNDLES, bundleForWorkType, type WorkBundle } from '@/lib/material-bundles';
@@ -10,6 +10,9 @@ type Props = {
   quote: Quote;
   value: GradeSelection;
   onChange: (next: GradeSelection) => void;
+  /** 목공사 sub-work 토글에 필요 (carpentry bundle 전용) */
+  scope?: Scope;
+  onScopeChange?: (s: Scope) => void;
 };
 
 const GRADES: Grade[] = ['가성비', '표준', '고급'];
@@ -41,7 +44,7 @@ type DisplayItem =
   | { kind: 'single'; work: WorkInfo; label: string; firstIdx: number }
   | { kind: 'bundle'; bundle: WorkBundle; works: WorkInfo[]; sub: number; firstIdx: number };
 
-export function MaterialOverrides({ quote, value, onChange }: Props) {
+export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange }: Props) {
   const [showAll, setShowAll] = useState(false);
 
   // 1) 견적에 등장하는 work_type 집계 (등장 순서·총 qty 보존)
@@ -168,6 +171,8 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
               onSelectBundleGrade={(g) => setBundleGrade(item.bundle, g)}
               onSelectComponentGrade={(wt, g) => setGrade(wt, g)}
               onClearBundle={() => clearBundleOverride(item.bundle)}
+              scope={scope}
+              onScopeChange={onScopeChange}
             />
           )
         )}
@@ -241,6 +246,7 @@ function SingleCard({
 function BundleCard({
   bundle, works, totalSub, gradeSelection, effectiveGrade,
   onSelectBundleGrade, onSelectComponentGrade, onClearBundle,
+  scope, onScopeChange,
 }: {
   bundle: WorkBundle;
   works: WorkInfo[];
@@ -250,6 +256,8 @@ function BundleCard({
   onSelectBundleGrade: (g: Grade) => void;
   onSelectComponentGrade: (wt: string, g: Grade) => void;
   onClearBundle: () => void;
+  scope?: Scope;
+  onScopeChange?: (s: Scope) => void;
 }) {
   const [showComponents, setShowComponents] = useState(false);
 
@@ -412,25 +420,151 @@ function BundleCard({
         })}
       </div>
 
-      {/* 구성 자재 영역 (펼침 시) */}
+      {/* 구성 자재 영역 (펼침 시) — carpentry는 sub-work 토글, 그 외 bundle은 등급 토글 */}
       {showComponents && (
-        <div className="border-t-2 border-zinc-200 bg-zinc-50/40 px-3 py-3">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2">
-            구성 자재 — 항목별로 다른 등급 선택 가능
+        bundle.id === 'carpentry' && scope && onScopeChange ? (
+          <CarpentryScopePanel scope={scope} onScopeChange={onScopeChange} />
+        ) : (
+          <div className="border-t-2 border-zinc-200 bg-zinc-50/40 px-3 py-3">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2">
+              구성 자재 — 항목별로 다른 등급 선택 가능
+            </div>
+            <div className="space-y-1.5">
+              {works.map(w => (
+                <ComponentRow
+                  key={w.wt}
+                  work={w}
+                  effectiveGrade={effectiveGrade(w.wt)}
+                  onSelectGrade={(g) => onSelectComponentGrade(w.wt, g)}
+                />
+              ))}
+            </div>
           </div>
-          <div className="space-y-1.5">
-            {works.map(w => (
-              <ComponentRow
-                key={w.wt}
-                work={w}
-                effectiveGrade={effectiveGrade(w.wt)}
-                onSelectGrade={(g) => onSelectComponentGrade(w.wt, g)}
-              />
-            ))}
-          </div>
-        </div>
+        )
       )}
     </div>
+  );
+}
+
+// =====================================================
+// CarpentryScopePanel — 목공사 6 sub-work 토글 UI
+// =====================================================
+
+function CarpentryScopePanel({
+  scope, onScopeChange,
+}: {
+  scope: Scope;
+  onScopeChange: (s: Scope) => void;
+}) {
+  const g = scope.global;
+  const setBool = (k: keyof typeof g, v: boolean) =>
+    onScopeChange({ ...scope, global: { ...g, [k]: v } });
+  const setNum = (k: keyof typeof g, v: number) =>
+    onScopeChange({ ...scope, global: { ...g, [k]: v } });
+
+  return (
+    <div className="border-t-2 border-zinc-200 bg-zinc-50/40 px-3 py-3 space-y-2">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-1">
+        목공사 세부 공종 — 필요한 항목만 선택
+      </div>
+
+      <CarpentryToggle
+        on={g.carpentry_base}
+        onChange={(v) => setBool('carpentry_base', v)}
+        title="기본 목공사"
+        desc="문틀·문선·기본 보강. 올철거 리모델링 시 거의 필수"
+      />
+      <CarpentryToggle
+        on={g.carpentry_ceiling}
+        onChange={(v) => setBool('carpentry_ceiling', v)}
+        title="천정 공사"
+        desc="평천 ↔ 우물천정 변경, 매입조명 박스, 기타 천정 수정"
+      />
+
+      {/* 가벽 — 길이 입력 */}
+      <div className="rounded-md bg-white border border-zinc-200 px-3 py-2 flex items-center gap-3 flex-wrap">
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-semibold text-zinc-900">가벽 공사</div>
+          <div className="text-[10px] text-zinc-500 leading-tight mt-0.5">가벽 철거·신설 필요 시 길이(m) 입력</div>
+        </div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <input
+            type="number"
+            min={0}
+            max={50}
+            step={0.5}
+            value={g.partition_length}
+            onChange={(e) => setNum('partition_length', Math.max(0, Number(e.target.value) || 0))}
+            className="w-20 rounded-md border border-zinc-300 px-2 py-1 text-xs text-right focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          />
+          <span className="text-[11px] text-zinc-600">m</span>
+        </div>
+      </div>
+
+      <CarpentryToggle
+        on={g.no_molding}
+        onChange={(v) => setBool('no_molding', v)}
+        title="무몰딩"
+        desc="천장-벽 접점을 몰딩 대신 목공+도배로 마감 (추가 비용 발생)"
+        warning
+      />
+      <CarpentryToggle
+        on={g.no_door_frame}
+        onChange={(v) => setBool('no_door_frame', v)}
+        title="무문선"
+        desc="문 주변 문선 대신 매입 보강+도배로 마감 (문짝당 10만원)"
+        warning
+      />
+      <CarpentryToggle
+        on={g.no_baseboard}
+        onChange={(v) => setBool('no_baseboard', v)}
+        title="무걸레받이"
+        desc="벽-바닥 접점을 걸레받이 대신 목공+도배로 마감 (추가 비용 발생)"
+        warning
+      />
+    </div>
+  );
+}
+
+function CarpentryToggle({
+  on, onChange, title, desc, warning = false,
+}: {
+  on: boolean;
+  onChange: (v: boolean) => void;
+  title: string;
+  desc: string;
+  warning?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!on)}
+      aria-pressed={on}
+      className={`w-full flex items-center gap-3 rounded-md border px-3 py-2 text-left transition active:scale-[0.99] ${
+        on
+          ? (warning ? 'border-amber-400 bg-amber-50' : 'border-blue-400 bg-blue-50')
+          : 'border-zinc-200 bg-white hover:bg-zinc-50'
+      }`}
+    >
+      <span className={`flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded border-2 ${
+        on
+          ? (warning ? 'border-amber-500 bg-amber-500 text-white' : 'border-blue-600 bg-blue-600 text-white')
+          : 'border-zinc-300 bg-white'
+      }`}>
+        {on && (
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 6.5L4.5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className={`text-xs font-semibold ${on ? (warning ? 'text-amber-900' : 'text-blue-900') : 'text-zinc-900'}`}>
+          {title}
+          {warning && <span className="ml-1.5 text-[9px] text-amber-700 font-normal">옵션</span>}
+        </div>
+        <div className="text-[10px] text-zinc-600 leading-tight mt-0.5">{desc}</div>
+      </div>
+    </button>
   );
 }
 

@@ -89,6 +89,13 @@ export type GlobalScope = {
   thermostat: boolean;
   silicon: boolean;
   expansion_report: boolean;   // 구청 확장공사 신고
+  // ── 목공사 (carpentry) — 6가지 sub-work ──
+  carpentry_base: boolean;     // 기본 목공사 (문틀·문선·기본 보강)
+  carpentry_ceiling: boolean;  // 천정 목공 (평천↔우물천, 매입조명 박스 등)
+  partition_length: number;    // 가벽 신설·철거 길이 (m). 0이면 미발생
+  no_molding: boolean;         // 무몰딩 — molding 자재 대신 천장-벽 목공+도배 마감
+  no_door_frame: boolean;      // 무문선 — door 자재 대신 매입보강+마감도배
+  no_baseboard: boolean;       // 무걸레받이 — baseboard 자재 대신 벽-바닥 목공+도배 마감
 };
 
 export type Scope = {

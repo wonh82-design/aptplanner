@@ -28,11 +28,36 @@ function defaultFormat(orientation: Orientation): [number, number] {
   return orientation === 'l' ? [297, 210] : [210, 297];
 }
 
+/**
+ * 캡처 전 안전 대기 — 한글 폰트 fallback 방지 + 외부 이미지(QR/로고) 로딩 보장.
+ * apt-planner-pdf skill §3, §7.1 참조.
+ */
+async function preCapture(el: HTMLElement) {
+  // (1) 웹폰트가 로딩 완료될 때까지 대기 — Korean fallback 방지
+  if (typeof document !== 'undefined' && (document as Document).fonts) {
+    try { await (document as Document).fonts.ready; } catch { /* ignore */ }
+  }
+  // (2) 외부 이미지(QR data URL 포함) onload 대기
+  const imgs = Array.from(el.querySelectorAll('img'));
+  await Promise.all(imgs.map((img) =>
+    img.complete && img.naturalWidth > 0
+      ? Promise.resolve()
+      : new Promise<void>((res) => {
+          img.onload = () => res();
+          img.onerror = () => res();
+          // 무한 대기 방지 — 2초 timeout
+          setTimeout(() => res(), 2000);
+        })
+  ));
+}
+
 async function renderToCanvas(el: HTMLElement, scale: number) {
+  await preCapture(el);
   return html2canvas(el, {
     scale,
     useCORS: true,
-    backgroundColor: '#ffffff',
+    // backgroundColor: null — 컴포넌트의 배경색을 그대로 사용 (다크 표지 등)
+    backgroundColor: null,
     logging: false,
   });
 }

@@ -107,6 +107,13 @@ function fullRenovateGlobal(current: Scope): Scope['global'] {
     thermostat: true,
     silicon: true,
     expansion_report: needsExpansionReport(current),
+    // 목공사 — 올리모델링이므로 기본·천정 ON
+    carpentry_base: true,
+    carpentry_ceiling: true,
+    partition_length: 0,
+    no_molding: false,
+    no_door_frame: false,
+    no_baseboard: false,
   };
 }
 
@@ -166,6 +173,13 @@ export const PRESETS: Preset[] = [
           thermostat: false,
           silicon: true,            // 마감 디테일은 일반적으로 포함
           expansion_report: needsExpansionReport(current),
+          // 마감재만 = 목공사 최소화
+          carpentry_base: false,
+          carpentry_ceiling: false,
+          partition_length: 0,
+          no_molding: false,
+          no_door_frame: false,
+          no_baseboard: false,
         },
       };
     },

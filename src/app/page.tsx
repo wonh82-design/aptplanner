@@ -29,25 +29,72 @@ export default function Landing() {
           <p className="text-base sm:text-lg text-zinc-600 leading-relaxed max-w-2xl mx-auto mb-6">
             정확한 스펙 없이 받은 견적은 비교가 불가능하고,
             <strong className="text-zinc-900"> 시공 중 추가금 분쟁의 80%</strong>가 그 모호함에서 시작됩니다.
+            <br /><br />
             apt-planner로 우리집 사양을 먼저 확정하고, 같은 조건으로 여러 업체에서 비교 견적을 받으세요.
           </p>
 
-          <div className="inline-flex flex-wrap items-center gap-2 mb-8 text-xs">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-8 text-xs">
             <span className="px-2 py-1 rounded bg-emerald-50 text-emerald-800 font-semibold">가입 없이 무료</span>
             <span className="px-2 py-1 rounded bg-blue-50 text-blue-800 font-semibold">업체 수수료 0원</span>
             <span className="px-2 py-1 rounded bg-amber-50 text-amber-800 font-semibold">컨설팅 50% 할인</span>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+          {/* ===== Hero Primary CTA — 전환율 최적화 ===== */}
+          <div className="flex flex-col items-center gap-4">
             <Link
               href="/calc"
-              className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 hover:bg-black px-7 py-3.5 text-white font-semibold shadow-sm transition active:scale-[0.98]"
+              className="group relative inline-flex items-center justify-center gap-3
+                         rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-rose-500
+                         hover:from-orange-600 hover:via-orange-700 hover:to-rose-600
+                         px-7 sm:px-10 py-4 sm:py-5
+                         text-white font-bold text-base sm:text-lg
+                         shadow-[0_10px_30px_-8px_rgba(234,88,12,0.55)]
+                         hover:shadow-[0_14px_38px_-6px_rgba(234,88,12,0.65)]
+                         ring-4 ring-orange-500/10 hover:ring-orange-500/20
+                         transition-all duration-200 active:scale-[0.98]"
             >
-              무료로 예상 공사비 산정하기 →
+              <span className="absolute -top-2.5 right-3 sm:right-4 px-2 py-0.5 rounded-full bg-amber-300 text-amber-900 text-[10px] font-extrabold uppercase tracking-wider shadow-sm">
+                무료
+              </span>
+              우리집 예상 공사비 알아보기
+              <svg
+                width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                className="transition-transform duration-200 group-hover:translate-x-1"
+                aria-hidden
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
             </Link>
-            <span className="text-xs text-zinc-500">
-              가입 없이 바로 시작 · 결과 PDF 무료 다운로드
-            </span>
+
+            {/* 신뢰 신호 3종 — 위험 회피 메시지 */}
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] sm:text-xs text-zinc-600">
+              <span className="inline-flex items-center gap-1">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600" aria-hidden>
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                1분이면 결과
+              </span>
+              <span className="text-zinc-300">·</span>
+              <span className="inline-flex items-center gap-1">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600" aria-hidden>
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                가입·결제 없음
+              </span>
+              <span className="text-zinc-300">·</span>
+              <span className="inline-flex items-center gap-1">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600" aria-hidden>
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                결과 PDF 무료
+              </span>
+            </div>
+
+            <p className="text-[11px] text-zinc-500 max-w-md leading-relaxed">
+              마음에 안 들면 그냥 닫으면 됩니다. 이메일·전화번호 받지 않아요.
+            </p>
           </div>
 
           {/* Hero stats — 혜택 중심 */}
@@ -74,6 +121,7 @@ export default function Landing() {
               이는 곧 그 비용이 견적에 반영된다는 뜻이고, &ldquo;공정한 비교&rdquo;라는 본래 취지가 흔들립니다.
               <br /><br />
               apt-planner는 어떤 인테리어 업체와도 거래·제휴 관계가 없습니다.
+              <br />
               오직 소비자가 정확한 정보로 무장할 수 있도록 돕습니다.
             </p>
           </div>
@@ -171,26 +219,53 @@ export default function Landing() {
 
           <ServicesPricing pyeong={30} recommended="spec" />
 
-          <div className="text-center mt-10">
+          <div className="text-center mt-10 flex flex-col items-center gap-3">
             <Link
               href="/calc"
-              className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 hover:bg-black px-7 py-3.5 text-white font-semibold shadow-md transition active:scale-[0.98]"
+              className="group relative inline-flex items-center justify-center gap-3
+                         rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-rose-500
+                         hover:from-orange-600 hover:via-orange-700 hover:to-rose-600
+                         px-8 py-4 text-white font-bold text-base
+                         shadow-[0_10px_30px_-8px_rgba(234,88,12,0.55)]
+                         hover:shadow-[0_14px_38px_-6px_rgba(234,88,12,0.65)]
+                         ring-4 ring-orange-500/10 hover:ring-orange-500/20
+                         transition-all duration-200 active:scale-[0.98]"
             >
-              먼저 무료 산정부터 시작하기 →
+              먼저 무료 예상 공사비부터 알아보기
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-1" aria-hidden>
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
             </Link>
-            <p className="text-xs text-zinc-500 mt-3">가입 없이 1분 안에 결과를 받아보세요 · 30평 기준 절감액 예시</p>
+            <p className="text-xs text-zinc-500">
+              <strong className="text-zinc-700">가입·결제 없음</strong> · 1분이면 결과 · 30평 기준 절감액 예시
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ===== Mobile Sticky CTA ===== */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-zinc-200 px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+      {/* ===== Mobile Sticky CTA — 전환율 최적화 ===== */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-zinc-200 px-3 py-2.5 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
         <Link
           href="/calc"
-          className="flex items-center justify-center gap-2 rounded-lg bg-zinc-900 hover:bg-black px-4 py-3 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98] w-full"
+          className="group relative flex items-center justify-center gap-2
+                     rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-rose-500
+                     active:from-orange-600 active:via-orange-700 active:to-rose-600
+                     px-4 py-3.5 text-white font-bold text-sm
+                     shadow-[0_8px_22px_-6px_rgba(234,88,12,0.55)]
+                     ring-2 ring-orange-500/15
+                     transition-all active:scale-[0.98] w-full"
         >
-          무료로 예상 공사비 산정하기 →
+          <span className="absolute -top-2 left-3 px-1.5 py-0.5 rounded-full bg-amber-300 text-amber-900 text-[9px] font-extrabold uppercase tracking-wider shadow-sm">
+            무료
+          </span>
+          우리집 예상 공사비 알아보기
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
         </Link>
+        <p className="text-center text-[10px] text-zinc-500 mt-1">1분이면 결과 · 가입·결제 없음</p>
       </div>
 
       {/* ===== Footer ===== */}

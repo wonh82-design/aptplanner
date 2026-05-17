@@ -163,11 +163,12 @@ export const BIG_WORK_GROUPS: BigWorkGroup[] = [
     globalKeys: ['middoor', 'entry_furniture'],
   },
   {
-    id: 'molding_baseboard',
-    title: '몰딩·걸레받이',
-    icon: '📏',
-    desc: '천장-벽 몰딩 + 벽-바닥 걸레받이 (고급 = 무몰딩·무걸레받이)',
-    roomKeys: ['molding'],
+    id: 'carpentry',
+    title: '목공사',
+    icon: '🪚',
+    desc: '기본·천정 목공 + 가벽 + 무몰딩/무문선/무걸레받이 (선택)',
+    globalKeys: ['carpentry_base', 'carpentry_ceiling', 'no_molding', 'no_door_frame', 'no_baseboard'],
+    // partition_length(가벽 길이)는 ScopeMatrix.tsx의 활성 판정 로직에 별도 추가
   },
 ];
 

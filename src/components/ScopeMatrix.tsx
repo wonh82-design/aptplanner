@@ -34,6 +34,12 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
   const isGroupActive = (group: BigWorkGroup): boolean => {
     // 확장공사: 신규 확장 시공 방이 있을 때만 활성 (expansion_report는 derived field로 무시)
     if (group.id === 'expansion') return hasNewExpansion();
+    // 목공사: globalKeys 중 하나라도 ON 또는 partition_length > 0이면 활성
+    if (group.id === 'carpentry') {
+      if (value.global.partition_length > 0) return true;
+      if (group.globalKeys?.some(k => value.global[k])) return true;
+      return false;
+    }
 
     if (group.globalKeys?.some(k => value.global[k])) return true;
     if (group.roomKeys?.some(k => visibleRooms.some(r => Boolean(value.rooms[r]?.[k])))) return true;
@@ -49,6 +55,13 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
         on: (planned ? 1 : 0) + (value.global.expansion_report ? 1 : 0),
         total: 2,
       };
+    }
+    // 목공사: 5 boolean + 1 partition_length = 총 6
+    if (group.id === 'carpentry') {
+      const boolKeys = (group.globalKeys ?? []).length;
+      const boolOn = (group.globalKeys ?? []).filter(k => value.global[k]).length;
+      const partitionOn = value.global.partition_length > 0 ? 1 : 0;
+      return { on: boolOn + partitionOn, total: boolKeys + 1 };
     }
     let on = 0;
     let total = 0;
@@ -86,8 +99,32 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
       return;
     }
 
+    // 목공사 — 카드 클릭 시: ON이면 기본 목공+천정만 ON (무몰딩/문선/걸레는 사용자가 별도 선택)
+    if (group.id === 'carpentry') {
+      if (turnOn) {
+        nextGlobal.carpentry_base = true;
+        nextGlobal.carpentry_ceiling = true;
+        // 무X 토글은 opt-in이므로 강제 ON 하지 않음 (기존 값 유지)
+      } else {
+        nextGlobal.carpentry_base = false;
+        nextGlobal.carpentry_ceiling = false;
+        nextGlobal.no_molding = false;
+        nextGlobal.no_door_frame = false;
+        nextGlobal.no_baseboard = false;
+        nextGlobal.partition_length = 0;
+      }
+      onChange({ ...value, rooms: nextRooms, global: nextGlobal });
+      return;
+    }
+
     if (group.globalKeys) {
-      for (const k of group.globalKeys) nextGlobal[k] = turnOn;
+      for (const k of group.globalKeys) {
+        // boolean 키만 토글 (carpentry 그룹은 위에서 처리)
+        const v = nextGlobal[k];
+        if (typeof v === 'boolean') {
+          (nextGlobal as Record<string, unknown>)[k] = turnOn;
+        }
+      }
     }
     if (group.roomKeys) {
       for (const k of group.roomKeys) {

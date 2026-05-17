@@ -85,6 +85,15 @@ export function defaultScope(): Scope {
       silicon: true,
       // 기본 default = '이미 확장된 상태'이므로 신규 확장 시공 0건 → 신고 불필요
       expansion_report: false,
+      // ── 목공사 6 sub-work ──
+      // 기본 목공·천정 목공은 올리모델링의 통상 포함 항목 → 기본 ON
+      carpentry_base: true,
+      carpentry_ceiling: true,
+      partition_length: 0,     // 가벽은 사용자가 직접 입력 시 발생
+      // 무몰딩·무문선·무걸레받이는 opt-in (사용자가 명시 선택 시)
+      no_molding: false,
+      no_door_frame: false,
+      no_baseboard: false,
     },
   };
 }

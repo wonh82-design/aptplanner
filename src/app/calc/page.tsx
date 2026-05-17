@@ -181,7 +181,13 @@ export default function CalcPage() {
                 <LivePricePreview quote={quote} step={3} />
               </div>
               <GradeSelector value={grade} onChange={setGrade} />
-              <MaterialOverrides quote={quote} value={grade} onChange={setGrade} />
+              <MaterialOverrides
+                quote={quote}
+                value={grade}
+                onChange={setGrade}
+                scope={scope}
+                onScopeChange={setScope}
+              />
 
               <div className="lg:hidden">
                 <StepNav

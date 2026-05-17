@@ -19,8 +19,8 @@ export function TipsPdfTemplate({ rootRef }: Props) {
       {/* 표지 */}
       <div data-pdf-page="cover">
         <PdfCover
-          category="인테리어 실전 가이드 · Premium"
-          title="인테리어\n실전 가이드"
+          category="유료 · 인테리어 실전 가이드"
+          title={'인테리어\n실전 가이드'}
           subtitle="현장 15년 · 건축사 · 건축시공기술사의 경험으로 정리한 공간별·공종별 핵심 팁. 인테리어 처음 하는 분들이 가장 자주 놓치는 부분만 모았습니다."
           meta={['공종별 8종', '공간별 7종', '업체 선택', '계약 체크리스트']}
           issuedAt={date.toISOString()}
