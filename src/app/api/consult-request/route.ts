@@ -67,16 +67,19 @@ export async function POST(req: Request) {
 
   // 3) Resend 이메일 전송 (선택)
   if (process.env.RESEND_API_KEY && process.env.CONSULT_NOTIFY_TO) {
+    const from = process.env.CONSULT_NOTIFY_FROM || 'apt-planner <onboarding@resend.dev>';
+    const to = process.env.CONSULT_NOTIFY_TO;
+    console.log('[apt-planner] consult resend attempt', { from, to, hasKey: !!process.env.RESEND_API_KEY });
     try {
-      await fetch('https://api.resend.com/emails', {
+      const resendRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: process.env.CONSULT_NOTIFY_FROM || 'apt-planner <noreply@aptplanner.kr>',
-          to: process.env.CONSULT_NOTIFY_TO,
+          from,
+          to,
           subject: `[apt-planner] 컨설팅 신청 — ${name} · ${plannedMonth}`,
           text:
 `새 컨설팅 신청이 접수되었습니다.
@@ -92,9 +95,20 @@ Referer: ${record.referer ?? '-'}
 `,
         }),
       });
+      const responseText = await resendRes.text();
+      if (!resendRes.ok) {
+        console.error('[apt-planner] consult resend non-ok response', resendRes.status, responseText);
+      } else {
+        console.log('[apt-planner] consult resend OK', resendRes.status, responseText.slice(0, 200));
+      }
     } catch (e) {
-      console.error('[apt-planner] resend failed', e);
+      console.error('[apt-planner] consult resend failed (exception)', e);
     }
+  } else {
+    console.warn('[apt-planner] consult resend skipped — env missing', {
+      hasKey: !!process.env.RESEND_API_KEY,
+      hasTo: !!process.env.CONSULT_NOTIFY_TO,
+    });
   }
 
   return NextResponse.json({ ok: true });
