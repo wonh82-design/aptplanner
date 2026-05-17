@@ -23,7 +23,7 @@ import type {
 import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
-  bayWidthForRoom, balconyAreaForRoom, doorCount,
+  bayWidthForRoom, balconyAreaForRoom, doorCount, downlightCount,
 } from './areas';
 import { getPrimaryMaterial, getMaterialById, labelOf } from './materials';
 
@@ -304,11 +304,18 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     push(lineItem('', '전체', 'ceiling_fan', fanRooms.length, grade));
   }
 
-  // ===== 8. 조명 (단순화: 1세트) =====
+  // ===== 8. 조명 풀세트 — 5종 emit =====
+  // 다운라이트는 평형 기반 수량, 간접·매그네틱은 위치별 1세트, 욕실 간접은 활성 욕실 수.
+  // 가성비 등급에서 간접·매그네틱 자재가는 0원이라 총합은 다운라이트가 결정 (의도).
   if (scope.global.lighting) {
-    push(lineItem('', '전체', 'lighting_downlight', 1, grade));
-    push(lineItem('', '거실', 'lighting_indirect_living', 1, grade));
-    push(lineItem('', '주방', 'lighting_magnetic_kitchen', 1, grade));
+    push(lineItem('', '전체', 'lighting_downlight', downlightCount(p.pyeong), grade));
+    push(lineItem('', '거실', 'lighting_indirect_living', 1, grade, 'per_set'));
+    push(lineItem('', '거실', 'lighting_magnetic_living', 1, grade, 'per_set'));
+    push(lineItem('', '주방', 'lighting_magnetic_kitchen', 1, grade, 'per_set'));
+    const bathCount = activeBathrooms(p).length;
+    if (bathCount > 0) {
+      push(lineItem('', '욕실', 'lighting_indirect_bath', bathCount, grade));
+    }
   }
 
   // ===== 9. 발코니 (확장된 부분은 제외) =====

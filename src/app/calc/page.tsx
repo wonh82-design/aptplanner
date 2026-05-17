@@ -10,7 +10,6 @@ import { QuotePanel } from '@/components/QuotePanel';
 import { StepIndicator } from '@/components/StepIndicator';
 import { ServicesPricing } from '@/components/ServicesPricing';
 import { LivePricePreview } from '@/components/LivePricePreview';
-import { Testimonials } from '@/components/Testimonials';
 import { WizardSidebar } from '@/components/WizardSidebar';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ConsultRequestModal } from '@/components/ConsultRequestModal';
@@ -225,9 +224,6 @@ export default function CalcPage() {
 
             {/* 신뢰 nudge — 누가 만들었나 */}
             <TrustNudge />
-
-            {/* 소셜 프루프 — 실제 사용자 사례 */}
-            <Testimonials />
 
             {/* 마무리 nudge */}
             <FinalNudge />

@@ -103,6 +103,12 @@ export function switchOutletCount(pyeong: number): number {
   return Math.round(interp(table as never, pyeong));
 }
 
+/** 평형별 다운라이트 권장 개수 — 10평 4ea / 24평 10ea / 30평 14ea / 60평 28ea */
+export function downlightCount(pyeong: number): number {
+  const table: Record<number, number> = { 10: 4, 30: 14, 60: 28 };
+  return Math.round(interp(table as never, pyeong));
+}
+
 /** 평형별 문짝 개수 권장 */
 export function doorCount(pyeong: number): number {
   if (pyeong < 27) return 5;
