@@ -406,15 +406,29 @@ const SPECIAL_WORK_TYPE_CATEGORY: Record<string, string> = {
 };
 
 /**
+ * 카테고리 표시 통합 매핑 — 결과 화면에서 비슷한 성격의 카테고리를 하나로 합침.
+ * '몰딩'·'걸레받이'는 사용자 관점에서 모두 목공 마감의 일부 → '목공사'로 통합.
+ */
+const CATEGORY_DISPLAY_ALIAS: Record<string, string> = {
+  '몰딩': '목공사',
+  '걸레받이': '목공사',
+};
+
+/**
  * LineItem을 어떤 CATEGORY로 묶을지 결정.
  * 우선순위: Material.category (자재마스터 등록 시) → 특수 매핑 → 기존 work_type 라벨 → '기타'.
+ * 마지막에 CATEGORY_DISPLAY_ALIAS로 표시용 카테고리 통합.
  */
 function categoryOf(it: LineItem): string {
+  let cat: string;
   if (it.material_id) {
     const mat = getMaterialById(it.material_id);
-    if (mat?.category) return mat.category;
+    if (mat?.category) cat = mat.category;
+    else cat = SPECIAL_WORK_TYPE_CATEGORY[it.work_type] || it.category || '기타';
+  } else {
+    cat = SPECIAL_WORK_TYPE_CATEGORY[it.work_type] || it.category || '기타';
   }
-  return SPECIAL_WORK_TYPE_CATEGORY[it.work_type] || it.category || '기타';
+  return CATEGORY_DISPLAY_ALIAS[cat] ?? cat;
 }
 
 /** 합계 집계 + 지역/연식 보정 + 10만원 단위 반올림 */

@@ -10,11 +10,11 @@ import { QuotePanel } from '@/components/QuotePanel';
 import { StepIndicator } from '@/components/StepIndicator';
 import { ServicesPricing } from '@/components/ServicesPricing';
 import { LivePricePreview } from '@/components/LivePricePreview';
-import { MobileConversionBar } from '@/components/MobileConversionBar';
 import { Testimonials } from '@/components/Testimonials';
 import { WizardSidebar } from '@/components/WizardSidebar';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ConsultRequestModal } from '@/components/ConsultRequestModal';
+import { SpecBookRequestModal } from '@/components/SpecBookRequestModal';
 import { QuotePdfTemplate } from '@/components/pdf/QuotePdfTemplate';
 import { PlanPdfTemplate } from '@/components/pdf/PlanPdfTemplate';
 import { TipsPdfTemplate } from '@/components/pdf/TipsPdfTemplate';
@@ -244,30 +244,25 @@ export default function CalcPage() {
         )}
       </main>
 
-      {/* 모바일 하단 전환 바 — Step 4 결과 화면에서만 노출 */}
-      {step === 4 && (
-        <MobileConversionBar
-          onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
-          onApplySpec={() => setPremiumOpen(true)}
-          downloading={downloading === 'quote'}
-        />
-      )}
-
-      <footer className="border-t border-zinc-200 bg-white mt-12 pb-16 sm:pb-0">
+      <footer className="border-t border-zinc-200 bg-white mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-[11px] sm:text-xs text-zinc-500 flex flex-col sm:flex-row gap-1 sm:justify-between leading-relaxed">
           <span>※ 본 견적은 표준 자재가 기준의 예상치이며, 실제 시공·견적은 업체 협의가 필요합니다.</span>
           <span>업체 수수료·제휴 0건</span>
         </div>
       </footer>
 
-      {/* 유료 신청 모달 (스펙북) */}
+      {/* 스펙북 신청 모달 — 이름·이메일 입력 → 입금 안내 */}
       {premiumOpen && (
-        <PremiumModal
+        <SpecBookRequestModal
           onClose={() => setPremiumOpen(false)}
-          onDownloadPlan={() => downloadPdf('plan', planRootRef, `apt-planner_인테리어계획서_${property.pyeong}평_${quote.quote_id}.pdf`)}
-          onDownloadTips={() => downloadPdf('tips', tipsRootRef, `apt-planner_인테리어실전가이드.pdf`)}
-          downloadingPlan={downloading === 'plan'}
-          downloadingTips={downloading === 'tips'}
+          meta={{
+            pyeong: property.pyeong,
+            bay: property.bay,
+            rooms: property.rooms,
+            grade: grade.default,
+            grand_total: quote.totals.grand_total,
+            quote_id: quote.quote_id,
+          }}
         />
       )}
 
@@ -340,7 +335,7 @@ function ResultBanner({
       <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
         <Stat label="부가세 포함" value={fmtKRWShort(totals.grand_total_with_vat)} />
         <Stat label="평당" value={`${fmtKRWShort(totals.per_pyeong)}/평`} />
-        <Stat label="라인 항목" value={`${quote.line_items.length}건`} />
+        <Stat label="세부 공종 및 자재 항목 수" value={`${quote.line_items.length}건`} />
       </div>
     </div>
   );
@@ -393,117 +388,3 @@ function FinalNudge() {
 }
 
 
-function PremiumModal({
-  onClose, onDownloadPlan, onDownloadTips, downloadingPlan, downloadingTips,
-}: {
-  onClose: () => void;
-  onDownloadPlan: () => void;
-  onDownloadTips: () => void;
-  downloadingPlan: boolean;
-  downloadingTips: boolean;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-6 sm:p-8">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-widest text-blue-700 mb-2">
-                유료 패키지 · 데모 버전
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
-                인테리어 계획서 + 실전 가이드 패키지
-              </h2>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-zinc-400 hover:text-zinc-900 text-2xl leading-none"
-              aria-label="닫기"
-            >
-              ×
-            </button>
-          </div>
-
-          <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 mb-6 text-xs text-amber-900">
-            <strong>현재 데모 버전</strong> — 결제 연동 전이라 두 PDF 모두 무료로 다운로드 가능합니다.
-            실서비스 출시 시 결제 후 다운로드되도록 변경됩니다.
-          </div>
-
-          <div className="space-y-4 mb-6">
-            <PackageItem
-              title="우리집 인테리어 계획서 PDF"
-              desc="선택하신 자재·수량 그대로의 상세 계획서. 인테리어 업체에 그대로 전달하면 같은 조건으로 비교 견적을 받을 수 있습니다."
-              bullets={[
-                '공간별 자재 사양·수량 표 (시공자 단가 기재용 빈칸 포함)',
-                '견적 회신 시 업체 답변 체크리스트',
-                '추가금 발생 가능 항목 사전 안내',
-              ]}
-              onDownload={onDownloadPlan}
-              downloading={downloadingPlan}
-            />
-            <PackageItem
-              title="인테리어 실전 가이드 PDF"
-              desc="인테리어 처음하는 분들이 가장 궁금해하는 핵심을 정리한 가이드입니다."
-              bullets={[
-                '인테리어 잘하는 법 — 5가지 원칙',
-                '좋은 업체 vs 위험한 업체 구분법',
-                '견적 요청·비교·협상의 정석',
-                '계약 직전 마지막 체크리스트',
-              ]}
-              onDownload={onDownloadTips}
-              downloading={downloadingTips}
-            />
-          </div>
-
-          <div className="text-[11px] text-zinc-500 leading-relaxed border-t border-zinc-200 pt-4">
-            <strong>중립성 약속</strong> · 본 패키지는 어떤 인테리어 업체와도 무관하게 제작된 소비자용 자료입니다.
-            특정 업체를 추천·노출하지 않으며, 광고비·제휴비를 받지 않습니다.
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PackageItem({
-  title, desc, bullets, onDownload, downloading,
-}: {
-  title: string;
-  desc: string;
-  bullets: string[];
-  onDownload: () => void;
-  downloading: boolean;
-}) {
-  return (
-    <div className="rounded-xl border border-zinc-200 p-4">
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-1.5 self-stretch rounded-full bg-blue-500" />
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-zinc-900 mb-1">{title}</h3>
-          <p className="text-xs text-zinc-600 leading-relaxed mb-2">{desc}</p>
-          <ul className="space-y-0.5 text-xs text-zinc-700 mb-3">
-            {bullets.map((s, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="text-blue-600 flex-shrink-0">✓</span>
-                <span>{s}</span>
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={onDownload}
-            disabled={downloading}
-            className="btn-primary text-xs"
-          >
-            {downloading ? '생성 중...' : '다운로드'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

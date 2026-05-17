@@ -244,32 +244,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== Mobile Sticky CTA — 전환율 최적화 ===== */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-zinc-200 px-3 py-2.5 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
-        <Link
-          href="/calc"
-          className="group relative flex items-center justify-center gap-2
-                     rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-rose-500
-                     active:from-orange-600 active:via-orange-700 active:to-rose-600
-                     px-4 py-3.5 text-white font-bold text-sm
-                     shadow-[0_8px_22px_-6px_rgba(234,88,12,0.55)]
-                     ring-2 ring-orange-500/15
-                     transition-all active:scale-[0.98] w-full"
-        >
-          <span className="absolute -top-2 left-3 px-1.5 py-0.5 rounded-full bg-amber-300 text-amber-900 text-[9px] font-extrabold uppercase tracking-wider shadow-sm">
-            무료
-          </span>
-          우리집 예상 공사비 알아보기
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </svg>
-        </Link>
-        <p className="text-center text-[10px] text-zinc-500 mt-1">1분이면 결과 · 가입·결제 없음</p>
-      </div>
-
       {/* ===== Footer ===== */}
-      <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300 pb-20 sm:pb-0">
+      <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
           <div className="flex flex-col sm:flex-row items-start gap-8">
             <div className="flex-1">

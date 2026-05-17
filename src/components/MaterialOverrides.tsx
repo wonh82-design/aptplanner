@@ -140,7 +140,7 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
   return (
     <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">
       <div className="flex items-baseline justify-between mb-3 gap-2">
-        <h2 className="text-base font-semibold">4. 자재 세부 조정</h2>
+        <h2 className="text-base font-semibold">4. 공사범위 및 자재 세부 선택</h2>
         <span className="text-[11px] text-zinc-500 flex-shrink-0">{displayItems.length}개 항목</span>
       </div>
       <p className="text-xs text-zinc-500 mb-4">
@@ -237,6 +237,27 @@ function SingleCard({
       </div>
     </div>
   );
+}
+
+// =====================================================
+// 번들 내부의 모든 work_type에 대해 해당 등급의 주력 자재 description을 합쳐 반환.
+// installer_spec(시공자용 풀스펙)을 우선 사용하고, 없으면 brand+product_line으로 폴백.
+// 같은 라벨이 중복되면 제거(예: 욕실 풀세트의 동일 브랜드 묶음).
+// =====================================================
+function bundleMaterialSummary(works: WorkInfo[], grade: Grade): string {
+  const seen = new Set<string>();
+  const parts: string[] = [];
+  for (const w of works) {
+    const mat = getPrimaryMaterial(w.wt, grade);
+    if (!mat) continue;
+    const label =
+      mat.installer_spec?.trim() ||
+      [mat.brand, mat.product_line].filter(Boolean).join(' ').trim();
+    if (!label || seen.has(label)) continue;
+    seen.add(label);
+    parts.push(label);
+  }
+  return parts.join(' + ');
 }
 
 // =====================================================
@@ -405,8 +426,9 @@ function BundleCard({
                 <div className="text-[10px] text-zinc-500 leading-tight hidden sm:block">{meta.label}</div>
               </div>
               <div className="flex-1 min-w-0 hidden sm:block">
-                <div className="text-[11px] text-zinc-500 truncate">
-                  {works.length}개 자재 일괄 적용 — {bundle.label}
+                {/* 등급별 주력 자재 리스트 — installer_spec 우선, brand·product fallback */}
+                <div className="text-[11px] text-zinc-500 truncate" title={bundleMaterialSummary(works, g)}>
+                  {bundleMaterialSummary(works, g) || `${works.length}개 자재 일괄 적용`}
                 </div>
               </div>
               <div className="flex-shrink-0 text-right ml-auto">

@@ -98,6 +98,35 @@ export const WORK_BUNDLES: WorkBundle[] = [
     workTypes: ['plumbing_base', 'thermostat', 'plumbing_heating', 'plumbing_relocation', 'distribution_panel'],
     displayOrder: 120,
   },
+  {
+    id: 'balcony',
+    label: '발코니 마감',
+    desc: '발코니 외벽 도장 + 발코니 바닥타일 (확장 안 한 발코니)',
+    workTypes: ['balcony_paint', 'balcony_floor_tile'],
+    displayOrder: 130,
+  },
+  // ─── 맨 아래로 이동 — 중문·붙박이장·실링팬 ───
+  {
+    id: 'middoor',
+    label: '중문',
+    desc: '현관-거실 슬라이딩 중문',
+    workTypes: ['middoor'],
+    displayOrder: 200,
+  },
+  {
+    id: 'closet',
+    label: '붙박이장',
+    desc: '안방·작은방 붙박이 옷장',
+    workTypes: ['closet'],
+    displayOrder: 210,
+  },
+  {
+    id: 'ceiling_fan',
+    label: '실링팬',
+    desc: '거실·안방 실링팬 (천장 선풍기)',
+    workTypes: ['ceiling_fan'],
+    displayOrder: 220,
+  },
 ];
 
 /** work_type → 속한 bundle (없으면 null) */
