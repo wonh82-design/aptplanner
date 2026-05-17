@@ -150,21 +150,18 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     }
   }
 
-  // ===== 2. 샷시 (공간별 베이폭 안분 + 확장분 추가) =====
+  // ===== 2. 샷시 — sash=Y 방의 외부창 분만 emit (베이폭 비율 안분) =====
+  // v5 엑셀 정합: 외부창 면적 × (sash=Y 방의 베이폭 합 / 활성 방 전체 베이폭 합).
+  // 확장 후 새 외부창은 외부창 면적 정의 자체에 포함되어 있으므로 별도 라인 emit 금지 (이중 계상 방지).
   const sashRooms = activeRooms(p).filter(r => scope.rooms[r as keyof Scope['rooms']]?.sash);
   if (sashRooms.length > 0) {
     const bayWidthSum = activeRooms(p).reduce((s, r) => s + bayWidthForRoom(r, p.pyeong), 0);
     if (bayWidthSum > 0) {
-      // 기본 외부창을 베이폭 비율로 공간별 안분
       for (const r of sashRooms) {
         const w = bayWidthForRoom(r, p.pyeong);
         const qty = windowArea * (w / bayWidthSum);
         push(lineItem('', r, 'window', qty, grade, 'per_m2'));
       }
-    }
-    // 확장된 공간이 있으면 새 외부창(추가확장 면적) 라인 추가
-    if (totalExpansion > 0) {
-      push(lineItem('', '전체', 'window', totalExpansion, grade, 'per_m2'));
     }
   }
 
@@ -177,7 +174,14 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
 
     if (rs.flooring) push(lineItem('', roomId, 'flooring', area, grade, 'per_m2'));
     if (rs.wallpaper) push(lineItem('', roomId, 'wallpaper', area * WALL_RATIO, grade, 'per_m2'));
-    if (rs.molding) push(lineItem('', roomId, 'molding', perim, grade, 'per_m'));
+    if (rs.molding) {
+      push(lineItem('', roomId, 'molding', perim, grade, 'per_m'));
+      // 고급 등급 = 무몰딩 시공: 몰딩 자재가는 0원이지만 천장 목공사·도배 추가비용이 발생
+      if (effectiveGrade('molding', grade) === '고급') {
+        push(lineItem('', roomId, 'molding_carpentry', area, grade, 'per_m2'));
+        push(lineItem('', roomId, 'molding_wallpaper', area, grade, 'per_m2'));
+      }
+    }
   }
 
   // ===== 4. 걸레받이 (전체) =====
@@ -185,7 +189,33 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   const wallpaperRooms = activeRooms(p).filter(r => scope.rooms[r as keyof Scope['rooms']]?.wallpaper);
   if (wallpaperRooms.length > 0) {
     const totalPerim = wallpaperRooms.reduce((s, r) => s + roomPerimeterForId(r, p.pyeong), 0);
-    push(lineItem('', '전체', 'baseboard', totalPerim * BASEBOARD_HEIGHT, grade, 'per_m2'));
+    const baseboardArea = totalPerim * BASEBOARD_HEIGHT;
+    push(lineItem('', '전체', 'baseboard', baseboardArea, grade, 'per_m2'));
+    // 고급 등급 = 무걸레받이: 벽-바닥 접점 목공사·도배 추가비용
+    if (effectiveGrade('baseboard', grade) === '고급') {
+      push(lineItem('', '전체', 'baseboard_carpentry', baseboardArea, grade, 'per_m2'));
+      push(lineItem('', '전체', 'baseboard_wallpaper', baseboardArea, grade, 'per_m2'));
+    }
+  }
+
+  // ===== 4.5. 목공사 — 기본 목공 셋업 + 천장 평탄화 + 가벽 신설 =====
+  // 인테리어 시공 시 거의 필수적인 목공 공정. 카테고리는 모두 '목공사'.
+  if (scope.global.demolition) {
+    // 기본 목공 세팅 — 철거 후 문틀·문선·기본 보강 작업 (per_set, 약 100만원)
+    push(lineItem('', '전체', 'carpentry_base', 1, grade, 'per_set'));
+  }
+  if (scope.global.lighting) {
+    // 천장 평탄화 — 거실·주방 천장 매입조명·간접조명 시공을 위한 목공
+    const ceilingArea =
+      roomAreaForId('거실', p.pyeong, p.bay) +
+      roomAreaForId('주방', p.pyeong, p.bay);
+    if (ceilingArea > 0) {
+      push(lineItem('', '거실/주방', 'carpentry_ceiling', ceilingArea, grade, 'per_m2'));
+    }
+  }
+  // 가벽 신설 — 발코니 신규 확장 시 새 벽체·구조변경 필요. 확장 면적의 약 25%로 추정.
+  if (totalExpansion > 0) {
+    push(lineItem('', '전체', 'carpentry_partition', totalExpansion * 0.25, grade, 'per_m2'));
   }
 
   // ===== 5. 욕실 컴포넌트 (per 욕실) =====
@@ -298,10 +328,12 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
       });
     }
   }
-  // 터닝도어: 거실 확장후=Y AND 안방 확장후=N (안방은 미확장)
+  // 터닝도어: 거실을 신규로 확장 시공 AND 안방은 미확장 상태일 때만 emit.
+  // (이미 확장된 거실은 기존 도어가 있으므로 신규 도어비 미발생)
   const livingExpand = scope.rooms['거실']?.expansion_after;
+  const livingAlreadyExpanded = scope.rooms['거실']?.expansion_current;
   const masterNotExpand = !scope.rooms['안방']?.expansion_after;
-  if (livingExpand && masterNotExpand) {
+  if (livingExpand && !livingAlreadyExpanded && masterNotExpand) {
     push({
       id: '',
       room: '거실/안방경계',
@@ -320,6 +352,8 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   // ===== 10. 전기/설비 =====
   if (scope.global.electrical_base) {
     push(lineItem('', '전체', 'electrical_base', supArea, grade, 'per_m2'));
+  }
+  if (scope.global.plumbing_base) {
     push(lineItem('', '전체', 'plumbing_base', supArea, grade, 'per_m2'));
   }
   if (scope.global.switch_outlet) {

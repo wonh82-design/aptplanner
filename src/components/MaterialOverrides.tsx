@@ -84,7 +84,10 @@ export function MaterialOverrides({ quote, value, onChange }: Props) {
     const items: DisplayItem[] = [];
     for (const s of singles) items.push({ kind: 'single', work: s, label: labelOf(s.wt), firstIdx: s.firstIdx });
     for (const b of bundleBuckets.values()) items.push({ kind: 'bundle', bundle: b.bundle, works: b.works, sub: b.sub, firstIdx: b.firstIdx });
-    items.sort((a, b) => a.firstIdx - b.firstIdx);
+    // 정렬 키: bundle.displayOrder가 있으면 그 값, 없으면 firstIdx
+    const sortKey = (it: DisplayItem) =>
+      it.kind === 'bundle' && it.bundle.displayOrder !== undefined ? it.bundle.displayOrder : it.firstIdx;
+    items.sort((a, b) => sortKey(a) - sortKey(b));
     return items;
   }, [workInfoList]);
 

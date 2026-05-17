@@ -10,6 +10,11 @@ export type WorkBundle = {
   desc?: string;
   /** 세트에 포함되는 work_type 키 목록 */
   workTypes: string[];
+  /**
+   * 표시 순서. 작을수록 위. 미지정 시 line_items의 firstIdx로 자동 정렬.
+   * 명시한 번들끼리는 이 값으로 정렬되며, 미지정 번들/싱글보다 뒤로 갈 수도 앞으로 갈 수도 있다 (firstIdx 비교).
+   */
+  displayOrder?: number;
 };
 
 export const WORK_BUNDLES: WorkBundle[] = [
@@ -64,6 +69,35 @@ export const WORK_BUNDLES: WorkBundle[] = [
       'kitchen_hood',
       'kitchen_sink',
     ],
+  },
+  {
+    id: 'molding_baseboard',
+    label: '몰딩·걸레받이',
+    desc: '천장 몰딩 + 벽-바닥 걸레받이 (고급 = 무몰딩/무걸레받이 시공)',
+    // 고급 등급 시 무몰딩·무걸레받이 변환을 위한 부속 work_type 포함
+    workTypes: [
+      'molding',
+      'baseboard',
+      'molding_carpentry',
+      'molding_wallpaper',
+      'baseboard_carpentry',
+      'baseboard_wallpaper',
+    ],
+    displayOrder: 100,  // 주방 풀세트 다음에 노출되도록 후순위로 강제
+  },
+  {
+    id: 'electrical',
+    label: '전기 공사',
+    desc: '전기 기본 + 스위치/콘센트 + 인덕션 220V 전용선',
+    workTypes: ['electrical_base', 'electrical_switch', 'induction_line'],
+    displayOrder: 110,
+  },
+  {
+    id: 'plumbing',
+    label: '설비 공사',
+    desc: '설비 기본 + 난방 온도조절기 + 난방배관 교체',
+    workTypes: ['plumbing_base', 'thermostat', 'plumbing_heating', 'plumbing_relocation', 'distribution_panel'],
+    displayOrder: 120,
   },
 ];
 

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ServicesPricing } from '@/components/ServicesPricing';
+import { SiteHeader } from '@/components/SiteHeader';
 
 export const metadata = {
   title: 'apt-planner — 인테리어 업체에 휘둘리지 않는 첫걸음',
@@ -10,22 +11,7 @@ export const metadata = {
 export default function Landing() {
   return (
     <div className="flex-1 w-full bg-white">
-      {/* ===== Top bar ===== */}
-      <header className="border-b border-zinc-200 bg-white/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2 min-w-0">
-            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold flex-shrink-0">a</span>
-            <span className="font-bold tracking-tight truncate">apt-planner</span>
-          </Link>
-          <nav className="flex items-center gap-3 sm:gap-5 text-xs font-medium text-zinc-600 flex-shrink-0">
-            <Link href="/about" className="hover:text-zinc-900">소개</Link>
-            <Link href="/calc" className="hover:text-zinc-900">
-              <span className="hidden sm:inline">예산 산정 시작 →</span>
-              <span className="sm:hidden">시작 →</span>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* ===== Hero ===== */}
       <section className="relative overflow-hidden">
@@ -36,7 +22,7 @@ export default function Landing() {
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-zinc-900 leading-[1.15] mb-6">
-            한 끼 식사값으로 <br className="hidden sm:block" />
+            인테리어 사기당하지 않고 <br className="hidden sm:block" />
             <span className="text-orange-600">500~3,000만원</span> 아끼는 법
           </h1>
 
@@ -66,9 +52,9 @@ export default function Landing() {
 
           {/* Hero stats — 혜택 중심 */}
           <div className="mt-14 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
-            <Stat n="30초" l="결과까지 걸리는 시간" />
+            <Stat n="1분" l="결과까지 걸리는 시간" />
             <Stat n="₩0" l="가입·수수료" highlight />
-            <Stat n="±20%" l="시장가 정확도" />
+            <Stat n="±5%" l="시장가 정확도" />
           </div>
         </div>
       </section>
@@ -115,12 +101,6 @@ export default function Landing() {
             />
           </div>
 
-          <div className="mt-8 rounded-xl bg-white border border-zinc-200 p-5 text-sm text-zinc-700 leading-relaxed">
-            <strong className="text-zinc-900">우리의 약속</strong> · apt-planner는 어떤 인테리어 업체로부터도
-            광고비·수수료·제휴비를 받지 않습니다. 본 서비스의 유일한 수익원은 사용자가 직접 신청하는
-            <strong className="text-blue-700"> 유료 인테리어 계획서·가이드 패키지</strong>뿐입니다.
-            그래서 우리는 어떤 업체에도 유리하게 작용할 동기가 없습니다.
-          </div>
         </div>
       </section>
 
@@ -165,7 +145,7 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StepCard n="1" title="우리집 정보 입력" desc="평형·베이·욕실·발코니 등 기본 정보. 30초면 충분합니다." />
+            <StepCard n="1" title="우리집 정보 입력" desc="평형·베이·욕실·발코니 등 기본 정보. 1분이면 충분합니다." />
             <StepCard n="2" title="공사 범위·자재 등급" desc="공간별로 무엇을 시공할지, 자재는 어떤 등급으로 할지 직관적으로 선택." />
             <StepCard n="3" title="실시간 공사비 산출" desc="공종별·공간별 상세 견적. PDF로 다운받아 업체에 그대로 전달 가능." />
           </div>
@@ -198,7 +178,7 @@ export default function Landing() {
             >
               먼저 무료 산정부터 시작하기 →
             </Link>
-            <p className="text-xs text-zinc-500 mt-3">가입 없이 30초 안에 결과를 받아보세요 · 30평 기준 절감액 예시</p>
+            <p className="text-xs text-zinc-500 mt-3">가입 없이 1분 안에 결과를 받아보세요 · 30평 기준 절감액 예시</p>
           </div>
         </div>
       </section>

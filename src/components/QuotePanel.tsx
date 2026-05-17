@@ -3,10 +3,10 @@
 /**
  * 견적 상세 내역 — 결과 화면에서 ResultBanner 바로 아래 항상 펼쳐서 노출.
  * 두 가지 형태로 합계를 보여준다:
- *   1) 공종별 구분 내역 (by_work_type)
+ *   1) 공종별 구분 내역 (by_category)
  *   2) 공간별 구분 내역 (by_room)
- * 마지막으로 상세 라인 항목 테이블도 기본 펼침으로 노출.
  *
+ * 라인별 상세 사양·자재는 유료 인테리어 계획서 PDF에서만 제공한다 (free→paid 차별화).
  * 금액은 모두 부가세 별도(보정 적용 후 grand_total 기준).
  */
 
@@ -52,48 +52,10 @@ export function QuotePanel({ quote }: Props) {
         />
       </div>
 
-      {/* 상세 라인 항목 — 기본 펼침, 내부 스크롤 */}
-      <div className="mt-6 pt-5 border-t border-zinc-200">
-        <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-          <h4 className="text-sm font-semibold text-zinc-900">상세 라인 항목</h4>
-          <span className="text-[11px] text-zinc-500">{quote.line_items.length}건 · 가로 스크롤로 자재명까지 확인</span>
-        </div>
-        <div className="overflow-auto max-h-[480px] border border-zinc-200 rounded-lg">
-          <table className="w-full text-xs min-w-[640px]">
-            <thead className="text-zinc-500 bg-zinc-50 sticky top-0 z-10">
-              <tr>
-                <th className="text-left px-3 py-2 font-semibold">#</th>
-                <th className="text-left px-3 py-2 font-semibold">공간</th>
-                <th className="text-left px-3 py-2 font-semibold">공종</th>
-                <th className="text-left px-3 py-2 font-semibold">자재</th>
-                <th className="text-right px-3 py-2 font-semibold">수량</th>
-                <th className="text-right px-3 py-2 font-semibold">소계</th>
-              </tr>
-            </thead>
-            <tbody className="font-mono">
-              {quote.line_items.map(it => (
-                <tr key={it.id} className="border-t border-zinc-100 hover:bg-zinc-50/60">
-                  <td className="px-3 py-1.5 text-zinc-400">{it.id}</td>
-                  <td className="px-3 py-1.5 whitespace-nowrap">{it.room}</td>
-                  <td className="px-3 py-1.5 whitespace-nowrap text-zinc-700">{it.category}</td>
-                  <td className="px-3 py-1.5 max-w-[240px] truncate text-zinc-600" title={it.material_label}>
-                    {it.material_label}
-                  </td>
-                  <td className="px-3 py-1.5 text-right tabular-nums whitespace-nowrap">
-                    {it.qty} <span className="text-zinc-400">{unitShort(it.unit_type)}</span>
-                  </td>
-                  <td className="px-3 py-1.5 text-right tabular-nums whitespace-nowrap font-semibold text-zinc-800">
-                    {fmtKRWShort(it.subtotal)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 text-[11px] text-zinc-500">
-          ※ 위 합계는 자재가 + 시공·인건비 기준이며, 지역·연식 보정 후 10만원 단위로 반올림된 총공사비와 차이가 있을 수 있습니다.
-        </p>
-      </div>
+      <p className="mt-4 text-[11px] text-zinc-500 leading-relaxed">
+        ※ 위 합계는 자재가 + 시공·인건비 기준이며, 지역·연식 보정 후 10만원 단위로 반올림된 총공사비와 약간의 차이가 있을 수 있습니다.
+        라인별 상세 사양·자재는 유료 인테리어 계획서 PDF에서 확인할 수 있습니다.
+      </p>
     </section>
   );
 }
@@ -150,12 +112,3 @@ function BreakdownTable({
   );
 }
 
-function unitShort(u: string): string {
-  switch (u) {
-    case 'per_m2': return '㎡';
-    case 'per_m': return 'm';
-    case 'per_ea': return 'ea';
-    case 'per_set': return 'set';
-    default: return u;
-  }
-}

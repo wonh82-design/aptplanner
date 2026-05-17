@@ -1,30 +1,17 @@
 import Link from 'next/link';
+import { SiteHeader } from '@/components/SiteHeader';
 
 export const metadata = {
   title: '소개 — apt-planner | 만든 사람과 만든 이유',
   description:
-    '대형 건설사 15년+, 건축사·건축시공기술사. 수만세대 시공관리·CS 경험으로 만든 투명한 인테리어 예산 산정 시스템.',
+    '건축사·건축시공기술사 자격, 대형 시공사 15년+. 아파트 설계와 하이엔드 초고층 주거 시공관리 경험으로 만든 투명한 인테리어 예산 산정 시스템.',
 };
 
 export default function About() {
   return (
     <div className="flex-1 w-full bg-white">
       {/* ===== Top bar ===== */}
-      <header className="border-b border-zinc-200 bg-white/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2 min-w-0">
-            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold flex-shrink-0">a</span>
-            <span className="font-bold tracking-tight truncate">apt-planner</span>
-          </Link>
-          <nav className="flex gap-3 sm:gap-5 text-xs font-medium text-zinc-600 flex-shrink-0">
-            <Link href="/about" className="text-zinc-900">소개</Link>
-            <Link href="/calc" className="hover:text-zinc-900">
-              <span className="hidden sm:inline">예산 산정 시작 →</span>
-              <span className="sm:hidden">시작 →</span>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* ===== Intro hero ===== */}
       <section className="border-b border-zinc-100">
@@ -47,34 +34,59 @@ export default function About() {
       <section className="border-b border-zinc-100 bg-zinc-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            {/* 검은 박스 — 자격·경력 강조 */}
             <div className="md:col-span-1 max-w-xs mx-auto md:mx-0 w-full">
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 flex flex-col items-center justify-center text-white p-6">
-                <div className="text-3xl font-extrabold tracking-tight mb-3">15년</div>
-                <div className="text-[11px] uppercase tracking-widest opacity-70">건설사 시공·CS</div>
-                <div className="h-px w-8 bg-white/30 my-3" />
-                <div className="text-sm font-medium opacity-90 text-center leading-snug">
-                  건축사<br />건축시공기술사
+              <div className="aspect-square rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 flex flex-col items-center justify-center text-white p-6 text-center">
+                {/* 자격 2종 강조 */}
+                <div className="space-y-1.5">
+                  <div className="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">
+                    건축사
+                  </div>
+                  <div className="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">
+                    건축시공기술사
+                  </div>
                 </div>
-                <div className="text-[10px] uppercase tracking-widest opacity-60 mt-4">apt-planner · founder</div>
+
+                <div className="h-px w-10 bg-white/30 my-4" />
+
+                {/* 시공사 경력 강조 */}
+                <div className="text-[11px] uppercase tracking-widest opacity-70 mb-1">
+                  대형 시공사 경력
+                </div>
+                <div className="text-2xl font-extrabold tracking-tight">
+                  15<span className="text-base font-bold opacity-80">년+</span>
+                </div>
+                <div className="text-[10px] opacity-75 mt-1 leading-tight">
+                  아파트 설계 · 하이엔드<br />초고층 주거 시공관리
+                </div>
+
+                <div className="text-[10px] uppercase tracking-widest opacity-50 mt-4">apt-planner · founder</div>
               </div>
             </div>
+
+            {/* 우측 — 자격·경력 상세 */}
             <div className="md:col-span-2 space-y-5">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-widest text-blue-700 mb-1">전문가 프로필</div>
-                <h2 className="text-2xl font-bold text-zinc-900 mb-2">건설 현장 15년 · 자격 2종</h2>
+                <h2 className="text-2xl font-bold text-zinc-900 mb-2">
+                  국가공인 자격 2종 · 대형 시공사 15년+
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Cred title="대형 건설사 15년+" desc="시공관리·CS 책임자로 다수 단지 운영" />
+                <Cred title="건축사" desc="국가공인 건축 설계 자격 — 인허가·설계 도서 발급 가능" />
+                <Cred title="건축시공기술사" desc="시공 분야 최상위 국가기술자격 — 시공 전반 책임 감리" />
+                <Cred title="아파트 설계" desc="대형 단지 평면·인허가·설계 도서 작성 경험" />
+                <Cred title="하이엔드 초고층 주거 시공관리" desc="프리미엄 단지 시공관리 · 마감 품질 책임" />
                 <Cred title="수만세대 시공·CS" desc="입주민 하자 대응·보수 누적 경험" />
-                <Cred title="건축사" desc="국가공인 건축 설계 자격" />
-                <Cred title="건축시공기술사" desc="시공 분야 최상위 국가기술자격" />
+                <Cred title="대형 시공사 15년+" desc="시공관리·CS 책임자로 다수 단지 운영" />
               </div>
 
               <p className="text-sm text-zinc-600 leading-relaxed pt-2 border-t border-zinc-200">
-                인테리어 자재·시공법뿐 아니라
-                <strong className="text-zinc-900"> 아파트의 뼈대(구조·배관·전기·단열)까지 이해</strong>하고 있습니다.
-                현장에서 가장 자주 보던 게 어떤 자재가 어떻게 시공됐을 때 몇 년 안에 어떤 하자가 발생하는지였습니다.
+                설계 단계부터 인허가·시공·하자 보수까지
+                <strong className="text-zinc-900"> 아파트 라이프사이클 전체를 다뤘습니다.</strong>
+                특히 하이엔드 초고층 주거 시공관리에서는 자재 사양·마감 디테일이
+                10년 뒤 어떤 결과를 만드는지 누적 데이터를 가지고 있습니다.
                 그 데이터가 본 서비스의 자재 등급·공종 구성의 근거입니다.
               </p>
             </div>
@@ -135,6 +147,56 @@ export default function About() {
         </div>
       </section>
 
+      {/* ===== Mission — 서비스의 가장 큰 목적 ===== */}
+      <section className="border-b border-zinc-100 bg-gradient-to-br from-blue-50/40 via-white to-emerald-50/40">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+          <div className="text-xs font-semibold uppercase tracking-widest text-blue-700 mb-3 text-center">
+            서비스의 가장 큰 목적
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-6 text-center leading-tight">
+            정확한 공사범위 · 정직한 업체 · 정확한 견적
+          </h2>
+          <p className="text-zinc-700 leading-relaxed text-center max-w-2xl mx-auto mb-10 text-[15px]">
+            소비자가 <strong className="text-zinc-900">예산에 맞는 정확한 공사범위</strong>를 알고,
+            그 공사범위를 <strong className="text-zinc-900">정확히 이해하고 정직하게 견적하는 좋은 업체</strong>와
+            공사를 진행할 수 있게 돕는 것 — 그게 apt-planner의 단 하나의 목적입니다.
+          </p>
+
+          {/* 핵심 철학 인용 — 큰 quote 박스 */}
+          <figure className="relative rounded-2xl border-2 border-zinc-900 bg-white p-6 sm:p-8 shadow-sm">
+            <div className="absolute -top-4 left-6 sm:left-8">
+              <span className="inline-block px-3 py-1 bg-zinc-900 text-white text-[10px] font-bold uppercase tracking-widest rounded">
+                인테리어 잘하는 단 하나의 방법
+              </span>
+            </div>
+
+            <blockquote className="text-zinc-900 leading-relaxed">
+              <p className="text-base sm:text-lg font-bold mb-3">
+                사기당하지 않고, 추가 공사비 없이, 하자 없이 인테리어 하는 방법은 단 하나입니다.
+              </p>
+              <p className="text-[15px] sm:text-base text-zinc-700 leading-relaxed border-l-4 border-blue-600 pl-4 my-4 italic">
+                &ldquo;정직하고 실력있는 좋은 업체를 찾아서,
+                내가 원하는 바를 명확히 설명하고,
+                그것에 맞는 적당한 가격에 계약하는 것.&rdquo;
+              </p>
+              <p className="text-sm sm:text-[15px] text-zinc-700 leading-relaxed">
+                그리고 이를 위해 <strong className="text-blue-700">가장 먼저 해야 할 일</strong>이 바로 이 사이트에서
+                {' '}<strong>내가 원하는 공사범위를 정해보고, 예상 공사비를 보고,
+                내 예산에 맞게 공사범위와 자재 등급을 조정한 후에 이것을 계획서로 만드는 것</strong>입니다.
+              </p>
+            </blockquote>
+
+            {/* 4단계 요약 */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-6 pt-5 border-t border-zinc-200">
+              <MiniStep n="1" t="공사범위 정의" />
+              <MiniStep n="2" t="예상 공사비 확인" />
+              <MiniStep n="3" t="예산 맞춰 조정" />
+              <MiniStep n="4" t="계획서 PDF" />
+            </div>
+          </figure>
+        </div>
+      </section>
+
       {/* ===== Pillars ===== */}
       <section className="border-b border-zinc-100 bg-zinc-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
@@ -172,7 +234,7 @@ export default function About() {
             이제 직접 써보실 차례입니다
           </h2>
           <p className="text-zinc-600 mb-8 leading-relaxed">
-            30초면 우리집 예상 공사비를 알 수 있습니다. 결과를 PDF로 받아 여러 업체에 같은 조건으로 비교 견적을 요청해보세요.
+            1분이면 우리집 예상 공사비를 알 수 있습니다. 결과를 PDF로 받아 여러 업체에 같은 조건으로 비교 견적을 요청해보세요.
           </p>
           <Link
             href="/calc"
@@ -185,9 +247,20 @@ export default function About() {
       </section>
 
       <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 text-xs text-zinc-400 flex flex-col sm:flex-row justify-between gap-3">
-          <span>© apt-planner — All rights reserved</span>
-          <span>본 서비스는 어떤 인테리어 업체와도 제휴·수수료 관계가 없습니다.</span>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 text-xs text-zinc-400 space-y-3">
+          <div className="flex flex-col sm:flex-row justify-between gap-3">
+            <span>© apt-planner — All rights reserved</span>
+            <span>본 서비스는 어떤 인테리어 업체와도 제휴·수수료 관계가 없습니다.</span>
+          </div>
+          <div className="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+            <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">사용 문의</span>
+            <a
+              href="mailto:wonh82@gmail.com"
+              className="text-zinc-200 hover:text-white font-mono transition"
+            >
+              wonh82@gmail.com
+            </a>
+          </div>
         </div>
       </footer>
     </div>
@@ -230,6 +303,17 @@ function Pillar({ n, title, desc }: { n: string; title: string; desc: string }) 
       <div className="font-mono text-xs font-bold text-blue-600 mb-2">{n}</div>
       <h3 className="font-bold text-zinc-900 mb-2">{title}</h3>
       <p className="text-sm text-zinc-600 leading-relaxed">{desc}</p>
+    </div>
+  );
+}
+
+function MiniStep({ n, t }: { n: string; t: string }) {
+  return (
+    <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:text-center">
+      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] font-bold flex-shrink-0">
+        {n}
+      </span>
+      <span className="text-[11px] sm:text-xs font-semibold text-zinc-700 leading-tight">{t}</span>
     </div>
   );
 }

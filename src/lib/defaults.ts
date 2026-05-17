@@ -14,7 +14,14 @@ export function defaultProperty(): Property {
   };
 }
 
-/** 공사범위 시트의 매트릭스를 기본값으로 */
+/**
+ * 공사범위 시트의 매트릭스를 기본값으로.
+ *
+ * 발코니 확장 디폴트 정책 (일반적인 한국 아파트 기준):
+ *  - 안방 제외 모든 방: 이미 확장됨 (expansion_current=true, expansion_after=true)
+ *  - 안방: 발코니 그대로 (expansion_current=false, expansion_after=false)
+ *  → 결과적으로 "신규 확장 시공" 0개 → 확장공사 카드 비활성화 시작
+ */
 export function defaultRoomScope(roomId: RoomId): Scope['rooms'][RoomId] {
   const base = {
     expansion_current: false,
@@ -27,18 +34,22 @@ export function defaultRoomScope(roomId: RoomId): Scope['rooms'][RoomId] {
     ceiling_fan: false,
     sash: true,
   };
-  // v4 '우리집' 시트 기본값: 안방 외 모든 공간 '확장 후=Y'
+  // 안방 외 모든 공간 — '이미 확장됨' 상태 (current=true, after=true)
   switch (roomId) {
     case '거실':
-      return { ...base, expansion_after: true, aircon: true, ceiling_fan: true };
+      return { ...base, expansion_current: true, expansion_after: true, aircon: true, ceiling_fan: true };
     case '주방':
-      return { ...base, expansion_after: true };
+      return { ...base, expansion_current: true, expansion_after: true };
     case '안방':
-      return { ...base, expansion_after: false, aircon: true, closet: true, ceiling_fan: true };
+      // 안방만 발코니 유지 (확장 없음)
+      return { ...base, expansion_current: false, expansion_after: false, aircon: true, closet: true, ceiling_fan: true };
     case '작은방1':
-      return { ...base, expansion_after: true, aircon: true, closet: true };
+      return { ...base, expansion_current: true, expansion_after: true, aircon: true, closet: true };
     case '작은방2':
-      return { ...base, expansion_after: true, aircon: true, closet: true };
+      return { ...base, expansion_current: true, expansion_after: true, aircon: true, closet: true };
+    case '작은방3':
+      // 작은방2와 동일 (4룸 평면에서 작방3은 작방2와 유사한 용도)
+      return { ...base, expansion_current: true, expansion_after: true, aircon: true, closet: true };
     default:
       return base;
   }
@@ -52,6 +63,7 @@ export function defaultScope(): Scope {
       '안방': defaultRoomScope('안방'),
       '작은방1': defaultRoomScope('작은방1'),
       '작은방2': defaultRoomScope('작은방2'),
+      '작은방3': defaultRoomScope('작은방3'),
     },
     global: {
       demolition: true,
@@ -68,9 +80,11 @@ export function defaultScope(): Scope {
       electrical_base: true,
       switch_outlet: true,
       induction_line: true,
+      plumbing_base: true,
       thermostat: true,
       silicon: true,
-      expansion_report: true,
+      // 기본 default = '이미 확장된 상태'이므로 신규 확장 시공 0건 → 신고 불필요
+      expansion_report: false,
     },
   };
 }

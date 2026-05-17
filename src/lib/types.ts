@@ -9,7 +9,7 @@
 export type Grade = '가성비' | '표준' | '고급' | '단일등급';
 export type YesNo = 'Y' | 'N' | '-';
 
-export type RoomId = '거실' | '주방' | '안방' | '작은방1' | '작은방2';
+export type RoomId = '거실' | '주방' | '안방' | '작은방1' | '작은방2' | '작은방3';
 export type BathId = '공용욕실' | '부부욕실';
 
 /** 자재마스터 1행 */
@@ -82,9 +82,10 @@ export type GlobalScope = {
   lighting: boolean;          // 조명 풀세트
   balcony_floor_tile: boolean;
   balcony_paint: boolean;
-  electrical_base: boolean;
+  electrical_base: boolean;    // 전기 기본공사 (배선·분전반)
   switch_outlet: boolean;
   induction_line: boolean;
+  plumbing_base: boolean;      // 설비 기본공사 (수도·난방·하수 점검·보강) — electrical_base와 분리
   thermostat: boolean;
   silicon: boolean;
   expansion_report: boolean;   // 구청 확장공사 신고

@@ -12,7 +12,8 @@ import type { Quote } from '@/lib/types';
 
 type Props = {
   quote: Quote;
-  step: 1 | 2;
+  /** 2: 공사 범위 단계 · 3: 자재 등급 단계 */
+  step: 2 | 3;
 };
 
 export function LivePricePreview({ quote, step }: Props) {
@@ -21,7 +22,7 @@ export function LivePricePreview({ quote, step }: Props) {
     <aside
       role="status"
       aria-live="polite"
-      className="sticky top-[60px] z-20 -mx-4 sm:mx-0 mb-3 sm:mb-4"
+      className="sticky top-28 sm:top-[132px] z-10 -mx-4 sm:mx-0 mb-3 sm:mb-4"
     >
       <div className="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 text-white rounded-none sm:rounded-xl shadow-sm border-y sm:border border-zinc-700/40 px-4 sm:px-5 py-3 sm:py-3.5">
         <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -40,12 +41,12 @@ export function LivePricePreview({ quote, step }: Props) {
           </div>
           <div className="flex items-center gap-2 text-[10px] text-zinc-300 flex-shrink-0">
             <Pill label={`${line_items.length} 라인`} />
-            <Pill label={step === 1 ? '입력 중' : '등급 조정'} accent />
+            <Pill label={step === 2 ? '공사 범위' : '등급 조정'} accent />
           </div>
         </div>
         <div className="mt-1.5 text-[10px] text-zinc-400">
-          {step === 1
-            ? '평형·범위를 바꾸면 즉시 반영됩니다. 자재 등급은 다음 단계에서 조정합니다.'
+          {step === 2
+            ? '공종을 ON/OFF 할 때마다 즉시 반영됩니다. 자재 등급은 다음 단계에서 조정합니다.'
             : '자재 등급·세부 자재 변경 시 위 금액이 즉시 업데이트됩니다.'}
         </div>
       </div>

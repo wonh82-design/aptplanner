@@ -47,13 +47,23 @@ export function balconyArea(key: string, pyeong: number): number {
   return interp(t, pyeong);
 }
 
-/** 우리집 시트 매핑: RoomId → 표준면적 시트의 키 */
+/**
+ * 우리집 시트 매핑: RoomId → 표준면적 시트의 키.
+ * 작은방3은 별도 데이터가 없어 작방2의 면적·둘레로 폴백한다.
+ * (40~50평대에서 작은방3은 작은방2와 유사한 크기로 설계되는 경우가 많아 무난한 근사)
+ */
 const ROOM_KEY: Record<string, string> = {
   '거실': '거실',
   '주방': '주방',
   '안방': '안방',
   '작은방1': '작방1',
   '작은방2': '작방2',
+  '작은방3': '작방2',
+};
+
+/** perimeters 시트는 키가 '작은방1' 형태 — 작은방3은 작은방2로 폴백 */
+const ROOM_PERIMETER_KEY: Record<string, string> = {
+  '작은방3': '작은방2',
 };
 
 export function roomAreaForId(roomId: string, pyeong: number, bay: number = 3): number {
@@ -61,7 +71,7 @@ export function roomAreaForId(roomId: string, pyeong: number, bay: number = 3): 
 }
 
 export function roomPerimeterForId(roomId: string, pyeong: number): number {
-  return roomPerimeter(ROOM_KEY[roomId] || roomId, pyeong);
+  return roomPerimeter(ROOM_PERIMETER_KEY[roomId] || roomId, pyeong);
 }
 
 /** 외부창 면적 — 베이별로 다름 (v4: 2/3/4/5베이 각각 표) */
@@ -105,6 +115,7 @@ export function activeRooms(p: Property): string[] {
   const rooms = ['거실', '주방', '안방'];   // 거실·주방은 항상, 안방은 방1
   if (p.rooms >= 2) rooms.push('작은방1');
   if (p.rooms >= 3) rooms.push('작은방2');
+  if (p.rooms >= 4) rooms.push('작은방3');
   return rooms;
 }
 

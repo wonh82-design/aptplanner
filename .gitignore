@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# verify-scenarios.ts 등 검증 스크립트가 만드는 임시 엑셀 사본
+/tmp_xlsx/
+/tmp_xlsx_recalc/

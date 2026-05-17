@@ -29,6 +29,7 @@ export const ROOM_META: Record<string, { icon: string; label: string }> = {
   '안방':    { icon: '🛏️', label: '안방' },
   '작은방1': { icon: '📚', label: '작은방 1' },
   '작은방2': { icon: '🧸', label: '작은방 2' },
+  '작은방3': { icon: '🎒', label: '작은방 3' },
 };
 
 /** 공종 토글 ON 시 기본 적용 공간. 사용자는 이후 개별 공간을 해제할 수 있다. */
@@ -46,13 +47,13 @@ export function defaultRoomsForWork(
       return visible.slice();
     case 'aircon': {
       // 30평대까지는 거실+침실, 40평 이상은 주방 포함
-      const base = (['거실', '안방', '작은방1', '작은방2'] as RoomId[]).filter(r => visible.includes(r));
+      const base = (['거실', '안방', '작은방1', '작은방2', '작은방3'] as RoomId[]).filter(r => visible.includes(r));
       if (p.pyeong >= 40 && visible.includes('주방')) base.unshift('주방');
       return base;
     }
     case 'closet':
       // 침실에만
-      return (['안방', '작은방1', '작은방2'] as RoomId[]).filter(r => visible.includes(r));
+      return (['안방', '작은방1', '작은방2', '작은방3'] as RoomId[]).filter(r => visible.includes(r));
     case 'ceiling_fan':
       // 거실 + 안방
       return (['거실', '안방'] as RoomId[]).filter(r => visible.includes(r));
@@ -61,7 +62,120 @@ export function defaultRoomsForWork(
   }
 }
 
-/** ② 공사 항목 — RoomScope 공종을 카테고리로 묶음 */
+/**
+ * ② 공사 범위 — 4×3 그리드로 표시되는 12개 큰 공종 카드.
+ *
+ * 각 그룹은 RoomScope 키와 GlobalScope 키 양쪽을 동시에 토글할 수 있다.
+ * 활성 상태: 그룹 내 어떤 sub-key 하나라도 ON이면 그룹이 ON으로 표시된다.
+ * 클릭 동작: 그룹 ON이면 모두 OFF, OFF이면 적절한 기본값으로 모두 ON.
+ */
+export type BigWorkGroup = {
+  id: string;
+  title: string;
+  icon: string;
+  /** 카드 하단에 표시될 세부 공종 설명 (한 줄) */
+  desc: string;
+  /** 그룹에 속한 RoomScope 키 (각 활성 공간에 동일하게 적용) */
+  roomKeys?: (keyof RoomScope)[];
+  /** 그룹에 속한 GlobalScope 키 */
+  globalKeys?: (keyof Scope['global'])[];
+};
+
+export const BIG_WORK_GROUPS: BigWorkGroup[] = [
+  {
+    id: 'demolition',
+    title: '철거공사',
+    icon: '🔨',
+    desc: '기존 마감재·바닥·도배 철거 + 외벽 단열재 보강',
+    globalKeys: ['demolition', 'insulation'],
+  },
+  {
+    id: 'expansion',
+    title: '확장공사',
+    icon: '🏗️',
+    desc: '발코니 확장 + 구청 신고 (확장 공간이 있을 때만 활성)',
+    roomKeys: ['expansion_after'],
+    globalKeys: ['expansion_report'],
+  },
+  {
+    id: 'sash',
+    title: '샷시공사',
+    icon: '🪟',
+    desc: '발코니 쪽 외창 교체 — 단열·소음 차단↑',
+    roomKeys: ['sash'],
+  },
+  {
+    id: 'electrical',
+    title: '전기 공사',
+    icon: '⚡',
+    desc: '전기 기본 배선·분전반 + 스위치/콘센트 + 인덕션 220V 전용선',
+    globalKeys: ['electrical_base', 'switch_outlet', 'induction_line'],
+  },
+  {
+    id: 'plumbing',
+    title: '설비 공사',
+    icon: '🚰',
+    desc: '수도·하수 점검·보강 + 난방 온도조절기 + 난방배관 교체',
+    globalKeys: ['plumbing_base', 'thermostat', 'heating_pipe'],
+  },
+  {
+    id: 'wallpaper',
+    title: '도배공사',
+    icon: '🧱',
+    desc: '활성 공간 전체 도배 재시공 + 발코니 외벽 도장',
+    roomKeys: ['wallpaper'],
+    globalKeys: ['balcony_paint'],
+  },
+  {
+    id: 'flooring',
+    title: '마루공사',
+    icon: '🪵',
+    desc: '활성 공간 전체 바닥재 교체 + 발코니 바닥타일',
+    roomKeys: ['flooring'],
+    globalKeys: ['balcony_floor_tile'],
+  },
+  {
+    id: 'bath',
+    title: '욕실공사',
+    icon: '🚿',
+    desc: '공용·부부욕실 풀세트 — 방수·타일·세면대·변기·악세사리',
+    globalKeys: ['common_bath_set', 'master_bath_set'],
+  },
+  {
+    id: 'kitchen',
+    title: '주방공사',
+    icon: '🍳',
+    desc: '주방가구 풀세트 — 상하부장·상판·후드·싱크볼·하드웨어',
+    globalKeys: ['kitchen_set'],
+  },
+  {
+    id: 'lighting',
+    title: '조명공사',
+    icon: '💡',
+    desc: '다운라이트 + 거실·주방 간접조명·매그네틱 조명',
+    globalKeys: ['lighting'],
+  },
+  {
+    id: 'doors',
+    title: '문 교체',
+    icon: '🚪',
+    desc: '중문 + 신발장 (현관 키 큰 가구)',
+    globalKeys: ['middoor', 'entry_furniture'],
+  },
+  {
+    id: 'molding_baseboard',
+    title: '몰딩·걸레받이',
+    icon: '📏',
+    desc: '천장-벽 몰딩 + 벽-바닥 걸레받이 (고급 = 무몰딩·무걸레받이)',
+    roomKeys: ['molding'],
+  },
+];
+
+// ─────────────────────────────────────────────────────────
+// 레거시 호환 export — 기존 코드(PDF 매트릭스 등)가 참조하므로 유지
+// ─────────────────────────────────────────────────────────
+
+/** PDF 공간×공종 매트릭스용 — RoomScope 키 라벨 */
 export const ROOM_WORK_GROUPS: {
   title: string;
   icon: string;
@@ -74,26 +188,14 @@ export const ROOM_WORK_GROUPS: {
     desc: '바닥재·도배·몰딩·외창 — 활성 공간 전체에 일괄 적용',
     keys: ['flooring', 'wallpaper', 'molding', 'sash'],
   },
-  {
-    title: '공조·환기',
-    icon: '❄️',
-    desc: '에어컨·실링팬 — 공간별로 시공 여부 선택',
-    keys: ['aircon', 'ceiling_fan'],
-  },
-  {
-    title: '수납',
-    icon: '👔',
-    desc: '붙박이장 — 시공할 공간 선택',
-    keys: ['closet'],
-  },
 ];
 
 export type GlobalItemMeta = {
   key: keyof Scope['global'];
   label: string;
   desc: string;
-  hint?: string;        // 우측에 보일 짧은 보조 텍스트
-  warning?: string;     // 주황 배지로 표시
+  hint?: string;
+  warning?: string;
 };
 
 export type GlobalGroup = {
@@ -103,79 +205,77 @@ export type GlobalGroup = {
   items: GlobalItemMeta[];
 };
 
-/** 전체 공종 — 카테고리로 그룹화 */
+/**
+ * PDF 등 기존 참조 호환용 — BIG_WORK_GROUPS의 globalKeys만 모아 카테고리화한 뷰.
+ * 신규 UI 코드에서는 BIG_WORK_GROUPS를 직접 사용하는 것을 권장.
+ */
 export const GLOBAL_GROUPS: GlobalGroup[] = [
   {
-    icon: '🏗️',
-    title: '기초 공사',
-    desc: '집을 한 번 비우고 새로 만드는 큰 단위 작업',
+    icon: '🔨', title: '철거공사', desc: '기존 마감재·단열 보강',
     items: [
-      { key: 'demolition',  label: '철거',         desc: '기존 마감재·가구 모두 뜯어내기. 풀리모델링 시 필수' },
-      { key: 'insulation',  label: '단열재 보강',   desc: '외벽 안쪽에 단열재 추가. 결로·곰팡이 방지, 겨울 따뜻함' },
+      { key: 'demolition', label: '철거', desc: '기존 마감재·가구 모두 뜯어내기' },
+      { key: 'insulation', label: '단열재 보강', desc: '외벽 안쪽 단열재 추가' },
     ],
   },
   {
-    icon: '🚿',
-    title: '욕실 풀세트',
-    desc: '벽·바닥·천장·도기까지 한꺼번에 교체',
+    icon: '🏗️', title: '확장공사', desc: '발코니 확장 신고',
     items: [
-      { key: 'common_bath_set', label: '공용욕실 풀세트', desc: '방수·타일·세면대·변기·악세사리 한꺼번에' },
-      { key: 'master_bath_set', label: '부부욕실 풀세트', desc: '안방 욕실(있는 경우)' },
+      { key: 'expansion_report', label: '구청 확장공사 신고', desc: '확장 시 필수' },
     ],
   },
   {
-    icon: '🍽️',
-    title: '주방 가구',
-    desc: '주방을 통째로 새로',
+    icon: '⚡', title: '전기 공사', desc: '전기 기본 + 스위치/콘센트 + 인덕션 전용선',
     items: [
-      { key: 'kitchen_set', label: '주방가구 (3.6m)', desc: '상하부장·상판·후드·싱크볼·하드웨어 일체' },
+      { key: 'electrical_base', label: '전기 기본', desc: '배선·분전반 점검·보강' },
+      { key: 'switch_outlet', label: '스위치/콘센트', desc: '평형별 자동 산정' },
+      { key: 'induction_line', label: '인덕션 220V 전용선', desc: '가스→인덕션 교체 시 필수' },
     ],
   },
   {
-    icon: '🚪',
-    title: '도어·가구',
-    desc: '현관·중문 등 큰 가구',
+    icon: '🚰', title: '설비 공사', desc: '설비 기본 + 난방 온도조절기 + 난방배관',
     items: [
-      { key: 'middoor',          label: '중문',     desc: '현관과 거실 사이 슬라이딩 문. 외풍 차단·미관·소음 차단' },
-      { key: 'entry_furniture',  label: '신발장',   desc: '현관 키 큰 신발장 (한샘 등 기성 가구)' },
+      { key: 'plumbing_base', label: '설비 기본', desc: '수도·하수 점검·보강' },
+      { key: 'thermostat', label: '난방 온도조절기', desc: '거실+각 방 자동 산정' },
+      { key: 'heating_pipe', label: '난방배관 교체', desc: '20년+ 노후 시 권장', warning: '큰 비용' },
     ],
   },
   {
-    icon: '💡',
-    title: '조명',
-    desc: '거실·주방 중심 조명 일괄',
+    icon: '🚿', title: '욕실공사', desc: '공용·부부욕실 풀세트',
     items: [
-      { key: 'lighting', label: '조명 풀세트', desc: '다운라이트 + 거실/주방 간접·매그네틱 조명' },
+      { key: 'common_bath_set', label: '공용욕실 풀세트', desc: '방수·타일·세면대·변기·악세사리' },
+      { key: 'master_bath_set', label: '부부욕실 풀세트', desc: '안방 욕실' },
     ],
   },
   {
-    icon: '🌿',
-    title: '발코니 정리',
-    desc: '확장 안 한 발코니의 마감',
+    icon: '🍳', title: '주방공사', desc: '주방가구 풀세트',
     items: [
-      { key: 'balcony_floor_tile', label: '발코니 바닥타일', desc: '발코니 바닥에 타일 시공 (실외기실 등)' },
-      { key: 'balcony_paint',      label: '발코니 외벽 도장', desc: '결로 방지·청결 유지용 도장' },
+      { key: 'kitchen_set', label: '주방가구', desc: '상하부장·상판·후드·싱크볼·하드웨어' },
     ],
   },
   {
-    icon: '⚡',
-    title: '전기·설비',
-    desc: '전기·수도·난방 정비',
+    icon: '💡', title: '조명공사', desc: '다운라이트·간접조명',
     items: [
-      { key: 'electrical_base', label: '전기·설비 기본',     desc: '전기·수도 배관 점검·보강' },
-      { key: 'switch_outlet',   label: '스위치/콘센트 교체', desc: '평형별 자동 산정 (30평=34개)' },
-      { key: 'induction_line',  label: '인덕션 220V 전용선', desc: '가스→인덕션 교체 시 필수. 분전반에서 주방까지' },
-      { key: 'thermostat',      label: '난방 온도조절기',    desc: '거실+각 방에 1개씩 자동 산정' },
-      { key: 'heating_pipe',    label: '난방배관 교체',      desc: '20년 이상 노후 시 권장. 큰 비용이지만 누수·수명 보장', warning: '큰 비용' },
+      { key: 'lighting', label: '조명 풀세트', desc: '다운라이트 + 거실/주방 간접·매그네틱' },
     ],
   },
   {
-    icon: '🧴',
-    title: '마감 디테일',
-    desc: '꼭 필요한 잔공사',
+    icon: '🚪', title: '문 교체', desc: '중문 + 신발장',
     items: [
-      { key: 'silicon',           label: '실리콘 마감',         desc: '욕실·주방·창틀 등 마감 실리콘' },
-      { key: 'expansion_report',  label: '구청 확장공사 신고',  desc: '확장 시 필수. 미신고 시 과태료 부과 위험', warning: '확장 시 필수' },
+      { key: 'middoor', label: '중문', desc: '현관-거실 슬라이딩 문' },
+      { key: 'entry_furniture', label: '신발장', desc: '현관 키 큰 가구' },
+    ],
+  },
+  {
+    icon: '🌿', title: '발코니 마감', desc: '확장 안 한 발코니 정리',
+    items: [
+      { key: 'balcony_floor_tile', label: '발코니 바닥타일', desc: '실외기실 등 타일 시공' },
+      { key: 'balcony_paint', label: '발코니 외벽 도장', desc: '결로 방지·청결' },
+    ],
+  },
+  {
+    icon: '🧴', title: '마감 디테일', desc: '실리콘 등 잔공사',
+    items: [
+      { key: 'silicon', label: '실리콘 마감', desc: '욕실·주방·창틀 마감' },
     ],
   },
 ];

@@ -48,6 +48,7 @@ function fullRenovateRoom(roomId: RoomId, opts: { sash: boolean } = { sash: fals
   if (roomId === '안방')    return { ...base, aircon: true, closet: true, ceiling_fan: true };
   if (roomId === '작은방1') return { ...base, aircon: true, closet: true };
   if (roomId === '작은방2') return { ...base, closet: true };
+  if (roomId === '작은방3') return { ...base, closet: true };
   return base;
 }
 
@@ -61,7 +62,7 @@ function makeRoomMap(
   factory: (roomId: RoomId) => RoomScope,
 ): Scope['rooms'] {
   const visible = activeRooms(p) as RoomId[];
-  const all: RoomId[] = ['거실', '주방', '안방', '작은방1', '작은방2'];
+  const all: RoomId[] = ['거실', '주방', '안방', '작은방1', '작은방2', '작은방3'];
   const map: Partial<Record<RoomId, RoomScope>> = {};
   for (const r of all) {
     const cur = current.rooms[r];
@@ -102,6 +103,7 @@ function fullRenovateGlobal(current: Scope): Scope['global'] {
     electrical_base: true,
     switch_outlet: true,
     induction_line: true,
+    plumbing_base: true,
     thermostat: true,
     silicon: true,
     expansion_report: needsExpansionReport(current),
@@ -157,9 +159,10 @@ export const PRESETS: Preset[] = [
           lighting: false,          // 조명 그대로
           balcony_floor_tile: false,
           balcony_paint: false,
-          electrical_base: false,   // 전기·설비 그대로
+          electrical_base: false,   // 전기 그대로
           switch_outlet: false,
           induction_line: false,
+          plumbing_base: false,     // 설비 그대로
           thermostat: false,
           silicon: true,            // 마감 디테일은 일반적으로 포함
           expansion_report: needsExpansionReport(current),

@@ -408,7 +408,7 @@ function PriceRangeExplainer() {
       </div>
       <p style={{ margin: '10px 0 0', fontSize: '10px', color: '#78350f', borderTop: '1px dashed #fcd34d', paddingTop: '8px' }}>
         ※ 본 보고서의 공사비는 <strong>중견 시공 업체</strong> 기준의 표준 시장가입니다.
-        업체 종류에 따라 위·아래로 큰 폭으로 움직일 수 있으니, 받으신 견적과 ±20% 이내라면
+        업체 종류에 따라 위·아래로 큰 폭으로 움직일 수 있으니, 받으신 견적과 ±5% 이내라면
         합리적인 범위로 판단하셔도 됩니다.
       </p>
     </div>

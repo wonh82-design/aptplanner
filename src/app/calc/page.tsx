@@ -12,6 +12,8 @@ import { ServicesPricing } from '@/components/ServicesPricing';
 import { LivePricePreview } from '@/components/LivePricePreview';
 import { MobileConversionBar } from '@/components/MobileConversionBar';
 import { Testimonials } from '@/components/Testimonials';
+import { WizardSidebar } from '@/components/WizardSidebar';
+import { SiteHeader } from '@/components/SiteHeader';
 import { ConsultRequestModal } from '@/components/ConsultRequestModal';
 import { QuotePdfTemplate } from '@/components/pdf/QuotePdfTemplate';
 import { PlanPdfTemplate } from '@/components/pdf/PlanPdfTemplate';
@@ -20,7 +22,7 @@ import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
 import { buildQuote, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { exportPagedPdf } from '@/lib/pdf/export';
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 
 export default function CalcPage() {
   const [step, setStep] = useState<Step>(1);
@@ -74,68 +76,131 @@ export default function CalcPage() {
 
   return (
     <div className="flex-1 w-full">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2 min-w-0">
-            <span className="inline-block w-7 h-7 rounded bg-zinc-900 text-white text-xs flex items-center justify-center font-bold flex-shrink-0">a</span>
-            <div className="min-w-0">
-              <div className="text-sm font-bold tracking-tight truncate">apt-planner</div>
-              <div className="text-[10px] text-zinc-500 truncate hidden sm:block">우리집 인테리어 공사비 산정</div>
-            </div>
-          </Link>
-          <div className="flex items-center gap-3 sm:gap-5 flex-shrink-0">
-            <Link href="/about" className="text-xs font-medium text-zinc-600 hover:text-zinc-900">소개</Link>
-            <span className="hidden sm:inline text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-              {quote.quote_id}
-            </span>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <StepIndicator current={step} maxReached={maxReached} onStepClick={goTo} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
+        {/* ===== Step 1: 우리집 현황 — 사이드바 등장 (예상 공사비 카드는 미노출) ===== */}
         {step === 1 && (
-          <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            <LivePricePreview quote={quote} step={1} />
-            <PropertyForm
-              value={property}
-              onChange={setProperty}
-              rooms={scope.rooms}
-              onRoomsChange={(rooms) => setScope({ ...scope, rooms })}
+          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6">
+            <WizardSidebar
+              step={1}
+              property={property}
+              scope={scope}
+              quote={quote}
+              gradeLabel={grade.default}
+              onJumpToStep={goTo}
+              onNext={() => goTo(2)}
+              nextLabel="공사 범위"
             />
-            <ScopeMatrix property={property} value={scope} onChange={setScope} />
-
-            <StepNav
-              right={
-                <button onClick={() => goTo(2)} className="btn-primary">
-                  자재 등급 선택 →
-                </button>
-              }
-            />
+            <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0">
+              <PropertyForm
+                value={property}
+                onChange={setProperty}
+                rooms={scope.rooms}
+                onRoomsChange={(rooms) => {
+                  const planned = Object.values(rooms).some(
+                    rs => !!rs && rs.expansion_after && !rs.expansion_current,
+                  );
+                  setScope({
+                    ...scope,
+                    rooms,
+                    global: { ...scope.global, expansion_report: planned },
+                  });
+                }}
+              />
+              <div className="lg:hidden">
+                <StepNav
+                  right={
+                    <button onClick={() => goTo(2)} className="btn-primary">
+                      공사 범위 선택 →
+                    </button>
+                  }
+                />
+              </div>
+            </div>
           </div>
         )}
 
+        {/* ===== Step 2: 공사 범위 — 사이드바에 예상 공사비 출현 ===== */}
         {step === 2 && (
-          <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            <LivePricePreview quote={quote} step={2} />
-            <GradeSelector value={grade} onChange={setGrade} />
-            <MaterialOverrides quote={quote} value={grade} onChange={setGrade} />
-
-            <StepNav
-              left={
-                <button onClick={() => goTo(1)} className="btn-secondary">← 현황 수정</button>
-              }
-              right={
-                <button onClick={() => goTo(3)} className="btn-primary">
-                  최종 결과 보기 →
-                </button>
-              }
+          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6">
+            <WizardSidebar
+              step={2}
+              property={property}
+              scope={scope}
+              quote={quote}
+              gradeLabel={grade.default}
+              onJumpToStep={goTo}
+              onPrev={() => goTo(1)}
+              prevLabel="현황 수정"
+              onNext={() => goTo(3)}
+              nextLabel="자재 등급"
             />
+            <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0">
+              {/* 모바일/태블릿 — 라이브 가격 배너 */}
+              <div className="lg:hidden">
+                <LivePricePreview quote={quote} step={2} />
+              </div>
+              <ScopeMatrix property={property} value={scope} onChange={setScope} />
+
+              <div className="lg:hidden">
+                <StepNav
+                  left={
+                    <button onClick={() => goTo(1)} className="btn-secondary">← 현황 수정</button>
+                  }
+                  right={
+                    <button onClick={() => goTo(3)} className="btn-primary">
+                      자재 등급 →
+                    </button>
+                  }
+                />
+              </div>
+            </div>
           </div>
         )}
 
+        {/* ===== Step 3: 자재 등급 — 사이드바 유지 ===== */}
         {step === 3 && (
+          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6">
+            <WizardSidebar
+              step={3}
+              property={property}
+              scope={scope}
+              quote={quote}
+              gradeLabel={grade.default}
+              onJumpToStep={goTo}
+              onPrev={() => goTo(2)}
+              prevLabel="공사 범위"
+              onNext={() => goTo(4)}
+              nextLabel="최종 결과"
+            />
+            <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0">
+              <div className="lg:hidden">
+                <LivePricePreview quote={quote} step={3} />
+              </div>
+              <GradeSelector value={grade} onChange={setGrade} />
+              <MaterialOverrides quote={quote} value={grade} onChange={setGrade} />
+
+              <div className="lg:hidden">
+                <StepNav
+                  left={
+                    <button onClick={() => goTo(2)} className="btn-secondary">← 공사 범위</button>
+                  }
+                  right={
+                    <button onClick={() => goTo(4)} className="btn-primary">
+                      최종 결과 보기 →
+                    </button>
+                  }
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===== Step 4: 공사비 결과 — 풀폭 결과 페이지 ===== */}
+        {step === 4 && (
           <div className="max-w-5xl mx-auto flex flex-col gap-5">
             <ResultBanner quote={quote} gradeLabel={grade.default} />
 
@@ -163,7 +228,7 @@ export default function CalcPage() {
 
             <StepNav
               left={
-                <button onClick={() => goTo(2)} className="btn-secondary">← 등급 수정</button>
+                <button onClick={() => goTo(3)} className="btn-secondary">← 등급 수정</button>
               }
               right={
                 <button onClick={reset} className="btn-secondary">새로 시작</button>
@@ -173,8 +238,8 @@ export default function CalcPage() {
         )}
       </main>
 
-      {/* 모바일 하단 전환 바 — Step 3에서만 노출 */}
-      {step === 3 && (
+      {/* 모바일 하단 전환 바 — Step 4 결과 화면에서만 노출 */}
+      {step === 4 && (
         <MobileConversionBar
           onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
           onApplySpec={() => setPremiumOpen(true)}

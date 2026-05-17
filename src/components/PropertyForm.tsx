@@ -195,6 +195,9 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           >
             <option value={2}>2개 (안방+작은방1)</option>
             <option value={3}>3개 (안방+작은방1·2)</option>
+            {value.pyeong >= 34 && (
+              <option value={4}>4개 (안방+작은방1·2·3)</option>
+            )}
           </select>
         </Field>
 
@@ -277,16 +280,53 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
 
       {/* ===== 공간별 확장 현황 ===== */}
       <div className="mt-6 pt-5 border-t border-zinc-200">
-        <div className="flex items-baseline justify-between mb-3 flex-wrap gap-x-3 gap-y-1">
-          <h3 className="text-sm font-semibold text-zinc-800">발코니 확장 현황</h3>
-          <span className="text-[10px] text-zinc-500">현재 상태·공사 후를 따로 선택</span>
+        <h3 className="text-sm font-semibold text-zinc-800 mb-1">발코니 확장 현황</h3>
+        <p className="text-xs text-zinc-600 leading-relaxed mb-3">
+          우리집 발코니는 <strong className="text-zinc-900">지금 어떤 상태</strong>인지,
+          공사 후에는 <strong className="text-zinc-900">어떻게 만들고 싶은지</strong> 공간별로 알려주세요.
+        </p>
+
+        {/* 개념 안내 카드 — 2개 컬럼의 의미를 시각적으로 보여줌 */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-3 items-stretch mb-4 rounded-lg bg-gradient-to-r from-zinc-50 via-white to-blue-50/50 border border-zinc-200 p-3">
+          <ConceptLegend
+            tone="zinc"
+            icon="🏠"
+            title="현재 상태"
+            subtitle="지금 우리집 모습"
+            examples={['발코니 있음 (확장 안 됨)', '이미 확장됨']}
+          />
+          <div className="hidden sm:flex items-center justify-center text-zinc-400">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </div>
+          <div className="sm:hidden flex items-center justify-center text-zinc-400 -my-1">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <polyline points="19 12 12 19 5 12" />
+            </svg>
+          </div>
+          <ConceptLegend
+            tone="blue"
+            icon="🔨"
+            title="공사 후"
+            subtitle="인테리어 끝난 모습"
+            examples={['확장 안 함 (그대로 유지)', '새로 확장 시공']}
+          />
         </div>
 
         {/* 데스크톱 컬럼 헤더 — 모바일에선 숨김 */}
-        <div className="hidden sm:grid grid-cols-12 gap-3 mb-1 text-[10px] uppercase tracking-wide text-zinc-500 font-semibold">
-          <div className="col-span-3">공간</div>
-          <div className="col-span-4">현재 상태</div>
-          <div className="col-span-5">공사 후</div>
+        <div className="hidden sm:grid grid-cols-12 gap-3 mb-2 items-center">
+          <div className="col-span-3 text-[11px] uppercase tracking-wider text-zinc-500 font-bold">공간</div>
+          <div className="col-span-4 flex items-center gap-1.5">
+            <span className="text-xs">🏠</span>
+            <span className="text-[11px] uppercase tracking-wider text-zinc-700 font-bold">현재 상태</span>
+          </div>
+          <div className="col-span-5 flex items-center gap-1.5">
+            <span className="text-xs">🔨</span>
+            <span className="text-[11px] uppercase tracking-wider text-blue-700 font-bold">공사 후</span>
+          </div>
         </div>
 
         <div className="space-y-2 sm:space-y-1.5">
@@ -308,7 +348,10 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
 
                 {/* 현재 상태 */}
                 <div className="sm:col-span-4">
-                  <div className="sm:hidden text-[10px] uppercase tracking-wide text-zinc-500 font-semibold mb-1">현재 상태</div>
+                  <div className="sm:hidden text-[11px] text-zinc-700 font-bold mb-1 flex items-center gap-1.5">
+                    <span>🏠</span><span>현재 상태</span>
+                    <span className="text-[10px] font-normal text-zinc-500">— 지금 어떤가요?</span>
+                  </div>
                   <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs w-full">
                     <ExpBtn
                       active={!already}
@@ -327,10 +370,16 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
 
                 {/* 공사 후 — 이미 확장된 공간은 숨김 */}
                 <div className="sm:col-span-5">
-                  <div className="sm:hidden text-[10px] uppercase tracking-wide text-zinc-500 font-semibold mb-1">공사 후</div>
+                  <div className="sm:hidden text-[11px] text-blue-700 font-bold mb-1 flex items-center gap-1.5">
+                    <span>🔨</span><span>공사 후</span>
+                    <span className="text-[10px] font-normal text-zinc-500">— 어떻게 만들까요?</span>
+                  </div>
                   {already ? (
-                    <div className="text-[11px] text-zinc-400 italic px-2 py-1.5">
-                      추가 확장공사 불필요
+                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 italic px-2 py-1.5 bg-zinc-50 rounded-md border border-dashed border-zinc-200">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>이미 확장된 상태 — 추가 공사 불필요</span>
                     </div>
                   ) : (
                     <div className="inline-flex rounded-md border border-zinc-200 bg-white overflow-hidden text-xs w-full">
@@ -354,8 +403,9 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             );
           })}
         </div>
-        <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed">
-          ‘확장 시공’ 공간이 있으면 확장공사·새 외창·구청 신고·터닝도어가 자동 추가됩니다.
+        <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed flex items-start gap-1.5">
+          <span className="text-amber-600 flex-shrink-0 mt-px">💡</span>
+          <span>‘확장 시공’ 공간이 있으면 확장공사·새 외창·구청 신고·터닝도어 비용이 자동으로 추가됩니다.</span>
         </p>
       </div>
     </section>
@@ -377,6 +427,41 @@ function MiniStat({ label, value }: { label: string; value: string }) {
       <span className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</span>
       <span className="font-mono font-semibold text-zinc-900 text-[11px]">{value}</span>
     </span>
+  );
+}
+
+/**
+ * 발코니 확장 현황 상단의 개념 안내 카드 (현재 상태 / 공사 후).
+ * 사용자가 두 컬럼의 의미를 한눈에 파악하도록 시각적 범례 역할.
+ */
+function ConceptLegend({
+  tone, icon, title, subtitle, examples,
+}: {
+  tone: 'zinc' | 'blue';
+  icon: string;
+  title: string;
+  subtitle: string;
+  examples: string[];
+}) {
+  const styles = tone === 'blue'
+    ? { bg: 'bg-blue-50/70', border: 'border-blue-200', title: 'text-blue-900', subtitle: 'text-blue-700', dot: 'bg-blue-500' }
+    : { bg: 'bg-white',       border: 'border-zinc-200', title: 'text-zinc-900', subtitle: 'text-zinc-600', dot: 'bg-zinc-500' };
+  return (
+    <div className={`rounded-md ${styles.bg} ${styles.border} border p-2.5`}>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <span className="text-base leading-none">{icon}</span>
+        <span className={`text-xs font-bold ${styles.title}`}>{title}</span>
+      </div>
+      <div className={`text-[10px] ${styles.subtitle} font-medium mb-1.5`}>{subtitle}</div>
+      <ul className="space-y-0.5">
+        {examples.map((ex, i) => (
+          <li key={i} className="flex items-start gap-1 text-[10px] text-zinc-700 leading-snug">
+            <span className={`inline-block w-1 h-1 rounded-full ${styles.dot} mt-1 flex-shrink-0`} />
+            <span>{ex}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
