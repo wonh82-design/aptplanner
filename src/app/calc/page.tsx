@@ -82,7 +82,7 @@ export default function CalcPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
         {/* ===== Step 1: 우리집 현황 — 사이드바 등장 (예상 공사비 카드는 미노출) ===== */}
         {step === 1 && (
-          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-8rem)]">
+          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
             <WizardSidebar
               step={1}
               property={property}
@@ -124,7 +124,7 @@ export default function CalcPage() {
 
         {/* ===== Step 2: 공사 범위 — 사이드바에 예상 공사비 출현 ===== */}
         {step === 2 && (
-          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-8rem)]">
+          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
             <WizardSidebar
               step={2}
               property={property}
@@ -162,7 +162,7 @@ export default function CalcPage() {
 
         {/* ===== Step 3: 자재 등급 — 사이드바 유지 ===== */}
         {step === 3 && (
-          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-8rem)]">
+          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
             <WizardSidebar
               step={3}
               property={property}
