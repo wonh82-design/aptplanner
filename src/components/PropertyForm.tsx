@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Property, RoomScope, Scope, RoomId, RegionId, AgeId } from '@/lib/types';
 import {
   recommendedRoomCount, exclusiveAreaM2, supplyAreaM2, outsideWindowArea, activeRooms,
+  clampPyeong, clampBalconyDepth,
 } from '@/lib/areas';
 import { ROOM_META } from '@/lib/scope-meta';
 import { REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
@@ -50,7 +51,9 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
     }
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
-    const py = inputMode === 'pyeong' ? n : n / PYEONG_TO_EX_M2;
+    // 입력을 평형 기준으로 환산 후 clamp [6, 100]
+    const rawPy = inputMode === 'pyeong' ? n : n / PYEONG_TO_EX_M2;
+    const py = clampPyeong(rawPy);
     onChange({
       ...value,
       pyeong: py,
@@ -71,14 +74,19 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
     Math.abs(p.pyeong - value.pyeong) < 0.5
   );
 
-  /** 현재 상태 변경 — 이미 확장됨이면 공사후도 자동 true (추가 공사 불필요 상태) */
+  /**
+   * 현재 상태 변경 — '이미 확장됨' ↔ '발코니 있음' 토글.
+   * 의도치 않은 신규 확장공사 추가를 방지하기 위해 두 값을 항상 동기화한다:
+   *  - 이미 확장됨 (current=true) → 공사후도 true (추가 공사 불필요)
+   *  - 발코니 있음 (current=false) → 공사후도 false (기본은 '확장 안 함'으로 리셋)
+   * 사용자는 이후 '공사 후' 블럭에서 '확장 시공'을 명시적으로 선택해야 한다.
+   */
   const setExpansionCurrent = (roomId: RoomId, isExpanded: boolean) => {
     const prev = rooms[roomId];
     const next: RoomScope = {
       ...prev,
       expansion_current: isExpanded,
-      // 이미 확장된 상태로 바꾸면 공사후도 확장 상태로 정렬 (추가 공사 불필요)
-      expansion_after: isExpanded ? true : prev.expansion_after,
+      expansion_after: isExpanded,
     };
     onRoomsChange({ ...rooms, [roomId]: next });
   };
@@ -271,7 +279,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             min={0}
             max={3}
             value={value.balcony_depth_m}
-            onChange={(e) => setField('balcony_depth_m', Number(e.target.value) || 0)}
+            onChange={(e) => setField('balcony_depth_m', clampBalconyDepth(Number(e.target.value) || 0))}
             className="input max-w-[120px]"
           />
           <span className="text-[11px] text-zinc-500">기본값 1.5m — 발코니 폭이 다른 경우만 조정</span>

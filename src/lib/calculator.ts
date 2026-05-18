@@ -24,6 +24,7 @@ import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
   bayWidthForRoom, balconyAreaForRoom, doorCount, downlightCount,
+  bathroomArea, kitchenLength,
 } from './areas';
 import { getPrimaryMaterial, getMaterialById, labelOf } from './materials';
 
@@ -240,9 +241,10 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     'bath_jendai', 'bath_waterproof', 'bath_tile', 'bath_grout', 'bath_partition',
     'bath_ceiling', 'bath_basin', 'bath_faucet', 'bath_toilet', 'bath_accessory',
   ];
-  const bathAreas = { '공용욕실': 5, '부부욕실': 5 };
+  // 욕실 1실 면적은 평형별로 다름 (areas.bathroomArea). 공용/부부 동일 평균값 사용.
+  const bathSingleArea = bathroomArea(p.pyeong);
+  const bathAreas = { '공용욕실': bathSingleArea, '부부욕실': bathSingleArea };
   // 욕실 둘레는 현재 산식에 사용하지 않음 — 면적 × 4.65로 벽 도면적을 환산 중.
-  // 향후 정밀화 시 bathPerims = { '공용욕실': 7.6, '부부욕실': 7.6 } 사용 예정.
 
   for (const bath of activeBathrooms(p)) {
     const enabled = bath === '공용욕실' ? scope.global.common_bath_set : scope.global.master_bath_set;
@@ -270,13 +272,15 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     push(lineItem('', '전체', 'tile_labor', bathCount * 2, grade));
   }
 
-  // ===== 6. 주방 (전체) =====
+  // ===== 6. 주방 (전체) — 평형별 표준 주방 길이 사용 =====
   if (scope.global.kitchen_set) {
-    const kitchenLen = 3.6;  // 표준 3.6m 환산
+    const kitchenLen = kitchenLength(p.pyeong);
+    // 하드웨어 수량도 길이에 비례 (3.6m 기준 16개 → 길이당 4.4개)
+    const hardwareQty = Math.max(8, Math.round(kitchenLen * 4.4));
     push(lineItem('', '주방', 'kitchen_furniture', kitchenLen, grade, 'per_m'));
     push(lineItem('', '주방', 'kitchen_top', kitchenLen, grade, 'per_m'));
     push(lineItem('', '주방', 'kitchen_midway', kitchenLen, grade, 'per_m'));
-    push(lineItem('', '주방', 'kitchen_hardware', 16, grade));
+    push(lineItem('', '주방', 'kitchen_hardware', hardwareQty, grade));
     push(lineItem('', '주방', 'kitchen_hood', 1, grade));
     push(lineItem('', '주방', 'kitchen_sink', 1, grade));
   }

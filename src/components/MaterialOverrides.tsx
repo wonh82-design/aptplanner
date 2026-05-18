@@ -4,6 +4,7 @@ import { memo, useMemo, useState } from 'react';
 import type { Grade, GradeSelection, Material, Quote, Scope } from '@/lib/types';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { fmtKRWShort } from '@/lib/calculator';
+import { clampPartitionLength } from '@/lib/areas';
 import { WORK_BUNDLES, bundleForWorkType, type WorkBundle } from '@/lib/material-bundles';
 
 type Props = {
@@ -533,7 +534,7 @@ function CarpentryScopePanel({
             max={50}
             step={0.5}
             value={g.partition_length}
-            onChange={(e) => setNum('partition_length', Math.max(0, Number(e.target.value) || 0))}
+            onChange={(e) => setNum('partition_length', clampPartitionLength(Number(e.target.value) || 0))}
             className="w-20 rounded-md border border-zinc-300 px-2 py-1 text-xs text-right focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           />
           <span className="text-[11px] text-zinc-600">m</span>

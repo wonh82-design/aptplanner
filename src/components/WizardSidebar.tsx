@@ -16,6 +16,7 @@
  * 모바일(< lg)에서는 hidden — 모바일은 LivePricePreview + 스택 레이아웃 사용.
  */
 
+import { useEffect, useState } from 'react';
 import { fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { activeRooms } from '@/lib/areas';
 import { BIG_WORK_GROUPS } from '@/lib/scope-meta';
@@ -36,10 +37,30 @@ type Props = {
   nextLabel?: string;
 };
 
+type SectionId = 'property' | 'scope' | 'category';
+
 export function WizardSidebar({
   step, property, scope, quote, gradeLabel,
   onJumpToStep, onPrev, onNext, prevLabel, nextLabel,
 }: Props) {
+  // 단계가 바뀌면 해당 단계의 섹션이 자동으로 펼쳐진다.
+  // 사용자는 단계 안에서 자유롭게 다른 섹션을 열고 닫을 수 있다 (state로 보존).
+  const [openMap, setOpenMap] = useState<Record<SectionId, boolean>>({
+    property: step === 1,
+    scope: step === 2,
+    category: step >= 3,
+  });
+  useEffect(() => {
+    setOpenMap({
+      property: step === 1,
+      scope: step === 2,
+      category: step >= 3,
+    });
+  }, [step]);
+
+  const toggle = (id: SectionId) => setOpenMap(m => ({ ...m, [id]: !m[id] }));
+  const open = (id: SectionId) => setOpenMap(m => ({ ...m, [id]: true }));
+
   return (
     <aside className="hidden lg:flex flex-col gap-3 w-72 flex-shrink-0 lg:h-full overflow-y-auto pb-2">
       {/*
@@ -74,9 +95,10 @@ export function WizardSidebar({
       {/* === 우리집 현황 — 모든 단계에서 노출. Step 1에서는 열어둠 === */}
       <SidebarSection
         title="우리집 현황"
-        defaultOpen={step === 1}
+        open={openMap.property}
+        onToggle={() => toggle('property')}
         editable={step !== 1}
-        onEdit={() => onJumpToStep(1)}
+        onEdit={() => { onJumpToStep(1); open('property'); }}
       >
         <KvRow k="평형" v={`${property.pyeong}평`} />
         <KvRow k="베이" v={`${property.bay}베이`} />
@@ -90,9 +112,10 @@ export function WizardSidebar({
       {/* === 공사 범위 — Step 1에선 placeholder, Step 2+에선 실데이터 === */}
       <SidebarSection
         title="공사 범위"
-        defaultOpen={step === 2}
+        open={openMap.scope}
+        onToggle={() => toggle('scope')}
         editable={step >= 2}
-        onEdit={() => onJumpToStep(2)}
+        onEdit={() => { onJumpToStep(2); open('scope'); }}
         locked={step === 1}
       >
         {step >= 2 ? (
@@ -107,9 +130,10 @@ export function WizardSidebar({
       {/* === 공종별 공사비 — Step 3+에서만 실데이터 === */}
       <SidebarSection
         title="공종별 공사비"
-        defaultOpen={step >= 3}
+        open={openMap.category}
+        onToggle={() => toggle('category')}
         editable={step >= 3}
-        onEdit={() => onJumpToStep(3)}
+        onEdit={() => { onJumpToStep(3); open('category'); }}
         locked={step < 3}
       >
         {step >= 3 ? (
@@ -153,10 +177,13 @@ export function WizardSidebar({
 // =====================================================
 
 function SidebarSection({
-  title, defaultOpen, editable, onEdit, locked, children,
+  title, open, onToggle, editable, onEdit, locked, children,
 }: {
   title: string;
-  defaultOpen?: boolean;
+  /** 펼침 여부 (controlled) */
+  open: boolean;
+  /** 사용자가 헤더 클릭 시 호출 */
+  onToggle: () => void;
   editable?: boolean;
   onEdit?: () => void;
   /** 아직 도달하지 않은 섹션 — 톤 다운, edit 비활성 */
@@ -165,12 +192,15 @@ function SidebarSection({
 }) {
   return (
     <details
-      open={defaultOpen}
+      open={open}
       className={`rounded-xl border shadow-sm group overflow-hidden ${
         locked ? 'bg-zinc-50/60 border-zinc-200' : 'bg-white border-zinc-200'
       }`}
     >
-      <summary className="cursor-pointer flex items-center justify-between gap-2 px-4 py-3 list-none hover:bg-zinc-50 transition">
+      <summary
+        onClick={(e) => { e.preventDefault(); onToggle(); }}
+        className="cursor-pointer flex items-center justify-between gap-2 px-4 py-3 list-none hover:bg-zinc-50 transition"
+      >
         <span className={`text-sm font-bold ${locked ? 'text-zinc-500' : 'text-zinc-900'}`}>
           {title}
           {locked && (

@@ -109,6 +109,45 @@ export function downlightCount(pyeong: number): number {
   return Math.round(interp(table as never, pyeong));
 }
 
+/**
+ * 평형별 욕실 1실 평균 면적 (㎡).
+ * 24평 4.0 / 34평 5.0 / 44평 6.0 / 60평+ 7.0 — 공용·부부 공통 평균치.
+ * 작은 평형(15평 이하)에서는 3.5㎡ 정도, 대형 평형(60평+)은 7㎡ 수준.
+ */
+export function bathroomArea(pyeong: number): number {
+  const table: Record<number, number> = { 15: 3.5, 24: 4.0, 34: 5.0, 44: 6.0, 60: 7.0 };
+  return interp(table as never, pyeong);
+}
+
+/**
+ * 평형별 표준 주방 길이 (m). ㄷ자/ㄱ자 평균값.
+ * 24평 3.0 / 34평 3.6 / 44평 4.5 / 60평+ 5.4 — 시트 v4 우리집 환산.
+ */
+export function kitchenLength(pyeong: number): number {
+  const table: Record<number, number> = { 15: 2.4, 24: 3.0, 34: 3.6, 44: 4.5, 60: 5.4 };
+  return interp(table as never, pyeong);
+}
+
+/**
+ * 평형 입력값 clamp — [6, 100] 평. 키보드로 우회된 비현실적 값 방어.
+ */
+export function clampPyeong(n: number): number {
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.max(6, Math.min(100, n));
+}
+
+/** 발코니 깊이 clamp — [0, 3] m */
+export function clampBalconyDepth(n: number): number {
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(3, n);
+}
+
+/** 가벽 길이 clamp — [0, 50] m */
+export function clampPartitionLength(n: number): number {
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(50, n);
+}
+
 /** 평형별 문짝 개수 권장 */
 export function doorCount(pyeong: number): number {
   if (pyeong < 27) return 5;

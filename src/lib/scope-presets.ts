@@ -146,7 +146,7 @@ export const PRESETS: Preset[] = [
     id: 'finish-only',
     icon: '🎨',
     label: '철거 최소화 + 마감재만 교체',
-    desc: '전기·설비·조명 그대로, 도배·마루·주방·욕실만',
+    desc: '철거·전기·설비·조명·목공 기본 포함, 도배·마루·주방·욕실 새로',
     apply(p, current) {
       return {
         rooms: makeRoomMap(p, current, () => makeRoomScope({
@@ -155,26 +155,26 @@ export const PRESETS: Preset[] = [
           wallpaper: true,
         })),
         global: {
-          demolition: false,        // 철거 최소화
-          insulation: false,
+          demolition: true,         // 철거공사 기본 포함
+          insulation: false,        // 단열 보강은 미포함 (옵션)
           heating_pipe: false,
           common_bath_set: true,    // 욕실공사
           master_bath_set: true,
           kitchen_set: true,        // 주방가구
           middoor: false,
           entry_furniture: false,
-          lighting: false,          // 조명 그대로
+          lighting: true,           // 조명공사 기본 포함
           balcony_floor_tile: false,
           balcony_paint: false,
-          electrical_base: false,   // 전기 그대로
-          switch_outlet: false,
+          electrical_base: true,    // 전기공사 기본 포함
+          switch_outlet: false,     // 스위치/콘센트는 옵션
           induction_line: false,
-          plumbing_base: false,     // 설비 그대로
+          plumbing_base: true,      // 설비공사 기본 포함
           thermostat: false,
           silicon: true,            // 마감 디테일은 일반적으로 포함
           expansion_report: needsExpansionReport(current),
-          // 마감재만 = 목공사 최소화
-          carpentry_base: false,
+          // 목공사 — 기본 목공 포함 (문틀·문선·기본 보강). 천정 목공은 옵션
+          carpentry_base: true,
           carpentry_ceiling: false,
           partition_length: 0,
           no_molding: false,

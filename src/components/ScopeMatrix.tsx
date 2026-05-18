@@ -9,9 +9,14 @@ type Props = {
   property: Property;
   value: Scope;
   onChange: (next: Scope) => void;
+  /**
+   * 확장공사 카드 클릭 시 호출. 확장 상태는 Step 1 발코니 확장 현황에서만 변경 가능.
+   * 미전달 시에는 fallback으로 기존 자동 토글 동작 사용 (호환성 유지).
+   */
+  onJumpToProperty?: () => void;
 };
 
-export function ScopeMatrix({ property, value, onChange }: Props) {
+export function ScopeMatrix({ property, value, onChange, onJumpToProperty }: Props) {
   const visibleRooms = activeRooms(property) as RoomId[];
 
   // ===== 빠른 시작 프리셋 — 확장 무관 =====
@@ -79,25 +84,18 @@ export function ScopeMatrix({ property, value, onChange }: Props) {
 
   /** 그룹 토글 — ON이면 모두 OFF, OFF이면 모두 ON (룸 키는 defaultRoomsForWork 사용) */
   const toggleGroup = (group: BigWorkGroup) => {
+    // 확장공사는 카드에서 자동 토글하지 않는다 — 발코니 확장 상태는 Step 1에서만 공간별로 변경.
+    // 카드 클릭 시 Step 1로 점프하여 사용자가 의도적으로 공간별 확장 여부를 결정하게 한다.
+    if (group.id === 'expansion') {
+      if (onJumpToProperty) {
+        onJumpToProperty();
+      }
+      return;
+    }
+
     const turnOn = !isGroupActive(group);
     const nextRooms = { ...value.rooms };
     const nextGlobal = { ...value.global };
-
-    // 확장공사 — already-expanded 방은 expansion_after=true 보존, 나머지만 토글
-    if (group.id === 'expansion') {
-      for (const r of visibleRooms) {
-        const rs = nextRooms[r];
-        if (!rs) continue;
-        nextRooms[r] = {
-          ...rs,
-          // 이미 확장된 방: 그대로 true (사실 상태). 그 외 방: 토글값
-          expansion_after: rs.expansion_current ? true : turnOn,
-        };
-      }
-      nextGlobal.expansion_report = turnOn;
-      onChange({ ...value, rooms: nextRooms, global: nextGlobal });
-      return;
-    }
 
     // 목공사 — 카드 클릭 시: ON이면 기본 목공+천정만 ON (무몰딩/문선/걸레는 사용자가 별도 선택)
     if (group.id === 'carpentry') {

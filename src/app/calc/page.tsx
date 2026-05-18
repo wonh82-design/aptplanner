@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { PropertyForm } from '@/components/PropertyForm';
 import { ScopeMatrix } from '@/components/ScopeMatrix';
@@ -20,8 +20,27 @@ import { TipsPdfTemplate } from '@/components/pdf/TipsPdfTemplate';
 import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
 import { buildQuote, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { exportPagedPdf } from '@/lib/pdf/export';
+import type { GradeSelection, Property, Scope } from '@/lib/types';
 
 type Step = 1 | 2 | 3 | 4;
+
+const STORAGE_KEY = 'apt-planner:calc:v1';
+const STORAGE_VERSION = 1;
+
+/** 단일 세션 동안 변하지 않는 quote_id 생성 */
+function generateQuoteId(): string {
+  return 'Q-' + new Date().toISOString().slice(0, 10) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+}
+
+type StoredState = {
+  version: number;
+  property: Property;
+  scope: Scope;
+  grade: GradeSelection;
+  step: Step;
+  maxReached: Step;
+  quoteId: string;
+};
 
 export default function CalcPage() {
   const [step, setStep] = useState<Step>(1);
@@ -32,17 +51,71 @@ export default function CalcPage() {
   const [downloading, setDownloading] = useState<string | null>(null);
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [consultOpen, setConsultOpen] = useState(false);
+  // quote_id는 세션 단위로 freeze — 입력 변경 시 ID가 바뀌지 않는다.
+  const [quoteId, setQuoteId] = useState<string>(() => generateQuoteId());
+  // localStorage 복원 알림 배너
+  const [restored, setRestored] = useState(false);
+  // hydration 완료 플래그 — 완료 전엔 저장 useEffect를 무시 (default 덮어쓰기 방지)
+  const hydratedRef = useRef(false);
 
+  // ---- localStorage hydrate (1회) ----
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) { hydratedRef.current = true; return; }
+      const data = JSON.parse(raw) as Partial<StoredState>;
+      if (data.version !== STORAGE_VERSION) { hydratedRef.current = true; return; }
+      if (data.property) setProperty(data.property);
+      if (data.scope) setScope(data.scope);
+      if (data.grade) setGrade(data.grade);
+      if (data.step) setStep(data.step);
+      if (data.maxReached) setMaxReached(data.maxReached);
+      if (data.quoteId) setQuoteId(data.quoteId);
+      setRestored(true);
+    } catch { /* ignore */ }
+    hydratedRef.current = true;
+  }, []);
+
+  // ---- localStorage persist (state 변경마다) ----
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    try {
+      const data: StoredState = {
+        version: STORAGE_VERSION,
+        property, scope, grade, step, maxReached, quoteId,
+      };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch { /* ignore */ }
+  }, [property, scope, grade, step, maxReached, quoteId]);
+
+  // ---- 평형이 0이 되면 Step 1로 강제 복귀 + 진행 차단 ----
+  const pyeongValid = property.pyeong > 0;
+  useEffect(() => {
+    if (!pyeongValid && (step > 1 || maxReached > 1)) {
+      setStep(1);
+      setMaxReached(1);
+    }
+  }, [pyeongValid, step, maxReached]);
+
+  // quote_id는 useMemo 결과를 freeze
   const quote = useMemo(
-    () => buildQuote(property, scope, grade),
-    [property, scope, grade]
+    () => {
+      const q = buildQuote(property, scope, grade);
+      return { ...q, quote_id: quoteId };
+    },
+    [property, scope, grade, quoteId]
   );
+
+  // 견적이 비어 있는지 (모든 공사 OFF 또는 평형 0)
+  const scopeEmpty = !pyeongValid || quote.line_items.length === 0 || quote.totals.grand_total === 0;
 
   const quoteRootRef = useRef<HTMLDivElement>(null);
   const planRootRef = useRef<HTMLDivElement>(null);
   const tipsRootRef = useRef<HTMLDivElement>(null);
 
   const goTo = (s: Step) => {
+    // 평형 미입력 상태에서 Step 2+ 진입 차단
+    if (s > 1 && !pyeongValid) return;
     setStep(s);
     if (s > maxReached) setMaxReached(s);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -53,8 +126,13 @@ export default function CalcPage() {
     setScope(defaultScope());
     setGrade(defaultGrade());
     setMaxReached(1);
+    setQuoteId(generateQuoteId());
+    setRestored(false);
+    try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
     goTo(1);
   };
+
+  const dismissRestored = () => setRestored(false);
 
   const downloadPdf = async (
     which: 'quote' | 'plan' | 'tips',
@@ -90,10 +168,29 @@ export default function CalcPage() {
               quote={quote}
               gradeLabel={grade.default}
               onJumpToStep={goTo}
-              onNext={() => goTo(2)}
+              onNext={pyeongValid ? () => goTo(2) : undefined}
               nextLabel="공사 범위"
             />
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
+              {restored && (
+                <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 flex items-center gap-2 text-xs text-emerald-900">
+                  <span className="flex-shrink-0">↻</span>
+                  <span className="flex-1">이전에 입력한 내용을 자동으로 복원했어요.</span>
+                  <button
+                    onClick={reset}
+                    className="text-emerald-700 hover:text-emerald-900 underline underline-offset-2 font-medium whitespace-nowrap"
+                  >
+                    처음부터 시작
+                  </button>
+                  <button
+                    onClick={dismissRestored}
+                    className="text-emerald-600 hover:text-emerald-900 ml-1"
+                    aria-label="알림 닫기"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
               <PropertyForm
                 value={property}
                 onChange={setProperty}
@@ -109,10 +206,19 @@ export default function CalcPage() {
                   });
                 }}
               />
+              {!pyeongValid && (
+                <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  💡 평형을 먼저 입력해주세요. 입력하시면 공사 범위 선택으로 진행할 수 있습니다.
+                </div>
+              )}
               <div className="lg:hidden">
                 <StepNav
                   right={
-                    <button onClick={() => goTo(2)} className="btn-primary">
+                    <button
+                      onClick={() => goTo(2)}
+                      disabled={!pyeongValid}
+                      className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       공사 범위 선택 →
                     </button>
                   }
@@ -142,7 +248,12 @@ export default function CalcPage() {
               <div className="lg:hidden">
                 <LivePricePreview quote={quote} step={2} />
               </div>
-              <ScopeMatrix property={property} value={scope} onChange={setScope} />
+              <ScopeMatrix
+                property={property}
+                value={scope}
+                onChange={setScope}
+                onJumpToProperty={() => goTo(1)}
+              />
 
               <div className="lg:hidden">
                 <StepNav
@@ -207,26 +318,35 @@ export default function CalcPage() {
         {/* ===== Step 4: 공사비 결과 — 풀폭 결과 페이지 ===== */}
         {step === 4 && (
           <div className="max-w-5xl mx-auto flex flex-col gap-5">
-            <ResultBanner quote={quote} gradeLabel={grade.default} />
+            {scopeEmpty ? (
+              <EmptyScopeNotice
+                onBackToScope={() => goTo(2)}
+                onReset={reset}
+              />
+            ) : (
+              <>
+                <ResultBanner quote={quote} gradeLabel={grade.default} />
 
-            {/* 견적 상세 내역 — 총공사비 바로 아래 항상 펼침 */}
-            <QuotePanel quote={quote} />
+                {/* 견적 상세 내역 — 총공사비 바로 아래 항상 펼침 */}
+                <QuotePanel quote={quote} />
 
-            {/* 3종 서비스 가격 카드 */}
-            <ServicesPricing
-              pyeong={property.pyeong}
-              onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
-              downloadingFree={downloading === 'quote'}
-              onApplySpec={() => setPremiumOpen(true)}
-              onApplyConsult={() => setConsultOpen(true)}
-              recommended="spec"
-            />
+                {/* 3종 서비스 가격 카드 */}
+                <ServicesPricing
+                  pyeong={property.pyeong}
+                  onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
+                  downloadingFree={downloading === 'quote'}
+                  onApplySpec={() => setPremiumOpen(true)}
+                  onApplyConsult={() => setConsultOpen(true)}
+                  recommended="spec"
+                />
 
-            {/* 신뢰 nudge — 누가 만들었나 */}
-            <TrustNudge />
+                {/* 신뢰 nudge — 누가 만들었나 */}
+                <TrustNudge />
 
-            {/* 마무리 nudge */}
-            <FinalNudge />
+                {/* 마무리 nudge */}
+                <FinalNudge />
+              </>
+            )}
 
             <StepNav
               left={
@@ -365,6 +485,48 @@ function TrustNudge() {
         <span className="text-xs text-blue-700 font-semibold group-hover:underline">소개 보기 →</span>
       </div>
     </Link>
+  );
+}
+
+/**
+ * 견적이 비어있을 때(공사 범위 0건 또는 평형 미입력) 결과 페이지 대신 표시되는 안내 카드.
+ * PDF 다운로드·스펙북·컨설팅 신청 버튼은 모두 비노출 — 사용자를 Step 2로 유도.
+ */
+function EmptyScopeNotice({
+  onBackToScope, onReset,
+}: {
+  onBackToScope: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-orange-50 to-white p-6 sm:p-8 text-center">
+      <div className="text-4xl mb-3">📋</div>
+      <h2 className="text-lg sm:text-xl font-bold text-zinc-900 mb-2">
+        아직 선택된 공사 범위가 없어요
+      </h2>
+      <p className="text-sm text-zinc-600 leading-relaxed max-w-md mx-auto mb-5">
+        공사 범위 단계에서 시공할 공종을 한 개 이상 선택해야
+        예상 공사비가 산출됩니다.
+        <br />
+        <span className="text-[11px] text-zinc-500">
+          빠른 시작 프리셋(올수리·마감재만 등)을 선택하시면 편리해요.
+        </span>
+      </p>
+      <div className="flex flex-col sm:flex-row gap-2 justify-center">
+        <button
+          onClick={onBackToScope}
+          className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition active:scale-[0.98]"
+        >
+          공사 범위 선택하러 가기 →
+        </button>
+        <button
+          onClick={onReset}
+          className="px-5 py-2.5 rounded-lg border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700 font-medium text-sm transition"
+        >
+          처음부터 다시 시작
+        </button>
+      </div>
+    </div>
   );
 }
 
