@@ -44,30 +44,6 @@ export function ServicesPricing({
 
   return (
     <div className="space-y-5">
-      {/* ===== 절감 가치 ANCHOR — 평형 기반 ===== */}
-      {savings && (
-        <div className="rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-2 border-amber-300 p-5 sm:p-7 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-200/40 to-transparent rounded-full -translate-y-1/3 translate-x-1/3" />
-          <div className="relative">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-amber-700 mb-1">
-              {pyeong}평 기준 · 추가금 분쟁 방지 시 절감 가능액
-            </div>
-            <div className="text-2xl sm:text-4xl font-extrabold text-zinc-900 leading-tight">
-              <span className="text-amber-700">{fmtSaving(savings.min)} ~ {fmtSaving(savings.max)}</span>
-            </div>
-            <p className="text-sm text-zinc-700 mt-2 leading-relaxed">
-              같은 사양으로 비교 견적을 받으면 평균 <strong>{fmtSaving(savings.min)} 이상</strong>,
-              추가금 분쟁까지 막으면 최대 <strong className="text-amber-700">{fmtSaving(savings.max)}</strong> 까지 절약 가능합니다.
-            </p>
-            <div className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-white border border-amber-300">
-              <span className="text-xs font-semibold text-zinc-800">
-                한 끼 식사값 ₩29,000 = 최대 절감액의 <span className="text-amber-700">단 {specSavingMax ?? 0.1}%</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ===== 3종 가격 카드 ===== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* 무료 */}

@@ -890,11 +890,7 @@ export function Footer() {
       lineHeight: 1.7,
       borderRadius: '4px',
     }}>
-      <div style={{ fontWeight: 700, color: '#111827', marginBottom: '4px' }}>본 자료의 성격</div>
-      <p style={{ margin: 0 }}>
-        본 보고서는 표준 시장가·표준 면적 기반 <strong>예상치</strong>이며, 실제 시공·자재·평면 차이에 따라 변동될 수 있습니다.
-      </p>
-      <div style={{ fontWeight: 700, color: '#111827', marginTop: '8px', marginBottom: '4px' }}>중립성 약속</div>
+      <div style={{ fontWeight: 700, color: '#111827', marginBottom: '4px' }}>중립성 약속</div>
       <p style={{ margin: 0 }}>
         apt-planner는 어떤 인테리어 업체와도 광고비·수수료·제휴 관계가 없습니다.
       </p>
