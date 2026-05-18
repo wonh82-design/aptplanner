@@ -11,6 +11,7 @@
 
 import { useState } from 'react';
 import { PAYMENT_ACCOUNT, PAYMENT_ACCOUNT_READY } from '@/lib/payment';
+import { track } from '@/lib/analytics';
 
 const EMPTY = '—';
 
@@ -64,6 +65,14 @@ export function ConsultRequestModal({ onClose, meta }: Props) {
         );
         return;
       }
+      // 등록 성공 — GA4 conversion event
+      track('submit_consult_request', {
+        pyeong: typeof meta?.pyeong === 'number' ? meta.pyeong : undefined,
+        grade: typeof meta?.grade === 'string' ? meta.grade : undefined,
+        grand_total: typeof meta?.grand_total === 'number' ? meta.grand_total : undefined,
+        quote_id: typeof meta?.quote_id === 'string' ? meta.quote_id : undefined,
+        planned_month: plannedMonth,
+      });
       setStatus('ok');
     } catch {
       setStatus('error');

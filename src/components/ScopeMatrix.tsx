@@ -4,6 +4,7 @@ import type { Property, Scope, RoomId } from '@/lib/types';
 import { activeRooms } from '@/lib/areas';
 import { BIG_WORK_GROUPS, defaultRoomsForWork, type BigWorkGroup } from '@/lib/scope-meta';
 import { PRESETS } from '@/lib/scope-presets';
+import { track } from '@/lib/analytics';
 
 type Props = {
   property: Property;
@@ -165,7 +166,14 @@ export function ScopeMatrix({ property, value, onChange, onJumpToProperty }: Pro
           {visiblePresets.map((preset, idx) => (
             <button
               key={preset.id}
-              onClick={() => onChange(preset.apply(property, value))}
+              onClick={() => {
+                track('select_preset', {
+                  preset_id: preset.id,
+                  preset_label: preset.label,
+                  pyeong: property.pyeong,
+                });
+                onChange(preset.apply(property, value));
+              }}
               className="flex flex-col items-start gap-0.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left
                          hover:border-blue-400 hover:bg-blue-50/30 active:scale-[0.98] transition-all"
             >

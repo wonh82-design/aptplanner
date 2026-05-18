@@ -20,6 +20,7 @@ import { TipsPdfTemplate } from '@/components/pdf/TipsPdfTemplate';
 import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
 import { buildQuote, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { exportPagedPdf } from '@/lib/pdf/export';
+import { track } from '@/lib/analytics';
 import type { GradeSelection, Property, Scope } from '@/lib/types';
 
 type Step = 1 | 2 | 3 | 4;
@@ -116,6 +117,15 @@ export default function CalcPage() {
   const goTo = (s: Step) => {
     // 평형 미입력 상태에서 Step 2+ 진입 차단
     if (s > 1 && !pyeongValid) return;
+    // 처음 도달하는 단계만 complete_step 이벤트로 트래킹 (단순 점프는 제외)
+    if (s > maxReached) {
+      track('complete_step', {
+        step: s,
+        from_step: step,
+        pyeong: property.pyeong,
+        grade: grade.default,
+      });
+    }
     setStep(s);
     if (s > maxReached) setMaxReached(s);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -143,12 +153,48 @@ export default function CalcPage() {
     setDownloading(which);
     try {
       await exportPagedPdf(ref.current, { filename, orientation: 'l' });
+      // 다운로드 성공 시에만 트래킹 — 실패/취소는 제외
+      if (which === 'quote') {
+        track('download_quote_pdf', {
+          pyeong: property.pyeong,
+          bay: property.bay,
+          rooms: property.rooms,
+          grade: grade.default,
+          region: property.region,
+          age: property.age,
+          grand_total: quote.totals.grand_total,
+          line_item_count: quote.line_items.length,
+          quote_id: quote.quote_id,
+        });
+      }
     } catch (e) {
       console.error('PDF export failed', e);
       alert('PDF 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setDownloading(null);
     }
+  };
+
+  /** 스펙북 신청 모달 오픈 + 트래킹 */
+  const openSpecModal = () => {
+    track('apply_spec_book_open', {
+      pyeong: property.pyeong,
+      grade: grade.default,
+      grand_total: quote.totals.grand_total,
+      quote_id: quote.quote_id,
+    });
+    setPremiumOpen(true);
+  };
+
+  /** 컨설팅 신청 모달 오픈 + 트래킹 */
+  const openConsultModal = () => {
+    track('apply_consult_open', {
+      pyeong: property.pyeong,
+      grade: grade.default,
+      grand_total: quote.totals.grand_total,
+      quote_id: quote.quote_id,
+    });
+    setConsultOpen(true);
   };
 
   return (
@@ -335,8 +381,8 @@ export default function CalcPage() {
                   pyeong={property.pyeong}
                   onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
                   downloadingFree={downloading === 'quote'}
-                  onApplySpec={() => setPremiumOpen(true)}
-                  onApplyConsult={() => setConsultOpen(true)}
+                  onApplySpec={openSpecModal}
+                  onApplyConsult={openConsultModal}
                   recommended="spec"
                 />
 
