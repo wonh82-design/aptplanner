@@ -3,17 +3,20 @@
 /**
  * 무료 예상 공사비 PDF — A4 가로 (1060×720).
  *
- * 새 구성 (4페이지):
- *   · 표지       : 제목 + 서비스 개략 소개
- *   · 페이지 1   : 우리집 현황 및 공사 범위
- *   · 페이지 2   : 총 예상 공사비 + 공종별 공사비 + 공사비 범위 설명
- *   · 페이지 3   : 유료 서비스 소개 (스펙북 + 전문가 컨설팅)
+ * 구성 (표지 + 본문 4페이지 = PDF 5페이지):
+ *   · 표지        : 제목 + 서비스 개략 소개
+ *   · PDF 2페이지 : 우리집 현황 및 공사 범위
+ *   · PDF 3페이지 : 총 예상 공사비 + 공종별 공사비 + 공사비 범위 설명
+ *   · PDF 4페이지 : 공종별 선택 자재 — 가성비·표준·고급 등급별 주력자재 비교
+ *                  (자재 라인 수가 많으면 4-A, 4-B로 자동 분할)
+ *   · PDF 5페이지 : 유료 서비스 소개 (스펙북 + 전문가 컨설팅)
  *
- * 라인 항목 상세 표는 무료 PDF에서 제외 — 유료(인테리어 계획서)에서 제공.
+ * 라인 항목 상세 단가 표는 무료 PDF에서 제외 — 유료(인테리어 계획서)에서 제공.
  */
 
-import type { Quote, RoomId, RoomScope } from '@/lib/types';
+import type { Quote, RoomId, RoomScope, Grade } from '@/lib/types';
 import { fmtKRW, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
+import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { PdfCover } from './PdfCover';
 import { PdfShareQr } from './PdfShareQr';
 import { ROOM_WORK_META, GLOBAL_GROUPS, ROOM_META } from '@/lib/scope-meta';
@@ -39,6 +42,16 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
     return rs && !rs.expansion_current && rs.expansion_after;
   });
 
+  // ===== 공종별 선택 자재 표시 데이터 추출 =====
+  // line_items에서 material_id가 있는 work_type만 등장 순서대로 중복 제거
+  const materialRows = extractMaterialRows(quote);
+  // 한 페이지에 들어갈 최대 row 수 (행 높이 ~22px × ~22행 = 484px ≤ 본문 영역 ~558px)
+  const MATERIAL_ROWS_PER_PAGE = 22;
+  const materialChunks = chunkArr(materialRows, MATERIAL_ROWS_PER_PAGE);
+  // 자재 페이지가 한 페이지로 들어가지 않을 때 4-A, 4-B 식으로 분할 라벨
+  const materialPageCount = Math.max(1, materialChunks.length);
+  const totalBodyPages = 2 + materialPageCount + 1; // 현황 + 공사비 + 자재(N) + 유료
+
   return (
     <div ref={rootRef}>
       {/* === 표지 (skill §5.2: 타이틀-태그 중복 제거 / §5.3: [유료성]·[문서종류] 톤 통일) === */}
@@ -60,7 +73,7 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
       </div>
 
       {/* === 페이지 1: 우리집 현황 및 공사 범위 === */}
-      <BodyPage docNo={quote.quote_id} date={date} pageLabel="1 / 3 · 우리집 현황 및 공사 범위">
+      <BodyPage docNo={quote.quote_id} date={date} pageLabel={`1 / ${totalBodyPages} · 우리집 현황 및 공사 범위`}>
         <Section num="01" title="우리집 현황">
           <KeyValGrid items={[
             { k: '평형 (공급)', v: `${quote.property.pyeong}평` },
@@ -86,7 +99,7 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
       </BodyPage>
 
       {/* === 페이지 2: 총 예상 공사비 + 공종별 공사비 + 범위 설명 === */}
-      <BodyPage docNo={quote.quote_id} date={date} pageLabel="2 / 3 · 예상 공사비">
+      <BodyPage docNo={quote.quote_id} date={date} pageLabel={`2 / ${totalBodyPages} · 예상 공사비`}>
         <HeroBox
           gradeLabel={gradeLabel}
           pyeong={quote.property.pyeong}
@@ -107,8 +120,37 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
         </div>
       </BodyPage>
 
-      {/* === 페이지 3: 유료 서비스 소개 + 공유 QR === */}
-      <BodyPage docNo={quote.quote_id} date={date} pageLabel="3 / 3 · 다음 단계 — 유료 서비스">
+      {/* === 페이지 3 ~ 3+N: 공종별 선택 자재 (등급별 주력자재 비교) === */}
+      {materialChunks.map((chunk, idx) => {
+        const pageNo = 3 + idx;
+        const suffix = materialPageCount > 1 ? ` (${idx + 1}/${materialPageCount})` : '';
+        return (
+          <BodyPage
+            key={`mat-${idx}`}
+            docNo={quote.quote_id}
+            date={date}
+            pageLabel={`${pageNo} / ${totalBodyPages} · 공종별 선택 자재${suffix}`}
+          >
+            <Section num="04" title={`공종별 선택 자재${suffix}`} compact>
+              {idx === 0 && (
+                <p style={{ margin: '0 0 8px', fontSize: '10.5px', color: '#4b5563', lineHeight: 1.6 }}>
+                  각 공종마다 <strong>가성비·표준·고급</strong> 등급의 주력 자재를 한눈에 비교합니다.
+                  <span style={{ marginLeft: '6px', padding: '1px 6px', background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '3px', fontSize: '10px', fontWeight: 700, color: '#92400e' }}>✓ 노란색</span>
+                  <span style={{ marginLeft: '4px' }}>으로 강조된 자재가 현재 우리집 견적에 적용된 자재입니다.</span>
+                </p>
+              )}
+              <MaterialSelectionTable rows={chunk} />
+            </Section>
+          </BodyPage>
+        );
+      })}
+
+      {/* === 마지막 페이지: 유료 서비스 소개 + 공유 QR === */}
+      <BodyPage
+        docNo={quote.quote_id}
+        date={date}
+        pageLabel={`${totalBodyPages} / ${totalBodyPages} · 다음 단계 — 유료 서비스`}
+      >
         <UpsellSection pyeong={quote.property.pyeong} />
         <div style={{ marginTop: '14px' }}>
           <PdfShareQr
@@ -119,6 +161,144 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
         <Footer />
       </BodyPage>
     </div>
+  );
+}
+
+// =====================================================
+// 공종별 선택 자재 — 데이터 추출 + 페이지 컴포넌트
+// =====================================================
+
+type MaterialRow = {
+  wt: string;          // work_type
+  label: string;       // 한글 라벨
+  effGrade: Grade;     // 실제 견적에 적용된 등급
+};
+
+/**
+ * Quote.line_items에서 material_id가 있는 공종을 등장 순서대로 중복 제거하여 추출.
+ * 각 행에 effective grade (default + overrides) 정보 부착.
+ */
+function extractMaterialRows(quote: Quote): MaterialRow[] {
+  const seen = new Set<string>();
+  const rows: MaterialRow[] = [];
+  for (const it of quote.line_items) {
+    if (!it.material_id || seen.has(it.work_type)) continue;
+    seen.add(it.work_type);
+    const overrideG = quote.grade.overrides[it.work_type] as Grade | undefined;
+    rows.push({
+      wt: it.work_type,
+      label: labelOf(it.work_type),
+      effGrade: overrideG ?? quote.grade.default,
+    });
+  }
+  return rows;
+}
+
+/** 배열을 size 크기 청크로 분할. 빈 배열이면 [[]] (1페이지는 보장) */
+function chunkArr<T>(arr: T[], size: number): T[][] {
+  if (arr.length === 0) return [[]];
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+const GRADES_DISPLAY: Grade[] = ['가성비', '표준', '고급'];
+
+/**
+ * 공종별 선택 자재 테이블 — 한 페이지 분량.
+ * 4컬럼: 공종 | 가성비 자재 | 표준 자재 | 고급 자재
+ * 현재 적용된 등급은 노란색 배경 + ✓ 마커로 강조.
+ */
+function MaterialSelectionTable({ rows }: { rows: MaterialRow[] }) {
+  if (rows.length === 0) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center', color: '#9ca3af', fontSize: '11px' }}>
+        선택된 자재가 없습니다. 공사 범위에서 시공 항목을 선택해주세요.
+      </div>
+    );
+  }
+  return (
+    <table style={{
+      width: '100%',
+      borderCollapse: 'collapse',
+      fontSize: '10px',
+      border: '1px solid #e5e7eb',
+      borderRadius: '6px',
+      overflow: 'hidden',
+      tableLayout: 'fixed',
+    }}>
+      <colgroup>
+        <col style={{ width: '14%' }} />
+        <col style={{ width: '28.6%' }} />
+        <col style={{ width: '28.7%' }} />
+        <col style={{ width: '28.7%' }} />
+      </colgroup>
+      <thead>
+        <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+          <th style={{ ...thStyle, textAlign: 'left' }}>공종</th>
+          {GRADES_DISPLAY.map(g => (
+            <th key={g} style={{ ...thStyle, textAlign: 'left' }}>
+              {g}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(row => (
+          <tr key={row.wt}>
+            <td style={{
+              ...tdL,
+              fontSize: '10px',
+              fontWeight: 700,
+              color: '#1f2937',
+              borderRight: '1px solid #f3f4f6',
+              padding: '5px 8px',
+            }}>
+              {row.label}
+            </td>
+            {GRADES_DISPLAY.map(g => {
+              const mat = getPrimaryMaterial(row.wt, g);
+              const isSel = row.effGrade === g;
+              const text = mat
+                ? (mat.installer_spec?.trim() ||
+                   [mat.brand, mat.product_line].filter(Boolean).join(' ').trim() ||
+                   '—')
+                : '—';
+              return (
+                <td
+                  key={g}
+                  style={{
+                    padding: '5px 8px',
+                    borderBottom: '1px solid #f3f4f6',
+                    fontSize: '9.5px',
+                    lineHeight: 1.45,
+                    background: isSel ? '#fef9c3' : 'transparent',
+                    color: isSel ? '#713f12' : '#4b5563',
+                    fontWeight: isSel ? 600 : 400,
+                    verticalAlign: 'top',
+                    wordBreak: 'keep-all',
+                    overflowWrap: 'break-word',
+                  }}
+                >
+                  {isSel && (
+                    <span style={{
+                      display: 'inline-block',
+                      marginRight: '4px',
+                      fontSize: '9px',
+                      fontWeight: 800,
+                      color: '#92400e',
+                    }}>
+                      ✓
+                    </span>
+                  )}
+                  {text}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -451,7 +631,7 @@ function RangeBand({ label, range, desc, color }: { label: string; range: string
 function UpsellSection({ pyeong }: { pyeong: number }) {
   return (
     <div>
-      <Section num="04" title="다음 단계 — 유료 서비스로 진짜 비교 견적 받기">
+      <Section num="05" title="다음 단계 — 유료 서비스로 진짜 비교 견적 받기">
         <p style={{ margin: '0 0 14px', fontSize: '11.5px', color: '#4b5563', lineHeight: 1.7 }}>
           위 보고서는 <strong>우리집 사양의 시장가 기준 예상치</strong>입니다. 실제 견적은 인테리어 업체와의 협의가 필요한데,
           이때 <strong>여러 업체에 같은 조건으로 비교 견적을 받을 수 있는 도구</strong>가 있으면 절감 폭이 커집니다.
