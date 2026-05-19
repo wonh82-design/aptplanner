@@ -6,6 +6,7 @@ import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { fmtKRWShort } from '@/lib/calculator';
 import { clampPartitionLength } from '@/lib/areas';
 import { WORK_BUNDLES, bundleForWorkType, type WorkBundle } from '@/lib/material-bundles';
+import { MaterialDetailModal } from './MaterialDetailModal';
 
 type Props = {
   quote: Quote;
@@ -61,6 +62,8 @@ type DisplayItem =
 
 export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange }: Props) {
   const [showAll, setShowAll] = useState(false);
+  // '자세히' 모달 — 어떤 work_type을 펼쳤는지
+  const [detailWorkType, setDetailWorkType] = useState<string | null>(null);
 
   // 1) 견적에 등장하는 work_type 집계 (등장 순서·총 qty 보존)
   const workInfoList = useMemo(() => {
@@ -174,6 +177,7 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
               hasOverride={value.overrides[item.work.wt] !== undefined}
               onSelectGrade={(g) => setGrade(item.work.wt, g)}
               onClear={() => clearOverride(item.work.wt)}
+              onShowDetail={() => setDetailWorkType(item.work.wt)}
             />
           ) : (
             <BundleCard
@@ -186,12 +190,22 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
               onSelectBundleGrade={(g) => setBundleGrade(item.bundle, g)}
               onSelectComponentGrade={(wt, g) => setGrade(wt, g)}
               onClearBundle={() => clearBundleOverride(item.bundle)}
+              onShowDetail={(wt) => setDetailWorkType(wt)}
               scope={scope}
               onScopeChange={onScopeChange}
             />
           )
         )}
       </div>
+
+      {/* '자세히' 모달 — 등급별 자재 비교 */}
+      {detailWorkType && (
+        <MaterialDetailModal
+          workType={detailWorkType}
+          currentGrade={effectiveGrade(detailWorkType)}
+          onClose={() => setDetailWorkType(null)}
+        />
+      )}
 
       {displayItems.length > TOP_N && (
         <button
@@ -211,7 +225,7 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
 
 function SingleCard({
   work, label, effectiveGrade: curGrade, hasOverride,
-  onSelectGrade, onClear,
+  onSelectGrade, onClear, onShowDetail,
 }: {
   work: WorkInfo;
   label: string;
@@ -219,20 +233,22 @@ function SingleCard({
   hasOverride: boolean;
   onSelectGrade: (g: Grade) => void;
   onClear: () => void;
+  onShowDetail: () => void;
 }) {
   return (
     <div className={`rounded-lg border ${hasOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
-      <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-zinc-900">{label}</span>
+      <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm font-semibold text-zinc-900 truncate">{label}</span>
+          <DetailButton onClick={onShowDetail} label={`${label} 자세히 보기`} />
           {hasOverride && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">개별 설정</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium whitespace-nowrap">개별 설정</span>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] text-zinc-500 tabular-nums">현재 {fmtKRWShort(work.sub)}</span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <span className="text-[11px] text-zinc-500 tabular-nums whitespace-nowrap">현재 {fmtKRWShort(work.sub)}</span>
           {hasOverride && (
-            <button onClick={onClear} className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2">
+            <button onClick={onClear} className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 whitespace-nowrap">
               초기화
             </button>
           )}
@@ -282,6 +298,7 @@ function bundleMaterialSummary(works: WorkInfo[], grade: Grade): string {
 function BundleCard({
   bundle, works, totalSub, gradeSelection, effectiveGrade,
   onSelectBundleGrade, onSelectComponentGrade, onClearBundle,
+  onShowDetail,
   scope, onScopeChange,
 }: {
   bundle: WorkBundle;
@@ -292,6 +309,8 @@ function BundleCard({
   onSelectBundleGrade: (g: Grade) => void;
   onSelectComponentGrade: (wt: string, g: Grade) => void;
   onClearBundle: () => void;
+  /** 번들 안의 특정 work_type을 자세히 보기 모달로 열기 */
+  onShowDetail: (workType: string) => void;
   scope?: Scope;
   onScopeChange?: (s: Scope) => void;
 }) {
@@ -332,6 +351,12 @@ function BundleCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold text-zinc-900">{bundle.label}</span>
+            {works.length > 0 && (
+              <DetailButton
+                onClick={() => onShowDetail(works[0].wt)}
+                label={`${bundle.label} 자세히 보기`}
+              />
+            )}
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">
               세트 · {works.length}개 자재
             </span>
@@ -476,6 +501,7 @@ function BundleCard({
                   work={w}
                   effectiveGrade={effectiveGrade(w.wt)}
                   onSelectGrade={(g) => onSelectComponentGrade(w.wt, g)}
+                  onShowDetail={() => onShowDetail(w.wt)}
                 />
               ))}
             </div>
@@ -613,11 +639,12 @@ function CarpentryToggle({
 // =====================================================
 
 function ComponentRow({
-  work, effectiveGrade, onSelectGrade,
+  work, effectiveGrade, onSelectGrade, onShowDetail,
 }: {
   work: WorkInfo;
   effectiveGrade: Grade;
   onSelectGrade: (g: Grade) => void;
+  onShowDetail: () => void;
 }) {
   const label = labelOf(work.wt);
   const currentMat = getPrimaryMaterial(work.wt, effectiveGrade);
@@ -625,7 +652,10 @@ function ComponentRow({
   return (
     <div className="flex items-center gap-2 rounded-md bg-white border border-zinc-200 px-2.5 py-1.5">
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-semibold text-zinc-900 truncate">{label}</div>
+        <div className="text-xs font-semibold text-zinc-900 truncate flex items-center gap-1.5">
+          <span className="truncate">{label}</span>
+          <DetailButton onClick={onShowDetail} label={`${label} 자세히 보기`} />
+        </div>
         {currentMat && (
           <div className="text-[10px] text-zinc-500 truncate">
             {currentMat.brand} {currentMat.product_line}
@@ -652,6 +682,29 @@ function ComponentRow({
         })}
       </div>
     </div>
+  );
+}
+
+// =====================================================
+// DetailButton — '자세히' (i) 작은 버튼
+// =====================================================
+
+function DetailButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      aria-label={label}
+      title={label}
+      className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-zinc-300 bg-white hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 text-zinc-600 text-[10px] font-semibold transition whitespace-nowrap"
+    >
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="16" x2="12" y2="12" />
+        <line x1="12" y1="8" x2="12.01" y2="8" />
+      </svg>
+      <span>자세히</span>
+    </button>
   );
 }
 

@@ -29,6 +29,14 @@ export type Material = {
   primary_grade: Grade;
   lookup_key: string | null;          // "flooring|표준" 등
   secondary_key: string | null;       // "강마루|표준" 등
+  /**
+   * 자재 이미지 URL (옵셔널).
+   * - 구글 드라이브 공유 링크 (https://drive.google.com/file/d/{ID}/view) 그대로 넣어도 됨
+   *   → normalizeImageUrl()이 자동으로 임베드 가능한 thumbnail URL로 변환
+   * - 일반 https://... URL도 그대로 사용 가능
+   * - 비어 있거나 null이면 모달에서 placeholder 표시
+   */
+  image_url?: string | null;
 };
 
 /** 평형별 표준면적 (3베이 기준) */
