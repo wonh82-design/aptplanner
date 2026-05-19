@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import type { Property, Scope, RoomId } from '@/lib/types';
 import { activeRooms } from '@/lib/areas';
 import { BIG_WORK_GROUPS, defaultRoomsForWork, type BigWorkGroup } from '@/lib/scope-meta';
@@ -18,16 +17,7 @@ type Props = {
   onJumpToProperty?: () => void;
 };
 
-/**
- * 사용자가 공사 범위를 입력하는 두 가지 방식.
- *  - 'preset': 대표 시나리오 카드 3종 중 선택 → 한 번에 자동 설정 (편의성↑)
- *  - 'detail': 12개 큰 공종 카드를 ON/OFF로 세밀 조정 (제어성↑)
- */
-type ScopeMode = 'preset' | 'detail';
-
 export function ScopeMatrix({ property, value, onChange, onJumpToProperty }: Props) {
-  // 첫 진입은 '빠르게'부터 — 대부분 사용자가 프리셋으로 시작하는 게 자연스러움.
-  const [mode, setMode] = useState<ScopeMode>('preset');
   const visibleRooms = activeRooms(property) as RoomId[];
 
   // ===== 빠른 시작 프리셋 — 확장 무관 =====
@@ -156,122 +146,24 @@ export function ScopeMatrix({ property, value, onChange, onJumpToProperty }: Pro
     onChange({ ...value, rooms: nextRooms, global: nextGlobal });
   };
 
-  // 현재 활성 큰 공종 수 — '자세히' 모드 진입 안내에 활용
-  const activeGroupCount = BIG_WORK_GROUPS.filter(isGroupActive).length;
-
   return (
-    <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200 space-y-4">
+    <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200 space-y-5">
       <header>
         <h2 className="text-base font-semibold">2. 공사 범위</h2>
         <p className="text-xs text-zinc-500 mt-1">
-          두 가지 방법 중 편한 방식을 고르세요. 언제든 다른 방식으로 전환할 수 있어요.
+          ① 빠른 프리셋으로 시작 → ② 큰 공종을 ON/OFF
+          <span className="text-zinc-400"> · 자재 등급·세부 사양은 다음 단계에서</span>
         </p>
       </header>
 
-      {/* ===== 모드 선택 — 두 큰 옵션 카드 ===== */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3">
-        <ModeOption
-          active={mode === 'preset'}
-          onClick={() => setMode('preset')}
-          icon="⚡"
-          title="프리셋으로 빠르게"
-          subtitle="대표 시나리오 3종 중 선택 — 한 번 클릭에 자동 설정"
-        />
-        <ModeOption
-          active={mode === 'detail'}
-          onClick={() => setMode('detail')}
-          icon="🛠"
-          title="자세하게 직접 고르기"
-          subtitle={`12개 공종을 ON/OFF로 세밀 조정${activeGroupCount > 0 ? ` · 현재 ${activeGroupCount}개 활성` : ''}`}
-        />
-      </div>
-
-      {/* ===== 선택된 모드 컨텐츠 ===== */}
-      {mode === 'preset' ? (
-        <PresetSection
-          presets={visiblePresets}
-          property={property}
-          value={value}
-          onChange={onChange}
-          onSwitchToDetail={() => setMode('detail')}
-        />
-      ) : (
-        <DetailSection
-          groups={BIG_WORK_GROUPS}
-          isGroupActive={isGroupActive}
-          groupCount={groupCount}
-          toggleGroup={toggleGroup}
-          onSwitchToPreset={() => setMode('preset')}
-        />
-      )}
-    </section>
-  );
-}
-
-// =====================================================
-// 모드 선택 카드 (2개)
-// =====================================================
-
-function ModeOption({
-  active, onClick, icon, title, subtitle,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: string;
-  title: string;
-  subtitle: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`relative flex flex-col gap-1 rounded-xl border-2 p-3 sm:p-4 text-left transition-all active:scale-[0.99] ${
-        active
-          ? 'border-blue-500 bg-blue-50/60 ring-2 ring-blue-200 shadow-sm'
-          : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
-      }`}
-    >
-      <div className="flex items-center gap-2 w-full">
-        <span className="text-lg sm:text-xl leading-none flex-shrink-0">{icon}</span>
-        <span className={`text-sm sm:text-base font-bold truncate flex-1 ${active ? 'text-blue-900' : 'text-zinc-900'}`}>
-          {title}
-        </span>
-        {active && (
-          <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white">
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden>
-              <path d="M2 6.5L4.5 9L10 3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        )}
-      </div>
-      <p className={`text-[10.5px] sm:text-xs leading-snug ${active ? 'text-blue-800' : 'text-zinc-500'}`}>
-        {subtitle}
-      </p>
-    </button>
-  );
-}
-
-// =====================================================
-// PresetSection — 프리셋 3종 카드 + 자세히 전환 링크
-// =====================================================
-
-function PresetSection({
-  presets, property, value, onChange, onSwitchToDetail,
-}: {
-  presets: typeof PRESETS;
-  property: Property;
-  value: Scope;
-  onChange: (s: Scope) => void;
-  onSwitchToDetail: () => void;
-}) {
-  const [appliedId, setAppliedId] = useState<string | null>(null);
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        {presets.map((preset, idx) => {
-          const isApplied = appliedId === preset.id;
-          return (
+      {/* ===== ① 빠른 프리셋 ===== */}
+      <div>
+        <div className="flex items-baseline justify-between mb-2">
+          <h3 className="text-xs font-semibold text-zinc-700">① 빠른 시작</h3>
+          <span className="text-[10px] text-zinc-400">대표 시나리오로 한 번에 설정</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {visiblePresets.map((preset, idx) => (
             <button
               key={preset.id}
               onClick={() => {
@@ -281,89 +173,37 @@ function PresetSection({
                   pyeong: property.pyeong,
                 });
                 onChange(preset.apply(property, value));
-                setAppliedId(preset.id);
               }}
-              className={`flex flex-col items-start gap-0.5 rounded-lg border-2 px-3 py-3 text-left transition-all active:scale-[0.98] ${
-                isApplied
-                  ? 'border-emerald-400 bg-emerald-50/70 ring-1 ring-emerald-200'
-                  : 'border-zinc-200 bg-white hover:border-blue-400 hover:bg-blue-50/30'
-              }`}
+              className="flex flex-col items-start gap-0.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left
+                         hover:border-blue-400 hover:bg-blue-50/30 active:scale-[0.98] transition-all"
             >
-              <div className="flex items-center gap-1.5 w-full">
-                <span className={`text-[10px] font-mono font-bold ${isApplied ? 'text-emerald-700' : 'text-blue-600'}`}>
-                  PRESET {idx + 1}
-                </span>
-                {isApplied && (
-                  <span className="ml-auto text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                    ✓ 적용됨
-                  </span>
-                )}
-              </div>
-              <span className="text-xs font-semibold text-zinc-900 mt-0.5">{preset.label}</span>
+              <span className="text-[10px] font-mono font-bold text-blue-600 mb-0.5">PRESET {idx + 1}</span>
+              <span className="text-xs font-semibold text-zinc-900">{preset.label}</span>
               <span className="text-[10px] text-zinc-500 leading-tight">{preset.desc}</span>
             </button>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
-      {/* 자세히로 전환 안내 — 프리셋 적용 후 미세 조정 유도 */}
-      <div className="flex items-center justify-between gap-2 rounded-lg bg-zinc-50 border border-zinc-200 px-3 py-2 text-[11px] text-zinc-600">
-        <span className="flex items-center gap-1.5">
-          <span className="text-zinc-400">💡</span>
-          <span>프리셋 적용 후 세부 공종을 추가/제외하려면</span>
-        </span>
-        <button
-          type="button"
-          onClick={onSwitchToDetail}
-          className="text-blue-700 hover:text-blue-900 font-semibold underline underline-offset-2 whitespace-nowrap"
-        >
-          자세히 고르기 →
-        </button>
+      {/* ===== ② 큰 공종 — 4×3 그리드 ===== */}
+      <div>
+        <div className="flex items-baseline justify-between mb-2">
+          <h3 className="text-xs font-semibold text-zinc-700">② 큰 공사 범위</h3>
+          <span className="text-[10px] text-zinc-400">카드 클릭 = 해당 공종 전체 ON/OFF · 일부만 켜져도 활성으로 표시</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {BIG_WORK_GROUPS.map(group => (
+            <BigGroupCard
+              key={group.id}
+              group={group}
+              active={isGroupActive(group)}
+              count={groupCount(group)}
+              onClick={() => toggleGroup(group)}
+            />
+          ))}
+        </div>
       </div>
-    </div>
-  );
-}
-
-// =====================================================
-// DetailSection — 12개 큰 공종 카드 그리드
-// =====================================================
-
-function DetailSection({
-  groups, isGroupActive, groupCount, toggleGroup, onSwitchToPreset,
-}: {
-  groups: BigWorkGroup[];
-  isGroupActive: (g: BigWorkGroup) => boolean;
-  groupCount: (g: BigWorkGroup) => { on: number; total: number };
-  toggleGroup: (g: BigWorkGroup) => void;
-  onSwitchToPreset: () => void;
-}) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] text-zinc-500">
-          카드 클릭 = 해당 공종 전체 ON/OFF · 일부만 켜져도 활성으로 표시
-        </span>
-        <button
-          type="button"
-          onClick={onSwitchToPreset}
-          className="text-[11px] text-blue-700 hover:text-blue-900 font-semibold underline underline-offset-2 whitespace-nowrap"
-        >
-          ← 프리셋으로 빠르게
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-        {groups.map(group => (
-          <BigGroupCard
-            key={group.id}
-            group={group}
-            active={isGroupActive(group)}
-            count={groupCount(group)}
-            onClick={() => toggleGroup(group)}
-          />
-        ))}
-      </div>
-    </div>
+    </section>
   );
 }
 
