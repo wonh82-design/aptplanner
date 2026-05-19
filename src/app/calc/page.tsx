@@ -25,20 +25,25 @@ import type { GradeSelection, Property, Scope } from '@/lib/types';
 
 type Step = 1 | 2 | 3 | 4;
 
-const STORAGE_KEY = 'apt-planner:calc:v1';
-const STORAGE_VERSION = 1;
+const STORAGE_KEY = 'apt-planner:calc:v2';
+const STORAGE_VERSION = 2;
 
 /** 단일 세션 동안 변하지 않는 quote_id 생성 */
 function generateQuoteId(): string {
   return 'Q-' + new Date().toISOString().slice(0, 10) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
 }
 
+/**
+ * localStorage에 저장하는 상태.
+ * v2부터 `step`은 저장하지 않는다 — 페이지 진입 시 항상 Step 1로 시작.
+ * (랜딩 → /calc 진입 시 이전 세션이 Step 4였다고 자동으로 결과 화면으로 점프되던 문제 방지)
+ * `maxReached`는 유지하여 사용자가 StepIndicator로 이전 진행 단계까지 자유롭게 점프 가능.
+ */
 type StoredState = {
   version: number;
   property: Property;
   scope: Scope;
   grade: GradeSelection;
-  step: Step;
   maxReached: Step;
   quoteId: string;
 };
@@ -60,6 +65,9 @@ export default function CalcPage() {
   const hydratedRef = useRef(false);
 
   // ---- localStorage hydrate (1회) ----
+  // step은 의도적으로 복원하지 않는다 — 항상 Step 1(우리집 현황)부터 시작.
+  // 사용자가 랜딩에서 "예상공사비 알아보기" 버튼으로 진입했을 때
+  // 이전 세션의 Step 4(결과 화면)로 자동 점프되던 문제 방지.
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -69,7 +77,6 @@ export default function CalcPage() {
       if (data.property) setProperty(data.property);
       if (data.scope) setScope(data.scope);
       if (data.grade) setGrade(data.grade);
-      if (data.step) setStep(data.step);
       if (data.maxReached) setMaxReached(data.maxReached);
       if (data.quoteId) setQuoteId(data.quoteId);
       setRestored(true);
@@ -78,16 +85,17 @@ export default function CalcPage() {
   }, []);
 
   // ---- localStorage persist (state 변경마다) ----
+  // step은 저장하지 않는다 (페이지 진입 시 항상 1로 시작하므로 무의미).
   useEffect(() => {
     if (!hydratedRef.current) return;
     try {
       const data: StoredState = {
         version: STORAGE_VERSION,
-        property, scope, grade, step, maxReached, quoteId,
+        property, scope, grade, maxReached, quoteId,
       };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch { /* ignore */ }
-  }, [property, scope, grade, step, maxReached, quoteId]);
+  }, [property, scope, grade, maxReached, quoteId]);
 
   // ---- 평형이 0이 되면 Step 1로 강제 복귀 + 진행 차단 ----
   const pyeongValid = property.pyeong > 0;
