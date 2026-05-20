@@ -2621,9 +2621,9 @@
       "주력"
     ],
     "unit_type": "per_m2",
-    "material_price": 270000.0,
+    "material_price": 400000.0,
     "labor_price": 100000.0,
-    "total_unit_price": 370000.0,
+    "total_unit_price": 500000.0,
     "primary_grade": "고급",
     "lookup_key": "window|고급",
     "secondary_key": "알루미늄|고급"
@@ -4149,7 +4149,7 @@
   },
   {
     "material_id": "MAT-TD-001",
-    "work_type": "window",
+    "work_type": "turning_door",
     "category": "창호",
     "sub_category": "터닝도어",
     "brand": "KCC창호",
@@ -4164,12 +4164,12 @@
     "labor_price": 400000.0,
     "total_unit_price": 1200000.0,
     "primary_grade": "가성비",
-    "lookup_key": "window|가성비",
+    "lookup_key": "turning_door|가성비",
     "secondary_key": "터닝도어|가성비"
   },
   {
     "material_id": "MAT-TD-002",
-    "work_type": "window",
+    "work_type": "turning_door",
     "category": "창호",
     "sub_category": "터닝도어",
     "brand": "LX하우시스",
@@ -4184,12 +4184,12 @@
     "labor_price": 500000.0,
     "total_unit_price": 1800000.0,
     "primary_grade": "표준",
-    "lookup_key": "window|표준",
+    "lookup_key": "turning_door|표준",
     "secondary_key": "터닝도어|표준"
   },
   {
     "material_id": "MAT-TD-003",
-    "work_type": "window",
+    "work_type": "turning_door",
     "category": "창호",
     "sub_category": "터닝도어",
     "brand": "LX하우시스",
@@ -4204,7 +4204,7 @@
     "labor_price": 600000.0,
     "total_unit_price": 2800000.0,
     "primary_grade": "고급",
-    "lookup_key": "window|고급",
+    "lookup_key": "turning_door|고급",
     "secondary_key": "터닝도어|고급"
   },
   {

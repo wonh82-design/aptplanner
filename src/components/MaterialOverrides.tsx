@@ -2,9 +2,10 @@
 
 import { memo, useMemo, useState } from 'react';
 import type { Grade, GradeSelection, Material, Quote, Scope } from '@/lib/types';
-import { getPrimaryMaterial, labelOf } from '@/lib/materials';
+import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort } from '@/lib/calculator';
 import { clampPartitionLength } from '@/lib/areas';
+import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
 import { WORK_BUNDLES, bundleForWorkType, type WorkBundle } from '@/lib/material-bundles';
 import { MaterialDetailModal } from './MaterialDetailModal';
 
@@ -61,9 +62,13 @@ type DisplayItem =
   | { kind: 'bundle'; bundle: WorkBundle; works: WorkInfo[]; sub: number; firstIdx: number };
 
 export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange }: Props) {
-  const [showAll, setShowAll] = useState(false);
+  // 기본은 모든 항목 펼침 — 사용자가 모든 공종·자재를 한눈에 보고 선택하도록.
+  // '주요 5개만 보기' 토글로 다시 압축 가능.
+  const [showAll, setShowAll] = useState(true);
   // '자세히' 모달 — 어떤 work_type을 펼쳤는지
   const [detailWorkType, setDetailWorkType] = useState<string | null>(null);
+  // 일괄 등급 선택 popover
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   // 1) 견적에 등장하는 work_type 집계 (등장 순서·총 qty 보존)
   const workInfoList = useMemo(() => {
@@ -126,6 +131,34 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
     onChange({ ...value, overrides, material_overrides: matOv });
   }
 
+  /**
+   * 특정 자재로 직접 변경 — material_overrides[wt] 설정.
+   * overrides[wt]도 그 자재의 등급으로 함께 설정해서 UI 등급 표시 일관성 유지.
+   */
+  function setMaterial(material: Material) {
+    const wt = material.work_type;
+    const overrides = { ...value.overrides, [wt]: material.primary_grade };
+    const matOv = { ...value.material_overrides, [wt]: material.material_id };
+    onChange({ ...value, overrides, material_overrides: matOv });
+  }
+
+  /**
+   * 일괄 등급 변경 — 모든 work_type에 같은 등급 적용.
+   * 모든 overrides·material_overrides를 초기화하여 default 등급만 남긴다.
+   */
+  function setBulkGrade(g: Grade) {
+    onChange({ default: g, overrides: {}, material_overrides: {} });
+    setBulkOpen(false);
+  }
+
+  /** 그 work_type에 현재 적용된 자재 ID (material_override 우선, 없으면 primary) */
+  function effectiveMaterialIdOf(wt: string): string | null {
+    const matOv = value.material_overrides[wt];
+    if (matOv) return matOv;
+    const g = effectiveGrade(wt);
+    return getPrimaryMaterial(wt, g)?.material_id ?? null;
+  }
+
   /** Bundle 등급 일괄 변경 — 내부 모든 work_type에 같은 등급 + material override 해제 */
   function setBundleGrade(bundle: WorkBundle, g: Grade) {
     const overrides = { ...value.overrides };
@@ -157,9 +190,18 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
 
   return (
     <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">
-      <div className="flex items-baseline justify-between mb-3 gap-2">
-        <h2 className="text-base font-semibold">4. 공사범위 및 자재 세부 선택</h2>
-        <span className="text-[11px] text-zinc-500 flex-shrink-0">{displayItems.length}개 항목</span>
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <h2 className="text-base font-semibold">공종 및 자재 세부 선택</h2>
+        <div className="flex items-center gap-2 flex-wrap">
+          <BulkGradeButton
+            currentGrade={value.default}
+            isOpen={bulkOpen}
+            onToggleOpen={() => setBulkOpen((o) => !o)}
+            onSelect={setBulkGrade}
+            onClose={() => setBulkOpen(false)}
+          />
+          <span className="text-[11px] text-zinc-500">{displayItems.length}개 항목</span>
+        </div>
       </div>
       <p className="text-xs text-zinc-500 mb-4">
         공종마다 가성비·표준·고급의 <strong>주력 자재</strong>와 <strong>우리집 총공사비</strong>를 한눈에 비교하고 선택하세요.
@@ -174,8 +216,12 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
               work={item.work}
               label={item.label}
               effectiveGrade={effectiveGrade(item.work.wt)}
-              hasOverride={value.overrides[item.work.wt] !== undefined}
-              onSelectGrade={(g) => setGrade(item.work.wt, g)}
+              effectiveMaterialId={effectiveMaterialIdOf(item.work.wt)}
+              hasOverride={
+                value.overrides[item.work.wt] !== undefined ||
+                value.material_overrides[item.work.wt] !== undefined
+              }
+              onSelectMaterial={setMaterial}
               onClear={() => clearOverride(item.work.wt)}
               onShowDetail={() => setDetailWorkType(item.work.wt)}
             />
@@ -223,20 +269,63 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
 // SingleCard — 단일 work_type 한 카드 (기존 동작 유지)
 // =====================================================
 
+/**
+ * 같은 등급 내 '추천(primary)' 판정 — tags에 '주력' 포함 자재가 primary.
+ * 없으면 등급 내 첫 번째 자재가 primary.
+ */
+function isPrimaryMaterial(m: Material, allInGrade: Material[]): boolean {
+  const primaries = allInGrade.filter((x) => x.tags?.includes('주력'));
+  if (primaries.length > 0) return primaries[0].material_id === m.material_id;
+  return allInGrade[0]?.material_id === m.material_id;
+}
+
+/**
+ * SingleCard — 한 work_type의 모든 자재를 카드 그리드로 나열.
+ * 등급 순(가성비 → 표준 → 고급), 같은 등급 내 추천(primary)이 먼저.
+ * 카드 클릭 시 material_override 설정 — 그 자재로 즉시 변경.
+ */
 function SingleCard({
-  work, label, effectiveGrade: curGrade, hasOverride,
-  onSelectGrade, onClear, onShowDetail,
+  work, label, effectiveGrade: curGrade, effectiveMaterialId, hasOverride,
+  onSelectMaterial, onClear, onShowDetail,
 }: {
   work: WorkInfo;
   label: string;
   effectiveGrade: Grade;
+  effectiveMaterialId: string | null;
   hasOverride: boolean;
-  onSelectGrade: (g: Grade) => void;
+  onSelectMaterial: (m: Material) => void;
   onClear: () => void;
   onShowDetail: () => void;
 }) {
+  // 그 work_type의 모든 자재 (현장시공 제외)
+  const allMaterials = materialsFor(work.wt).filter((m) => m.brand !== '현장시공');
+
+  // 등급별 그룹핑 → 각 등급 안에서 primary 먼저 정렬
+  const sortedMaterials = (() => {
+    const byGrade = new Map<Grade, Material[]>();
+    for (const m of allMaterials) {
+      const g = m.primary_grade;
+      if (!byGrade.has(g)) byGrade.set(g, []);
+      byGrade.get(g)!.push(m);
+    }
+    const out: Array<{ material: Material; isPrimary: boolean }> = [];
+    for (const g of (['가성비', '표준', '고급', '단일등급'] as Grade[])) {
+      const list = byGrade.get(g) ?? [];
+      // primary 먼저
+      const primaryIdx = list.findIndex((m) => m.tags?.includes('주력'));
+      const ordered = primaryIdx >= 0
+        ? [list[primaryIdx], ...list.filter((_, i) => i !== primaryIdx)]
+        : list;
+      for (const m of ordered) {
+        out.push({ material: m, isPrimary: isPrimaryMaterial(m, list) });
+      }
+    }
+    return out;
+  })();
+
   return (
     <div className={`rounded-lg border ${hasOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
+      {/* 헤더 */}
       <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70 gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-sm font-semibold text-zinc-900 truncate">{label}</span>
@@ -254,18 +343,156 @@ function SingleCard({
           )}
         </div>
       </div>
-      <div className="divide-y divide-zinc-100">
-        {GRADES.map(g => (
-          <GradeRow
-            key={g}
-            grade={g}
-            material={getPrimaryMaterial(work.wt, g)}
-            selected={curGrade === g}
-            totalQty={work.totalQty}
-            onSelect={() => onSelectGrade(g)}
-          />
-        ))}
+
+      {/* 자재 카드 — 한 행 가로 스크롤 (등급 순서 보존, 우측으로 스크롤하여 나머지 확인) */}
+      {sortedMaterials.length === 0 ? (
+        <div className="px-3 py-6 text-center text-xs text-zinc-400 italic">
+          등록된 자재가 없습니다
+        </div>
+      ) : (
+        <div className="relative">
+          <div
+            className="flex gap-2 overflow-x-auto p-2.5 snap-x snap-mandatory scrollbar-thin"
+            style={{ scrollbarWidth: 'thin' }}
+          >
+            {sortedMaterials.map(({ material, isPrimary }) => (
+              <div
+                key={material.material_id}
+                className="flex-shrink-0 w-40 sm:w-44 snap-start"
+              >
+                <MaterialCard
+                  material={material}
+                  isPrimary={isPrimary}
+                  isSelected={effectiveMaterialId === material.material_id}
+                  totalQty={work.totalQty}
+                  onSelect={() => onSelectMaterial(material)}
+                />
+              </div>
+            ))}
+          </div>
+          {/* 우측 페이드 — 더 있음을 시각적으로 암시 (스크롤 가능 시) */}
+          {sortedMaterials.length > 4 && (
+            <div className="pointer-events-none absolute top-2.5 bottom-2.5 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =====================================================
+// MaterialCard — 자재 1개를 시각 카드로 표시
+//   상단: 등급 배지 + (추천이면) '추천' 마커
+//   이미지: 4:3, image_url 우선 / dev면 picsum 더미
+//   본문: brand + product_line + installer_spec
+//   하단: 우리집 총공사비 (qty × total_unit_price)
+//   선택 시: blue ring
+// =====================================================
+
+const MaterialCard = memo(function MaterialCard({
+  material, isPrimary, isSelected, totalQty, onSelect,
+}: {
+  material: Material;
+  isPrimary: boolean;
+  isSelected: boolean;
+  totalQty: number;
+  onSelect: () => void;
+}) {
+  const meta = GRADE_META[material.primary_grade];
+  const homeTotal = Math.round(totalQty * material.total_unit_price);
+  const realUrl = normalizeImageUrl(material.image_url ?? null, 600);
+  const useDummy = !realUrl && shouldUseDummyImages();
+  const imageUrl = realUrl || (useDummy ? placeholderImageUrl(material.material_id, 600) : null);
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={isSelected}
+      className={`group relative w-full flex flex-col rounded-lg border-2 overflow-hidden text-left transition-all active:scale-[0.99] ${
+        isSelected
+          ? `${meta.ring.replace('ring-', 'border-')} ring-2 ${meta.ring} shadow-md`
+          : 'border-zinc-200 hover:border-zinc-400 hover:shadow-sm'
+      }`}
+    >
+      {/* 상단 등급 배지 */}
+      <div className={`${meta.bg} px-2 py-1 flex items-center gap-1 border-b ${
+        isSelected ? meta.ring.replace('ring-', 'border-') : 'border-zinc-200'
+      }`}>
+        <span className={`text-[10px] font-bold ${meta.color}`}>{material.primary_grade}</span>
+        {isPrimary && (
+          <span className={`text-[9px] font-bold px-1 py-0 rounded ${meta.color} bg-white/70 border ${meta.ring.replace('ring-', 'border-')} whitespace-nowrap`}>
+            추천
+          </span>
+        )}
+        {isSelected && (
+          <span className="ml-auto flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden>
+              <path d="M2 6.5L4.5 9L10 3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        )}
       </div>
+
+      {/* 이미지 */}
+      <MaterialCardImage
+        url={imageUrl}
+        alt={`${material.brand ?? ''} ${material.product_line ?? ''}`.trim()}
+        isDummy={useDummy && !realUrl}
+      />
+
+      {/* 본문 — brand/product_line + spec + 가격 */}
+      <div className="flex-1 px-2 py-1.5 flex flex-col gap-0.5">
+        <div className="text-[11px] font-bold text-zinc-900 leading-tight line-clamp-2 min-h-[2.4em]">
+          {material.brand} {material.product_line}
+        </div>
+        {material.installer_spec && (
+          <div className="text-[9.5px] text-zinc-500 leading-snug line-clamp-2" title={material.installer_spec}>
+            {material.installer_spec}
+          </div>
+        )}
+        <div className="mt-1 pt-1 border-t border-zinc-100 flex items-baseline justify-between gap-1">
+          <span className="text-[9px] text-zinc-500">우리집</span>
+          <span className={`text-xs font-bold tabular-nums ${isSelected ? meta.color : 'text-zinc-900'}`}>
+            {fmtKRWShort(homeTotal)}
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+});
+
+function MaterialCardImage({ url, alt, isDummy = false }: { url: string | null; alt: string; isDummy?: boolean }) {
+  const [errored, setErrored] = useState(false);
+
+  if (!url || errored) {
+    return (
+      <div className="aspect-[4/3] bg-gradient-to-br from-zinc-100 to-zinc-50 flex items-center justify-center border-b border-zinc-200">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-300" aria-hidden>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative aspect-[4/3] bg-zinc-50 border-b border-zinc-200 overflow-hidden">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt={alt}
+        loading="lazy"
+        onError={() => setErrored(true)}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        referrerPolicy="no-referrer"
+      />
+      {isDummy && (
+        <span className="absolute top-1 left-1 text-[7px] font-bold uppercase tracking-wider px-1 py-0 rounded bg-amber-500/90 text-white shadow-sm">
+          샘플
+        </span>
+      )}
     </div>
   );
 }
@@ -686,6 +913,85 @@ function ComponentRow({
 }
 
 // =====================================================
+// BulkGradeButton — 일괄로 모든 공종 등급 변경 (헤더 통합)
+// =====================================================
+
+function BulkGradeButton({
+  currentGrade, isOpen, onToggleOpen, onSelect, onClose,
+}: {
+  currentGrade: Grade;
+  isOpen: boolean;
+  onToggleOpen: () => void;
+  onSelect: (g: Grade) => void;
+  onClose: () => void;
+}) {
+  const meta = GRADE_META[currentGrade];
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggleOpen}
+        aria-expanded={isOpen}
+        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white hover:border-blue-400 hover:bg-blue-50 text-xs font-semibold text-zinc-800 transition whitespace-nowrap"
+        title="모든 공종 자재를 한 번에 같은 등급으로 변경"
+      >
+        <span>일괄로 등급 선택하기</span>
+        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${meta.bg} ${meta.color}`}>
+          현재: {currentGrade}
+        </span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} aria-hidden>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <>
+          {/* 외부 클릭 시 닫힘 */}
+          <div className="fixed inset-0 z-20" onClick={onClose} aria-hidden />
+          <div className="absolute right-0 mt-1.5 w-64 rounded-lg border border-zinc-200 bg-white shadow-xl z-30 overflow-hidden">
+            <div className="px-3 py-2 border-b border-zinc-100 bg-zinc-50/50">
+              <div className="text-[11px] font-bold text-zinc-900">전체 공종 등급 일괄 변경</div>
+              <div className="text-[10px] text-zinc-500 mt-0.5 leading-tight">
+                현재 개별 설정한 항목도 모두 새 등급으로 덮어씁니다
+              </div>
+            </div>
+            <div className="p-1.5 space-y-1">
+              {(['가성비', '표준', '고급'] as Grade[]).map((g) => {
+                const m = GRADE_META[g];
+                const selected = currentGrade === g;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => onSelect(g)}
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-left transition ${
+                      selected ? `${m.bg} ${m.ring} ring-1` : 'hover:bg-zinc-50'
+                    }`}
+                  >
+                    <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 flex-shrink-0 ${
+                      selected ? `border-current ${m.color}` : 'border-zinc-300'
+                    }`}>
+                      {selected && <span className={`w-2 h-2 rounded-full bg-current ${m.color}`} />}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className={`text-xs font-bold ${m.color}`}>{g}</div>
+                      <div className="text-[10px] text-zinc-500 leading-tight">{m.label}</div>
+                    </div>
+                    {selected && (
+                      <span className="text-[9px] font-bold text-zinc-500">현재</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// =====================================================
 // DetailButton — '자세히' (i) 작은 버튼
 // =====================================================
 
@@ -707,68 +1013,6 @@ function DetailButton({ onClick, label }: { onClick: () => void; label: string }
     </button>
   );
 }
-
-// =====================================================
-// GradeRow — SingleCard의 등급 행. memo: 같은 props 시 리렌더 회피
-// =====================================================
-
-const GradeRow = memo(function GradeRow({
-  grade, material, selected, totalQty, onSelect,
-}: {
-  grade: Grade;
-  material: Material | null;
-  selected: boolean;
-  totalQty: number;
-  onSelect: () => void;
-}) {
-  const meta = GRADE_META[grade];
-
-  if (!material) {
-    return (
-      <div className="flex items-center gap-3 px-3 py-2.5 opacity-50">
-        <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 border-zinc-300`}>
-          {selected && <span className="w-2 h-2 rounded-full bg-zinc-400" />}
-        </span>
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded ${meta.bg} ${meta.color}`}>{grade}</span>
-        <span className="text-xs text-zinc-400 italic">등록된 자재 없음</span>
-      </div>
-    );
-  }
-
-  const homeTotal = Math.round(totalQty * material.total_unit_price);
-
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 text-left transition
-        ${selected ? `${meta.bg} ring-2 ring-inset ${meta.ring}` : 'bg-white hover:bg-zinc-50'}`}
-    >
-      <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 transition flex-shrink-0
-        ${selected ? `border-current ${meta.color}` : 'border-zinc-300'}`}>
-        {selected && <span className={`w-2 h-2 rounded-full bg-current ${meta.color}`} />}
-      </span>
-      <div className="flex-shrink-0 sm:min-w-[80px]">
-        <div className={`text-xs font-bold ${meta.color}`}>{grade}</div>
-        <div className="text-[10px] text-zinc-500 leading-tight hidden sm:block">{meta.label}</div>
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-xs sm:text-sm font-medium text-zinc-900 truncate">
-          {material.brand} {material.product_line}
-        </div>
-        <div className="text-[10px] sm:text-[11px] text-zinc-500 truncate" title={material.installer_spec || ''}>
-          {material.installer_spec || `${material.category}${material.sub_category ? ' · ' + material.sub_category : ''}`}
-        </div>
-      </div>
-      <div className="flex-shrink-0 text-right">
-        <div className={`text-xs sm:text-sm font-bold tabular-nums ${selected ? meta.color : 'text-zinc-900'}`}>
-          {fmtKRWShort(homeTotal)}
-        </div>
-        <div className="text-[10px] text-zinc-500 whitespace-nowrap">우리집 총공사비</div>
-      </div>
-    </button>
-  );
-});
 
 // 미사용 import 회피 (Quote 타입은 props에서 사용)
 void WORK_BUNDLES;

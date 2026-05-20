@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "image-stats": "node scripts/image-stats.mjs",
+    "image-checklist": "node scripts/phase1-build-checklist.mjs"
   },
   "dependencies": {
     "@types/qrcode": "^1.5.6",

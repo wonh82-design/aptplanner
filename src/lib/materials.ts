@@ -69,6 +69,7 @@ export const WORK_TYPE_LABEL: Record<string, string> = {
   molding: '몰딩',
   baseboard: '걸레받이',
   window: '샷시',
+  turning_door: '터닝도어',
   door_replacement: '문틀/문짝',
   sliding_door: '중문',
   kitchen_top: '주방 상판',

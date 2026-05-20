@@ -16,7 +16,7 @@
 import { useState } from 'react';
 import type { Grade, Material } from '@/lib/types';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
-import { normalizeImageUrl } from '@/lib/image-utils';
+import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
 import { fmtKRWShort } from '@/lib/calculator';
 
 const GRADES: Grade[] = ['가성비', '표준', '고급'];
@@ -155,7 +155,12 @@ function GradeCard({
   isCurrent: boolean;
 }) {
   const meta = GRADE_META[grade];
-  const imageUrl = normalizeImageUrl(material?.image_url ?? null, 800);
+  const realUrl = normalizeImageUrl(material?.image_url ?? null, 800);
+  // image_url이 없을 때 더미 이미지 사용 여부 (env or dev)
+  const useDummy = !realUrl && shouldUseDummyImages() && !!material;
+  const imageUrl = realUrl || (useDummy
+    ? placeholderImageUrl(material?.material_id || `${workType}-${grade}`, 800)
+    : null);
 
   return (
     <div
@@ -179,7 +184,11 @@ function GradeCard({
       </div>
 
       {/* 이미지 영역 */}
-      <MaterialImage url={imageUrl} alt={material ? `${material.brand ?? ''} ${material.product_line ?? ''}`.trim() : workType} />
+      <MaterialImage
+        url={imageUrl}
+        alt={material ? `${material.brand ?? ''} ${material.product_line ?? ''}`.trim() : workType}
+        isDummy={useDummy}
+      />
 
       {/* 자재 정보 */}
       <div className="flex-1 px-3 py-3 space-y-2">
@@ -217,7 +226,7 @@ function GradeCard({
 // MaterialImage — 이미지 로딩/오류 처리
 // =====================================================
 
-function MaterialImage({ url, alt }: { url: string | null; alt: string }) {
+function MaterialImage({ url, alt, isDummy = false }: { url: string | null; alt: string; isDummy?: boolean }) {
   const [errored, setErrored] = useState(false);
 
   if (!url || errored) {
@@ -236,7 +245,7 @@ function MaterialImage({ url, alt }: { url: string | null; alt: string }) {
   }
 
   return (
-    <div className="aspect-[4/3] bg-zinc-50 border-b border-zinc-200 overflow-hidden">
+    <div className="relative aspect-[4/3] bg-zinc-50 border-b border-zinc-200 overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={url}
@@ -246,6 +255,11 @@ function MaterialImage({ url, alt }: { url: string | null; alt: string }) {
         className="w-full h-full object-cover"
         referrerPolicy="no-referrer"
       />
+      {isDummy && (
+        <span className="absolute top-1.5 left-1.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/90 text-white shadow-sm">
+          샘플 이미지
+        </span>
+      )}
     </div>
   );
 }

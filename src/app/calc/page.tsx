@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { PropertyForm } from '@/components/PropertyForm';
 import { ScopeMatrix } from '@/components/ScopeMatrix';
-import { GradeSelector } from '@/components/GradeSelector';
 import { MaterialOverrides } from '@/components/MaterialOverrides';
 import { QuotePanel } from '@/components/QuotePanel';
 import { StepIndicator } from '@/components/StepIndicator';
@@ -344,7 +343,6 @@ export default function CalcPage() {
               <div className="lg:hidden">
                 <LivePricePreview quote={quote} step={3} />
               </div>
-              <GradeSelector value={grade} onChange={setGrade} />
               <MaterialOverrides
                 quote={quote}
                 value={grade}

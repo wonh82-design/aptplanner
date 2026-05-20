@@ -358,23 +358,13 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   }
   // 터닝도어: 거실을 신규로 확장 시공 AND 안방은 미확장 상태일 때만 emit.
   // (이미 확장된 거실은 기존 도어가 있으므로 신규 도어비 미발생)
+  // 자재마스터 work_type='turning_door' 의 등급별 자재가 자동 선택된다
+  // (가성비 KCC LiV Suite ₩1.2M / 표준 LX LSS-30 ₩1.8M / 고급 LX PRESTIGE ₩2.8M).
   const livingExpand = scope.rooms['거실']?.expansion_after;
   const livingAlreadyExpanded = scope.rooms['거실']?.expansion_current;
   const masterNotExpand = !scope.rooms['안방']?.expansion_after;
   if (livingExpand && !livingAlreadyExpanded && masterNotExpand) {
-    push({
-      id: '',
-      room: '거실/안방경계',
-      work_type: 'turning_door',
-      category: '터닝도어',
-      unit_type: 'per_ea',
-      qty: 1,
-      grade: grade.default,
-      material_id: null,
-      material_label: 'LX하우시스 LSS-30 (일반)',
-      unit_price: 1_800_000,
-      subtotal: 1_800_000,
-    });
+    push(lineItem('', '거실/안방경계', 'turning_door', 1, grade, 'per_ea'));
   }
 
   // ===== 10. 전기/설비 =====
@@ -408,11 +398,11 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
 
 /**
  * 자재마스터에 등록되지 않은 특수 라인의 카테고리 매핑.
- * (예: 구청 신고 / 터닝도어는 둘 다 발코니 확장 시 발생 → '확장' 카테고리로 묶는다)
+ * (예: 구청 신고는 자재가 아니라 행정 비용 → '확장' 카테고리로 묶음.
+ *  터닝도어는 자재마스터 work_type='turning_door' 자재가 등록되어 category='창호'로 자동 분류됨.)
  */
 const SPECIAL_WORK_TYPE_CATEGORY: Record<string, string> = {
   expansion_report: '확장',
-  turning_door: '확장',
   door_no_frame: '목공사',
 };
 

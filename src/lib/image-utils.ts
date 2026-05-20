@@ -67,3 +67,36 @@ export function normalizeImageUrl(
   // 외부 일반 URL (Cloudinary, https://example.com/foo.jpg 등) → 그대로
   return trimmed;
 }
+
+/**
+ * 자재마스터에 image_url이 아직 등록되지 않은 자재에 대해 placeholder 이미지를 보여줄지 결정.
+ *
+ * 정책:
+ *  - `NEXT_PUBLIC_DUMMY_IMAGES=1` 명시 → 항상 ON (production 포함)
+ *  - `NEXT_PUBLIC_DUMMY_IMAGES=0` 명시 → 항상 OFF
+ *  - 미설정 시 → development 환경에서만 자동 ON (Vercel production은 OFF)
+ *
+ * Phase 1 작업 중 어떻게 보이는지 미리보기용. 실제 image_url이 등록된 자재는
+ * 환경 무관하게 실제 이미지를 우선 사용한다.
+ */
+export function shouldUseDummyImages(): boolean {
+  const flag = process.env.NEXT_PUBLIC_DUMMY_IMAGES;
+  if (flag === '1') return true;
+  if (flag === '0') return false;
+  return process.env.NODE_ENV !== 'production';
+}
+
+/**
+ * 자재 ID 기반 더미 이미지 URL 생성.
+ * picsum.photos는 seed가 같으면 같은 이미지를 반환 → 자재마다 다른 이미지가 일관되게 표시됨.
+ *
+ * @param seed  Material.material_id 또는 work_type 등 일관된 키
+ * @param size  너비 px (기본 800)
+ */
+export function placeholderImageUrl(seed: string, size: number = 800): string {
+  // seed에 허용 문자만 남김 — picsum이 안전하게 처리하도록
+  const safe = (seed || 'apt-planner').replace(/[^a-zA-Z0-9-]/g, '-').slice(0, 64);
+  // 4:3 비율 (자세히 모달의 aspect-[4/3]에 맞춤)
+  const h = Math.round(size * 0.75);
+  return `https://picsum.photos/seed/${safe}/${size}/${h}`;
+}
