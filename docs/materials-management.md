@@ -29,7 +29,53 @@ C:\Users\user\Documents\Claude\Projects\int biz\materials_master.xlsx
 
 ---
 
-## 자주 하는 작업
+## 편집 방법 — 2가지 선택
+
+| 방법 | 장점 | 단점 |
+|---|---|---|
+| **A. 엑셀 → sync** (기존) | 일괄 편집·필터/정렬 좋음 | `npm run materials:sync` 필요 |
+| **B. 웹 관리자 페이지** (NEW) | 즉시 적용·미리보기 / 브라우저만 있으면 됨 | 한 번에 1개씩 편집 |
+
+두 방법 모두 같은 `src/data/materials.json` 을 갱신합니다. 본인 작업 흐름에 맞게 선택.
+
+---
+
+## B. 웹 관리자 페이지 (NEW)
+
+### 접속
+```
+https://app.apt-planner.com/admin/materials   (production)
+http://localhost:3000/admin/materials         (dev)
+```
+
+### 초기 설정 (1회)
+1. **비밀번호 설정**: `.env.local` (로컬) + Vercel Settings → Environment Variables (production)
+   ```
+   ADMIN_PASSWORD=원하는비밀번호
+   ```
+2. 미설정 시 페이지 진입 자체가 차단됨 (안전 기본값)
+
+### 사용 흐름
+1. `/admin/materials` 접속 → 비밀번호 입력 → 토큰 sessionStorage 저장 (탭 닫으면 만료)
+2. 자재 리스트에서 검색·필터·"이미지 미등록만" 토글로 작업 대상 찾기
+3. 자재 행의 **편집** 버튼 클릭 → 상세 페이지
+4. 필드 수정 (브랜드·단가·이미지URL 등)
+5. **💾 저장** 클릭
+
+### 저장 동작
+- **로컬 dev (`npm run dev`)** — 서버가 `src/data/materials.json` 에 직접 쓰기 → 즉시 반영
+- **Production (Vercel)** — read-only 파일시스템이라 직접 쓰기 불가
+  → 변경된 JSON을 응답으로 반환 → **"materials.json 다운로드"** 버튼
+  → 다운로드한 파일을 `src/data/materials.json` 에 교체 후 git commit
+
+### 이미지 URL 입력
+- 구글 드라이브 공유 링크 그대로 붙여넣기 → 자동으로 thumbnail URL 정규화
+- 입력 즉시 미리보기 4:3 비율로 표시
+- 외부 일반 URL (Cloudinary 등) 도 그대로 사용 가능
+
+---
+
+## A. 자주 하는 작업 (엑셀)
 
 ### 1. 자재 단가 변경
 
@@ -125,7 +171,7 @@ npx tsx scripts/verify-scenarios.ts
 # 엑셀 → JSON 동기화 (가장 자주 사용)
 npm run materials:sync
 
-# JSON → 엑셀 export (긴급 복구 시에만)
+# JSON → 엑셀 export (긴급 복구 시 또는 웹 편집 후 엑셀 sync)
 npm run materials:export
 
 # 5가지 시나리오 견적 검증
@@ -137,6 +183,19 @@ npm run image-stats
 # 이미지 등록 체크리스트 재생성
 npm run image-checklist
 ```
+
+## 웹 ↔ 엑셀 양방향 sync (선택)
+
+웹에서 자재를 편집한 후 엑셀에도 반영하고 싶다면:
+```bash
+npm run materials:export   # JSON → 엑셀 (덮어씀)
+```
+반대로 엑셀에서 일괄 편집한 후 웹/앱에 반영:
+```bash
+npm run materials:sync     # 엑셀 → JSON
+```
+
+⚠️ 두 방식 동시 작업은 충돌 위험. 작업 시작 전 어느 쪽이 truth인지 확인.
 
 ---
 
