@@ -13,8 +13,9 @@
  *  - mode: 'download_required' 이면 JSON 다운로드 버튼 노출
  */
 
-import { use, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import type { Grade, Material } from '@/lib/types';
 import { normalizeImageUrl } from '@/lib/image-utils';
 import { AdminGate } from '../../AdminGate';
@@ -22,11 +23,14 @@ import { useAdminToken } from '../../useAdminToken';
 
 const GRADES: Grade[] = ['가성비', '표준', '고급', '단일등급'];
 
-export default function MaterialEditPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function MaterialEditPage() {
+  // client page에서 dynamic param은 useParams hook으로 — use(params)는 Suspense를 throw해서
+  // 가까운 boundary가 없으면 not-found 페이지로 fallback되는 버그가 있어 우회.
+  const params = useParams();
+  const id = decodeURIComponent(String(params?.id ?? ''));
   return (
     <AdminGate>
-      <MaterialEditor materialId={decodeURIComponent(id)} />
+      <MaterialEditor materialId={id} />
     </AdminGate>
   );
 }
