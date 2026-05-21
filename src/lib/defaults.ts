@@ -1,9 +1,9 @@
-/** 기본 입력값 — 30평/3베이/3룸 케이스 */
+/** 기본 입력값 — 평형은 0(미입력)으로 시작, 나머지는 일반적인 30평대 3베이 케이스 */
 import type { Property, Scope, GradeSelection, RoomId } from './types';
 
 export function defaultProperty(): Property {
   return {
-    pyeong: 30,
+    pyeong: 0,              // 사용자가 직접 입력하도록 placeholder만 표시
     bay: 3,
     rooms: 3,
     common_bath: 1,

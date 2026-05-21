@@ -76,6 +76,14 @@ function MaterialEditor({ materialId }: { materialId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [materialId, hydrated, token]);
 
+  // 기존 카테고리 목록 — datalist 자동완성용 (조기 return 전에 호출되어야 hook 순서 보존)
+  const categoryOptions = useMemo(() => {
+    if (!allMaterials) return [];
+    const set = new Set<string>();
+    for (const m of allMaterials) if (m.category) set.add(m.category);
+    return Array.from(set).sort();
+  }, [allMaterials]);
+
   if (loading) {
     return <div className="px-6 py-12 text-center text-sm text-zinc-500">자재 데이터 불러오는 중…</div>;
   }
@@ -177,14 +185,6 @@ function MaterialEditor({ materialId }: { materialId: string }) {
       alert('네트워크 오류: ' + String(e));
     }
   };
-
-  // 기존 카테고리 목록 — datalist 자동완성용
-  const categoryOptions = useMemo(() => {
-    if (!allMaterials) return [];
-    const set = new Set<string>();
-    for (const m of allMaterials) if (m.category) set.add(m.category);
-    return Array.from(set).sort();
-  }, [allMaterials]);
 
   const previewImageUrl = normalizeImageUrl(draft.image_url, 600);
 

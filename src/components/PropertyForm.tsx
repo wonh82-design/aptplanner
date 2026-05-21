@@ -154,7 +154,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
               min={inputMode === 'pyeong' ? 10 : 25}
               max={inputMode === 'pyeong' ? 80 : 200}
               value={displayValue}
-              placeholder={inputMode === 'pyeong' ? '예: 30' : '예: 75'}
+              placeholder={inputMode === 'pyeong' ? '예: 24평' : '예: 59㎡'}
               onChange={(e) => handleInput(e.target.value)}
               className="input w-full pr-12"
             />

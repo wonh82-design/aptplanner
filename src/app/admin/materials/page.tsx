@@ -38,6 +38,11 @@ function MaterialsList() {
   const [grade, setGrade] = useState<Grade | 'all'>('all');
   const [query, setQuery] = useState('');
   const [onlyMissingImage, setOnlyMissingImage] = useState(false);
+  // 정렬 state
+  type SortKey = 'default' | 'category' | 'grade' | 'work_type' | 'brand' | 'price' | 'image';
+  type SortDir = 'asc' | 'desc';
+  const [sortKey, setSortKey] = useState<SortKey>('default');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
 
   // hydrate 완료 + 토큰 있을 때만 fetch (AdminGate 통과한 후)
   useEffect(() => {
@@ -120,6 +125,57 @@ function MaterialsList() {
     });
   }, [materials, category, grade, query, onlyMissingImage]);
 
+  // === 정렬 ===
+  // 등급은 사용자 정의 순서: 가성비 → 표준 → 고급 → 단일등급
+  const GRADE_ORDER: Record<Grade, number> = {
+    '가성비': 0, '표준': 1, '고급': 2, '단일등급': 3,
+  };
+  const sorted = useMemo(() => {
+    if (sortKey === 'default') return filtered;
+    const arr = filtered.slice();
+    const dir = sortDir === 'asc' ? 1 : -1;
+    arr.sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case 'category':
+          cmp = (a.category ?? '').localeCompare(b.category ?? '');
+          break;
+        case 'grade':
+          cmp = (GRADE_ORDER[a.primary_grade] ?? 99) - (GRADE_ORDER[b.primary_grade] ?? 99);
+          break;
+        case 'work_type':
+          cmp = a.work_type.localeCompare(b.work_type);
+          break;
+        case 'brand':
+          cmp = (a.brand ?? '').localeCompare(b.brand ?? '')
+            || (a.product_line ?? '').localeCompare(b.product_line ?? '');
+          break;
+        case 'price':
+          cmp = a.total_unit_price - b.total_unit_price;
+          break;
+        case 'image':
+          // 이미지 있는 것 먼저 (asc 기준)
+          cmp = (a.image_url ? 1 : 0) - (b.image_url ? 1 : 0);
+          break;
+      }
+      // 동률일 때 material_id로 안정 정렬
+      if (cmp === 0) cmp = a.material_id.localeCompare(b.material_id);
+      return cmp * dir;
+    });
+    return arr;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtered, sortKey, sortDir]);
+
+  /** 헤더 클릭 시 정렬 토글: 같은 키 다시 클릭 → 방향 반전, 다른 키 클릭 → 그 키로 asc 시작 */
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
   if (loading) {
     return <div className="px-6 py-12 text-center text-sm text-zinc-500">자재 데이터 불러오는 중…</div>;
   }
@@ -199,6 +255,43 @@ function MaterialsList() {
           />
           이미지 미등록만
         </label>
+        <div className="ml-auto flex items-end gap-2">
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-zinc-500 mb-1">정렬</label>
+            <select
+              value={`${sortKey}|${sortDir}`}
+              onChange={(e) => {
+                const [k, d] = e.target.value.split('|') as [SortKey, SortDir];
+                setSortKey(k);
+                setSortDir(d);
+              }}
+              className="rounded-md border border-zinc-300 px-2 py-1.5 text-sm"
+            >
+              <option value="default|asc">기본 (등록 순)</option>
+              <option value="category|asc">카테고리 (가나다)</option>
+              <option value="category|desc">카테고리 (역순)</option>
+              <option value="grade|asc">등급 (가성비 → 고급)</option>
+              <option value="grade|desc">등급 (고급 → 가성비)</option>
+              <option value="work_type|asc">공종명 ↑</option>
+              <option value="work_type|desc">공종명 ↓</option>
+              <option value="brand|asc">브랜드 ↑</option>
+              <option value="brand|desc">브랜드 ↓</option>
+              <option value="price|asc">단가 낮은 순</option>
+              <option value="price|desc">단가 높은 순</option>
+              <option value="image|desc">이미지 등록된 것 먼저</option>
+              <option value="image|asc">이미지 미등록 먼저</option>
+            </select>
+          </div>
+          {sortKey !== 'default' && (
+            <button
+              onClick={() => { setSortKey('default'); setSortDir('asc'); }}
+              className="text-[11px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 pb-1.5"
+              title="정렬 해제"
+            >
+              초기화
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 테이블 */}
@@ -208,17 +301,17 @@ function MaterialsList() {
             <thead className="bg-zinc-50 border-b border-zinc-200">
               <tr>
                 <th className="px-3 py-2 text-left font-semibold text-zinc-600">ID</th>
-                <th className="px-3 py-2 text-left font-semibold text-zinc-600">카테고리</th>
-                <th className="px-3 py-2 text-left font-semibold text-zinc-600">공종</th>
-                <th className="px-3 py-2 text-left font-semibold text-zinc-600">브랜드 / 제품</th>
-                <th className="px-3 py-2 text-left font-semibold text-zinc-600">등급</th>
-                <th className="px-3 py-2 text-right font-semibold text-zinc-600">합계 단가</th>
-                <th className="px-3 py-2 text-center font-semibold text-zinc-600">이미지</th>
+                <SortableTh label="카테고리" sortKey="category" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableTh label="공종" sortKey="work_type" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableTh label="브랜드 / 제품" sortKey="brand" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableTh label="등급" sortKey="grade" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableTh label="합계 단가" sortKey="price" current={sortKey} dir={sortDir} onClick={toggleSort} align="right" />
+                <SortableTh label="이미지" sortKey="image" current={sortKey} dir={sortDir} onClick={toggleSort} align="center" />
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
-              {filtered.map((m) => (
+              {sorted.map((m) => (
                 <tr key={m.material_id} className="hover:bg-blue-50/30">
                   <td className="px-3 py-2 font-mono text-[10px] text-zinc-500">{m.material_id}</td>
                   <td className="px-3 py-2 text-zinc-700">{m.category ?? '—'}</td>
@@ -270,6 +363,34 @@ function MaterialsList() {
         </div>
       </div>
     </div>
+  );
+}
+
+function SortableTh({
+  label, sortKey, current, dir, onClick, align = 'left',
+}: {
+  label: string;
+  sortKey: 'category' | 'grade' | 'work_type' | 'brand' | 'price' | 'image';
+  current: string;
+  dir: 'asc' | 'desc';
+  onClick: (key: 'category' | 'grade' | 'work_type' | 'brand' | 'price' | 'image') => void;
+  align?: 'left' | 'right' | 'center';
+}) {
+  const active = current === sortKey;
+  const alignCls = align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left';
+  return (
+    <th
+      className={`px-3 py-2 ${alignCls} font-semibold text-zinc-600 cursor-pointer select-none hover:bg-zinc-100 transition`}
+      onClick={() => onClick(sortKey)}
+      title={active ? `정렬: ${label} (${dir === 'asc' ? '오름차순' : '내림차순'})` : `${label} 기준 정렬`}
+    >
+      <span className={`inline-flex items-center gap-0.5 ${active ? 'text-blue-700' : ''}`}>
+        {label}
+        <span className={`text-[10px] ${active ? 'opacity-100' : 'opacity-30'}`}>
+          {active ? (dir === 'asc' ? '▲' : '▼') : '▾'}
+        </span>
+      </span>
+    </th>
   );
 }
 
