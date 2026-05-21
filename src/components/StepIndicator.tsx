@@ -33,8 +33,8 @@ export function StepIndicator({ current, maxReached, onStepClick }: Props) {
           </div>
         )}
 
-        {/* 4단계 원형 + 단축 라벨 — 얇고 컴팩트 */}
-        <ol className="flex items-center">
+        {/* 3단계 원형 + 단축 라벨 — 가운데 정렬, 컴팩트 */}
+        <ol className="flex items-center justify-center">
           {STEPS.map((s, idx) => {
             const reachable = s.id <= maxReached;
             const isCurrent = s.id === current;
@@ -42,7 +42,7 @@ export function StepIndicator({ current, maxReached, onStepClick }: Props) {
             const connectorFilled = s.id < current;
 
             return (
-              <li key={s.id} className="flex items-center flex-1 min-w-0 last:flex-none">
+              <li key={s.id} className="flex items-center min-w-0 last:flex-none">
                 <button
                   type="button"
                   disabled={!reachable}

@@ -511,58 +511,6 @@ export function MaterialOverrides({
             </div>
           </div>
 
-          {/* 12 큰공종 ON/OFF 칩 */}
-          <div>
-            <div className="flex items-baseline gap-2 mb-1.5">
-              <span className="text-[11px] font-bold text-zinc-700">🛠 공종 선택</span>
-              <span className="text-[10px] text-zinc-400">시공 / 제외할 공종을 클릭으로 토글</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {BIG_WORK_GROUPS.map((group) => {
-                const active = isGroupActive(group);
-                return (
-                  <button
-                    key={group.id}
-                    type="button"
-                    onClick={() => toggleGroup(group)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border-2 text-xs font-semibold transition active:scale-[0.98] ${
-                      active
-                        ? 'border-blue-500 bg-blue-50 text-blue-900'
-                        : 'border-zinc-200 bg-zinc-50 text-zinc-400 hover:border-zinc-300'
-                    }`}
-                    title={group.desc}
-                  >
-                    <span className={`flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-sm border-2 ${
-                      active ? 'border-blue-600 bg-blue-600 text-white' : 'border-zinc-300 bg-white'
-                    }`}>
-                      {active && (
-                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6.5L4.5 9L10 3" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
-                    </span>
-                    <span>{group.title}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-2 text-[10px] text-zinc-500 leading-relaxed">
-              ※ '확장공사'는 우리집 현황의 발코니 확장 현황에서 공간별로 결정합니다.
-              칩 클릭 시 해당 단계로 이동.
-            </p>
-          </div>
-
-          {/* 고급 옵션: 자세한 등급 토글 popover */}
-          <div className="flex items-center gap-2 pt-1 border-t border-zinc-100">
-            <span className="text-[10px] text-zinc-500">고급:</span>
-            <BulkGradeButton
-              currentGrade={value.default}
-              isOpen={bulkOpen}
-              onToggleOpen={() => setBulkOpen((o) => !o)}
-              onSelect={setBulkGrade}
-              onClose={() => setBulkOpen(false)}
-            />
-          </div>
         </div>
       )}
 
@@ -692,10 +640,11 @@ function SingleCard({
 
   return (
     <div className={`rounded-lg border ${hasOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
-      {/* 헤더 */}
+      {/* 헤더 — 공종명 옆에 [제외] [자세히] 버튼 */}
       <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-sm font-semibold text-zinc-900 truncate">{label}</span>
+          {onExclude && <ExcludeButton onExclude={onExclude} />}
           <DetailButton onClick={onShowDetail} label={`${label} 자세히 보기`} />
           {hasOverride && (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium whitespace-nowrap">개별 설정</span>
@@ -710,9 +659,6 @@ function SingleCard({
           )}
         </div>
       </div>
-
-      {/* 이 공종 제외 — 자재 카드 위에 라디오 형태로 노출 */}
-      {onExclude && <ExcludeRow onExclude={onExclude} />}
 
       {/* 자재 카드 — 한 행 가로 스크롤 (등급 순서 보존, 우측으로 스크롤하여 나머지 확인) */}
       {sortedMaterials.length === 0 ? (
@@ -950,6 +896,7 @@ function BundleCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold text-zinc-900">{bundle.label}</span>
+            {onExclude && <ExcludeButton onExclude={onExclude} />}
             {works.length > 0 && (
               <DetailButton
                 onClick={() => onShowDetail(works[0].wt)}
@@ -1012,9 +959,6 @@ function BundleCard({
           </div>
         </div>
       </div>
-
-      {/* 이 공종 제외 — 등급 행 위에 라디오 형태로 노출 */}
-      {onExclude && <ExcludeRow onExclude={onExclude} />}
 
       {/* 등급별 행 — 세트 합계 */}
       <div className="divide-y divide-zinc-100">
@@ -1367,29 +1311,24 @@ function BulkGradeButton({
 }
 
 // =====================================================
-// ExcludeRow — '이 공종 제외' 라디오 형태 행. 가성비 위에 위치.
+// ExcludeButton — 타이틀 바에 들어가는 작은 '이 공종 제외' 버튼.
 //   클릭 시 onExclude 호출 → scope OFF → 카드 자동 사라짐.
-//   사용자는 상단 12 공종 칩 또는 공사범위 프리셋으로 다시 추가 가능.
+//   사용자는 공사범위 프리셋을 다시 클릭하면 그 공종이 다시 추가됨.
 // =====================================================
 
-function ExcludeRow({ onExclude }: { onExclude: () => void }) {
+function ExcludeButton({ onExclude }: { onExclude: () => void }) {
   return (
     <button
       type="button"
-      onClick={onExclude}
-      className="w-full flex items-center gap-2 px-3 py-2 bg-zinc-50/60 hover:bg-red-50 border-b border-zinc-200/70 text-left transition group"
-      title="이 공종을 견적에서 빼고 카드를 닫습니다 (상단 공종 칩에서 다시 추가 가능)"
+      onClick={(e) => { e.stopPropagation(); onExclude(); }}
+      title="이 공종을 견적에서 제외 (공사범위 프리셋 다시 선택 시 복원)"
+      className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-zinc-300 bg-white text-zinc-500 hover:border-red-400 hover:bg-red-50 hover:text-red-700 text-[10px] font-semibold transition whitespace-nowrap"
     >
-      {/* 라디오 모양 — 클릭 시 채워질 듯한 인디케이터 */}
-      <span className="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full border-2 border-zinc-300 group-hover:border-red-400 transition">
-        <span className="block w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-red-400 transition" />
-      </span>
-      <span className="text-[11px] font-medium text-zinc-600 group-hover:text-red-700 transition">
-        이 공종 제외
-      </span>
-      <span className="ml-auto text-[10px] text-zinc-400 group-hover:text-red-500 transition">
-        견적에서 빼기
-      </span>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="8" y1="12" x2="16" y2="12" />
+      </svg>
+      <span>제외</span>
     </button>
   );
 }
