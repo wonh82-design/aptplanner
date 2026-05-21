@@ -44,3 +44,6 @@ next-env.d.ts
 # verify-scenarios.ts 등 검증 스크립트가 만드는 임시 엑셀 사본
 /tmp_xlsx/
 /tmp_xlsx_recalc/
+
+# materials:sync 가 안전을 위해 만드는 자동 백업
+src/data/*.bak

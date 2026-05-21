@@ -1,0 +1,45 @@
+{
+  "_comment": "FROZEN — 엑셀 v5 메인 시트(공사비산출)를 LibreOffice headless로 재계산한 ground truth. 자재 단가 변경/계산 로직 변경 시 의도적으로 이 값을 업데이트하고 git diff로 영향을 추적할 것. archive/v5_legacy_xlsx/ 의 원본 파일에서 LibreOffice headless로 재계산하여 갱신.",
+  "common": {
+    "bay": 3,
+    "rooms": 3,
+    "common_bath": 1,
+    "master_bath": 1,
+    "balcony_depth_m": 1.5,
+    "region": "gyeonggi",
+    "age": "15-30",
+    "note": "안방 외 모든 공간 확장 후=Y, 모든 매트릭스 ON, 욕실 2개, 주방 3.6m"
+  },
+  "scenarios": [
+    {
+      "name": "#1 · 30평 / 3베이 / 가성비 등급",
+      "pyeong": 30,
+      "grade": "가성비",
+      "excel_grand_total": 48813607
+    },
+    {
+      "name": "#2 · 30평 / 3베이 / 표준 등급 (v5 baseline)",
+      "pyeong": 30,
+      "grade": "표준",
+      "excel_grand_total": 68060518
+    },
+    {
+      "name": "#3 · 30평 / 3베이 / 고급 등급",
+      "pyeong": 30,
+      "grade": "고급",
+      "excel_grand_total": 94892490
+    },
+    {
+      "name": "#4 · 24평 / 3베이 / 표준 등급",
+      "pyeong": 24,
+      "grade": "표준",
+      "excel_grand_total": 59708369
+    },
+    {
+      "name": "#5 · 40평 / 3베이 / 표준 등급",
+      "pyeong": 40,
+      "grade": "표준",
+      "excel_grand_total": 76211665
+    }
+  ]
+}

@@ -1,18 +1,28 @@
 /**
- * v5 엑셀 메인 시트(공사비산출) vs 웹 계산기 5가지 시나리오 검증.
- * 엑셀 입력값을 평형/등급별로 변경 후 LibreOffice 재계산한 결과를 사용.
+ * apt-planner 5가지 대표 시나리오 검증.
+ *
+ * 비교 기준: scripts/scenarios-fixture.json (frozen, 엑셀 v5 LibreOffice 재계산 결과)
+ *
+ * - 자재 단가/계산 로직을 변경하면 이 비교 결과가 변하는 게 정상.
+ * - 변경이 의도적이라면 fixture의 excel_grand_total을 함께 업데이트.
+ * - 의도하지 않은 변화면 regression. 코드 변경을 재검토할 것.
  *
  * 실행: npx tsx scripts/verify-scenarios.ts
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { buildQuote } from '../src/lib/calculator';
 import type { Property, Scope, GradeSelection, Grade, RoomScope } from '../src/lib/types';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function makeRoom(opts: Partial<RoomScope> = {}): RoomScope {
   return { expansion_current: false, expansion_after: false, flooring: false, wallpaper: false, molding: false, aircon: false, closet: false, ceiling_fan: false, sash: false, ...opts };
 }
 
-/** v5 엑셀 baseline scope — 안방 외 모든 공간 확장 후=Y, 매트릭스 그대로 */
+/** v5 baseline scope — 안방 외 모든 공간 확장 후=Y, 매트릭스 전체 ON */
 function v5Scope(): Scope {
   return {
     rooms: {
@@ -27,11 +37,31 @@ function v5Scope(): Scope {
   };
 }
 
-function makeProperty(opts: Partial<Property> = {}): Property {
-  return { pyeong: 30, bay: 3, rooms: 3, common_bath: 1, master_bath: 1, balcony_depth_m: 1.5, region: 'gyeonggi', age: '15-30', ...opts };
-}
-
 function makeGrade(g: Grade): GradeSelection { return { default: g, overrides: {}, material_overrides: {} }; }
+
+type FixtureScenario = {
+  name: string;
+  pyeong: number;
+  grade: Grade;
+  excel_grand_total: number;
+};
+type Fixture = {
+  common: {
+    bay: 2 | 3 | 4 | 5;
+    rooms: 2 | 3 | 4 | 5;
+    common_bath: 1 | 2;
+    master_bath: 0 | 1;
+    balcony_depth_m: number;
+    region: Property['region'];
+    age: Property['age'];
+    note: string;
+  };
+  scenarios: FixtureScenario[];
+};
+
+// fixture 로드
+const fixturePath = path.join(__dirname, 'scenarios-fixture.json');
+const fixture: Fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf-8'));
 
 type Scenario = {
   name: string;
@@ -40,14 +70,21 @@ type Scenario = {
   excel_grand_total: number;
 };
 
-// 엑셀 메인 시트(공사비산출)를 평형/등급별로 변경 후 LibreOffice 재계산한 실제 결과
-const SCENARIOS: Scenario[] = [
-  { name: '#1 · 30평 / 3베이 / 가성비 등급', property: makeProperty({ pyeong: 30 }), grade: '가성비', excel_grand_total: 48_813_607 },
-  { name: '#2 · 30평 / 3베이 / 표준 등급 (v5 baseline)', property: makeProperty({ pyeong: 30 }), grade: '표준', excel_grand_total: 68_060_518 },
-  { name: '#3 · 30평 / 3베이 / 고급 등급', property: makeProperty({ pyeong: 30 }), grade: '고급', excel_grand_total: 94_892_490 },
-  { name: '#4 · 24평 / 3베이 / 표준 등급', property: makeProperty({ pyeong: 24 }), grade: '표준', excel_grand_total: 59_708_369 },
-  { name: '#5 · 40평 / 3베이 / 표준 등급', property: makeProperty({ pyeong: 40 }), grade: '표준', excel_grand_total: 76_211_665 },
-];
+const SCENARIOS: Scenario[] = fixture.scenarios.map((s) => ({
+  name: s.name,
+  property: {
+    pyeong: s.pyeong,
+    bay: fixture.common.bay,
+    rooms: fixture.common.rooms,
+    common_bath: fixture.common.common_bath,
+    master_bath: fixture.common.master_bath,
+    balcony_depth_m: fixture.common.balcony_depth_m,
+    region: fixture.common.region,
+    age: fixture.common.age,
+  },
+  grade: s.grade,
+  excel_grand_total: s.excel_grand_total,
+}));
 
 const KRW = (n: number) => n.toLocaleString('ko-KR') + '원';
 
