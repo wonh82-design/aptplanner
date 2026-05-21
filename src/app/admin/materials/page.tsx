@@ -71,6 +71,38 @@ function MaterialsList() {
     return Array.from(set).sort();
   }, [materials]);
 
+  /** 단일 자재 삭제 — 전체 배열에서 제거하여 PUT */
+  const handleDelete = async (id: string, label: string) => {
+    if (!materials) return;
+    if (!confirm(`자재 "${label}" (${id}) 를 삭제하시겠어요?\n복구 불가합니다.`)) return;
+    const next = materials.filter((m) => m.material_id !== id);
+    try {
+      const res = await fetchWithAuth('/api/admin/materials', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ materials: next }),
+      });
+      if (res.status === 401) { setToken(null); return; }
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        alert('삭제 실패: ' + (data.errors?.join('\n') || data.message || res.status));
+        return;
+      }
+      setMaterials(next);
+      if (data.mode === 'download_required' && data.json) {
+        // Production: JSON 다운로드 유도
+        const blob = new Blob([data.json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'materials.json'; a.click();
+        URL.revokeObjectURL(url);
+        alert('Production 환경: 변경된 materials.json 이 다운로드되었습니다. src/data/materials.json 에 교체 후 git commit 하세요.');
+      }
+    } catch (e) {
+      alert('네트워크 오류: ' + String(e));
+    }
+  };
+
   const filtered = useMemo(() => {
     if (!materials) return [];
     const q = query.trim().toLowerCase();
@@ -108,6 +140,13 @@ function MaterialsList() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/admin/materials/new"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition"
+          >
+            <span className="text-base leading-none">＋</span>
+            <span>신규 자재 추가</span>
+          </Link>
           <button
             onClick={() => { setToken(null); }}
             className="text-[11px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2"
@@ -189,7 +228,10 @@ function MaterialsList() {
                     <div className="text-[10px] text-zinc-500 truncate max-w-md">{m.installer_spec}</div>
                   </td>
                   <td className="px-3 py-2">
-                    <GradeBadge grade={m.primary_grade} />
+                    <GradeBadge
+                      grade={m.primary_grade}
+                      isPrimary={(m.tags ?? []).includes('주력')}
+                    />
                   </td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900">
                     {m.total_unit_price.toLocaleString('ko-KR')}
@@ -199,13 +241,20 @@ function MaterialsList() {
                       ? <span className="text-emerald-600 font-bold">✓</span>
                       : <span className="text-zinc-300">—</span>}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-2 text-right whitespace-nowrap">
                     <Link
                       href={`/admin/materials/${encodeURIComponent(m.material_id)}`}
                       className="inline-block px-2.5 py-1 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-[10px]"
                     >
                       편집
                     </Link>
+                    <button
+                      onClick={() => handleDelete(m.material_id, `${m.brand ?? ''} ${m.product_line ?? ''}`.trim())}
+                      className="ml-1 inline-block px-2 py-1 rounded border border-red-200 bg-white hover:bg-red-50 text-red-600 font-semibold text-[10px]"
+                      title="이 자재 삭제"
+                    >
+                      🗑
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -224,15 +273,18 @@ function MaterialsList() {
   );
 }
 
-function GradeBadge({ grade }: { grade: Grade }) {
+function GradeBadge({ grade, isPrimary }: { grade: Grade; isPrimary: boolean }) {
   const color =
     grade === '가성비' ? 'bg-emerald-100 text-emerald-700' :
     grade === '표준' ? 'bg-blue-100 text-blue-700' :
     grade === '고급' ? 'bg-amber-100 text-amber-700' :
     'bg-zinc-100 text-zinc-700';
   return (
-    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${color}`}>
-      {grade}
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${color}`}>
+      <span>{grade}</span>
+      {isPrimary && (
+        <span className="text-[9px] font-extrabold opacity-90">★ 추천</span>
+      )}
     </span>
   );
 }

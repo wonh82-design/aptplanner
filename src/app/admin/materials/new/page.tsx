@@ -1,19 +1,19 @@
 'use client';
 
 /**
- * 자재마스터 관리자 — 단일 자재 편집 페이지.
+ * 자재마스터 관리자 — 신규 자재 추가 페이지.
  *
- * URL: /admin/materials/[material_id]
+ * URL: /admin/materials/new
  *
  * 동작:
- *  - 마운트 시 GET /api/admin/materials 로 전체 자재 로드 → 해당 ID 찾기
- *  - 폼 편집
- *  - 저장 시 그 자재만 교체한 새 전체 배열을 PUT
- *  - 응답이 mode: 'file_written' 이면 즉시 적용 안내
- *  - mode: 'download_required' 이면 JSON 다운로드 버튼 노출
+ *  - 빈 폼 + material_id 자동 생성 (MAT-{XX}-{NNN}, 운영자 수정 가능)
+ *  - 카테고리는 기존 자재 목록에서 datalist 자동완성
+ *  - 저장 시 전체 배열에 추가하여 PUT
+ *  - 성공 시 편집 페이지로 리다이렉트
  */
 
-import { use, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { Grade, Material } from '@/lib/types';
 import { normalizeImageUrl } from '@/lib/image-utils';
@@ -22,19 +22,33 @@ import { useAdminToken } from '../../useAdminToken';
 
 const GRADES: Grade[] = ['가성비', '표준', '고급', '단일등급'];
 
-export default function MaterialEditPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function NewMaterialPage() {
   return (
     <AdminGate>
-      <MaterialEditor materialId={decodeURIComponent(id)} />
+      <NewMaterialForm />
     </AdminGate>
   );
 }
 
-function MaterialEditor({ materialId }: { materialId: string }) {
+/** 기존 material_id 중 같은 prefix 그룹의 최대 번호 + 1 — 충돌 방지 자동 생성 */
+function generateNextId(materials: Material[], prefix: string): string {
+  const pattern = new RegExp(`^${prefix}-(\\d+)$`);
+  let maxNum = 0;
+  for (const m of materials) {
+    const match = m.material_id.match(pattern);
+    if (match) {
+      const n = parseInt(match[1], 10);
+      if (n > maxNum) maxNum = n;
+    }
+  }
+  const next = maxNum + 1;
+  return `${prefix}-${String(next).padStart(3, '0')}`;
+}
+
+function NewMaterialForm() {
+  const router = useRouter();
   const { token, hydrated, fetchWithAuth, setToken } = useAdminToken();
   const [allMaterials, setAllMaterials] = useState<Material[] | null>(null);
-  const [draft, setDraft] = useState<Material | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -44,7 +58,25 @@ function MaterialEditor({ materialId }: { materialId: string }) {
     json?: string;
   } | null>(null);
 
-  // hydrate 완료 + 토큰 있을 때만 fetch
+  const [draft, setDraft] = useState<Material>({
+    material_id: 'MAT-NEW-001',
+    work_type: '',
+    category: null,
+    sub_category: null,
+    brand: null,
+    product_line: null,
+    installer_spec: null,
+    tags: [],
+    unit_type: 'per_m2',
+    material_price: 0,
+    labor_price: 0,
+    total_unit_price: 0,
+    primary_grade: '표준',
+    lookup_key: null,
+    secondary_key: null,
+  });
+
+  // 기존 자재 로드 → material_id 자동 생성 + 카테고리 옵션
   useEffect(() => {
     if (!hydrated || !token) return;
     let cancelled = false;
@@ -55,13 +87,12 @@ function MaterialEditor({ materialId }: { materialId: string }) {
         if (!res.ok) throw new Error('GET failed: ' + res.status);
         const data = await res.json();
         if (cancelled) return;
-        setAllMaterials(data.materials);
-        const found = (data.materials as Material[]).find((m) => m.material_id === materialId);
-        if (!found) {
-          setErr(`material_id "${materialId}" 를 찾을 수 없습니다.`);
-        } else {
-          setDraft({ ...found });
-        }
+        setAllMaterials(data.materials as Material[]);
+        // 기본 ID: MAT-NEW-{N} — 사용자가 수정 가능
+        setDraft((prev) => ({
+          ...prev,
+          material_id: generateNextId(data.materials, 'MAT-NEW'),
+        }));
       } catch (e) {
         if (!cancelled) setErr(String(e));
       } finally {
@@ -70,27 +101,11 @@ function MaterialEditor({ materialId }: { materialId: string }) {
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [materialId, hydrated, token]);
+  }, [hydrated, token]);
 
-  if (loading) {
-    return <div className="px-6 py-12 text-center text-sm text-zinc-500">자재 데이터 불러오는 중…</div>;
-  }
-  if (err) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">{err}</div>
-        <Link href="/admin/materials" className="mt-4 inline-block text-blue-700 text-sm hover:underline">← 자재 목록으로</Link>
-      </div>
-    );
-  }
-  if (!draft || !allMaterials) return null;
-
-  // total = material + labor 자동 동기화
   const updateField = <K extends keyof Material>(k: K, v: Material[K]) => {
     setDraft((prev) => {
-      if (!prev) return prev;
       const next = { ...prev, [k]: v };
-      // 가격 필드 변경 시 total 자동 재계산
       if (k === 'material_price' || k === 'labor_price') {
         next.total_unit_price = (Number(next.material_price) || 0) + (Number(next.labor_price) || 0);
       }
@@ -99,31 +114,50 @@ function MaterialEditor({ materialId }: { materialId: string }) {
     setSaveResult(null);
   };
 
+  const categoryOptions = useMemo(() => {
+    if (!allMaterials) return [];
+    const set = new Set<string>();
+    for (const m of allMaterials) if (m.category) set.add(m.category);
+    return Array.from(set).sort();
+  }, [allMaterials]);
+
+  const workTypeOptions = useMemo(() => {
+    if (!allMaterials) return [];
+    const set = new Set<string>();
+    for (const m of allMaterials) if (m.work_type) set.add(m.work_type);
+    return Array.from(set).sort();
+  }, [allMaterials]);
+
   const handleSave = async () => {
-    if (!draft || !allMaterials || saving) return;
+    if (!allMaterials || saving) return;
+    // 기본 검증
+    if (!draft.material_id.trim()) { alert('material_id 입력 필요'); return; }
+    if (allMaterials.some((m) => m.material_id === draft.material_id)) {
+      alert(`material_id "${draft.material_id}" 중복. 다른 ID로 변경하세요.`);
+      return;
+    }
+    if (!draft.work_type.trim()) { alert('work_type 입력 필요'); return; }
+
     setSaving(true);
     setSaveResult(null);
     try {
-      // 전체 배열에서 해당 자재만 교체
-      const updated = allMaterials.map((m) => m.material_id === draft.material_id ? draft : m);
+      const next = [...allMaterials, draft];
       const res = await fetchWithAuth('/api/admin/materials', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ materials: updated }),
+        body: JSON.stringify({ materials: next }),
       });
       if (res.status === 401) { setToken(null); return; }
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        const errMsg = data.errors?.join('\n') || data.message || '저장 실패';
-        setErr(errMsg);
+        setErr(data.errors?.join('\n') || data.message || '저장 실패');
         return;
       }
-      setSaveResult({
-        mode: data.mode,
-        message: data.message,
-        json: data.json,
-      });
-      setAllMaterials(updated);
+      setSaveResult({ mode: data.mode, message: data.message, json: data.json });
+      // dev 환경: 편집 페이지로 즉시 이동
+      if (data.mode === 'file_written') {
+        setTimeout(() => router.push(`/admin/materials/${encodeURIComponent(draft.material_id)}`), 800);
+      }
     } catch (e) {
       setErr(String(e));
     } finally {
@@ -136,51 +170,17 @@ function MaterialEditor({ materialId }: { materialId: string }) {
     const blob = new Blob([saveResult.json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'materials.json';
-    a.click();
+    a.href = url; a.download = 'materials.json'; a.click();
     URL.revokeObjectURL(url);
   };
 
-  /** 이 자재 삭제 — 전체 배열에서 제거 후 PUT → 리스트로 이동 */
-  const handleDelete = async () => {
-    if (!draft || !allMaterials) return;
-    if (!confirm(`자재 "${draft.brand} ${draft.product_line}" (${draft.material_id}) 를 삭제하시겠어요?\n복구 불가합니다.`)) return;
-    try {
-      const next = allMaterials.filter((m) => m.material_id !== draft.material_id);
-      const res = await fetchWithAuth('/api/admin/materials', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ materials: next }),
-      });
-      if (res.status === 401) { setToken(null); return; }
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        alert('삭제 실패: ' + (data.errors?.join('\n') || data.message || res.status));
-        return;
-      }
-      if (data.mode === 'download_required' && data.json) {
-        const blob = new Blob([data.json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'materials.json'; a.click();
-        URL.revokeObjectURL(url);
-        alert('Production 환경: 변경된 materials.json 이 다운로드되었습니다. src/data/materials.json 에 교체 후 git commit 하세요.');
-      }
-      // 리스트로 이동
-      window.location.href = '/admin/materials';
-    } catch (e) {
-      alert('네트워크 오류: ' + String(e));
-    }
-  };
-
-  // 기존 카테고리 목록 — datalist 자동완성용
-  const categoryOptions = useMemo(() => {
-    if (!allMaterials) return [];
-    const set = new Set<string>();
-    for (const m of allMaterials) if (m.category) set.add(m.category);
-    return Array.from(set).sort();
-  }, [allMaterials]);
+  if (loading) return <div className="px-6 py-12 text-center text-sm text-zinc-500">기존 자재 로드 중…</div>;
+  if (err) return (
+    <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800 whitespace-pre-wrap">{err}</div>
+      <Link href="/admin/materials" className="mt-4 inline-block text-blue-700 text-sm hover:underline">← 자재 목록으로</Link>
+    </div>
+  );
 
   const previewImageUrl = normalizeImageUrl(draft.image_url, 600);
 
@@ -191,26 +191,18 @@ function MaterialEditor({ materialId }: { materialId: string }) {
         <div className="flex items-center gap-2">
           <Link href="/admin/materials" className="text-xs text-zinc-500 hover:text-blue-700">← 자재 목록</Link>
           <span className="text-zinc-300">/</span>
-          <span className="font-mono text-xs text-zinc-700">{draft.material_id}</span>
+          <span className="text-xs font-bold text-blue-700">신규 자재</span>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleDelete}
-            className="px-3 py-2 rounded-lg border border-red-300 bg-white hover:bg-red-50 text-red-700 font-semibold text-sm transition"
-          >
-            🗑 삭제
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition disabled:opacity-50"
-          >
-            {saving ? '저장 중…' : '💾 저장'}
-          </button>
-        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition disabled:opacity-50"
+        >
+          {saving ? '저장 중…' : '＋ 자재 추가'}
+        </button>
       </div>
 
-      {/* 저장 결과 알림 */}
+      {/* 저장 결과 */}
       {saveResult && (
         <div className={`mb-4 rounded-lg p-4 border ${
           saveResult.mode === 'file_written'
@@ -220,9 +212,9 @@ function MaterialEditor({ materialId }: { materialId: string }) {
           <div className={`text-sm font-bold mb-1 ${
             saveResult.mode === 'file_written' ? 'text-emerald-900' : 'text-amber-900'
           }`}>
-            {saveResult.mode === 'file_written' ? '✓ 파일 저장 완료' : '⚠ JSON 다운로드 필요'}
+            {saveResult.mode === 'file_written' ? '✓ 자재 추가 완료' : '⚠ JSON 다운로드 필요'}
           </div>
-          <div className="text-xs text-zinc-700 leading-relaxed">{saveResult.message}</div>
+          <div className="text-xs text-zinc-700">{saveResult.message}</div>
           {saveResult.mode === 'download_required' && saveResult.json && (
             <button
               onClick={downloadJson}
@@ -234,15 +226,22 @@ function MaterialEditor({ materialId }: { materialId: string }) {
         </div>
       )}
 
-      {/* 폼 */}
       <div className="bg-white rounded-lg border border-zinc-200 p-5 sm:p-6 space-y-5">
-        {/* 기본 정보 */}
         <FieldGroup title="기본 정보">
-          <Field label="material_id (변경 금지)">
-            <input value={draft.material_id} readOnly className="input bg-zinc-50 font-mono text-xs" />
+          <Field label="material_id (충돌 시 변경)">
+            <input value={draft.material_id} onChange={(e) => updateField('material_id', e.target.value)} className="input font-mono text-xs" />
           </Field>
           <Field label="work_type">
-            <input value={draft.work_type} onChange={(e) => updateField('work_type', e.target.value)} className="input font-mono" />
+            <input
+              value={draft.work_type}
+              onChange={(e) => updateField('work_type', e.target.value)}
+              className="input font-mono"
+              list="work-type-options"
+              placeholder="예: flooring, wallpaper, kitchen_top"
+            />
+            <datalist id="work-type-options">
+              {workTypeOptions.map((w) => <option key={w} value={w} />)}
+            </datalist>
           </Field>
           <Field label="카테고리">
             <input
@@ -257,11 +256,10 @@ function MaterialEditor({ materialId }: { materialId: string }) {
             </datalist>
           </Field>
           <Field label="서브 카테고리">
-            <input value={draft.sub_category ?? ''} onChange={(e) => updateField('sub_category', e.target.value || null)} className="input" />
+            <input value={draft.sub_category ?? ''} onChange={(e) => updateField('sub_category', e.target.value || null)} className="input" placeholder="예: 강마루, 합지" />
           </Field>
         </FieldGroup>
 
-        {/* 자재 정보 */}
         <FieldGroup title="자재 정보">
           <Field label="브랜드">
             <input value={draft.brand ?? ''} onChange={(e) => updateField('brand', e.target.value || null)} className="input" />
@@ -287,7 +285,6 @@ function MaterialEditor({ materialId }: { materialId: string }) {
           </Field>
         </FieldGroup>
 
-        {/* 단가 */}
         <FieldGroup title="단가">
           <Field label="단위">
             <select value={draft.unit_type} onChange={(e) => updateField('unit_type', e.target.value)} className="input">
@@ -313,17 +310,15 @@ function MaterialEditor({ materialId }: { materialId: string }) {
           </Field>
         </FieldGroup>
 
-        {/* 키 */}
-        <FieldGroup title="lookup (자동 생성 가능)">
+        <FieldGroup title="lookup (비워두면 자동 생성)">
           <Field label="lookup_key">
-            <input value={draft.lookup_key ?? ''} onChange={(e) => updateField('lookup_key', e.target.value || null)} className="input font-mono text-xs" placeholder="예: flooring|표준" />
+            <input value={draft.lookup_key ?? ''} onChange={(e) => updateField('lookup_key', e.target.value || null)} className="input font-mono text-xs" placeholder="자동: {work_type}|{grade}" />
           </Field>
           <Field label="secondary_key">
             <input value={draft.secondary_key ?? ''} onChange={(e) => updateField('secondary_key', e.target.value || null)} className="input font-mono text-xs" placeholder="예: 강마루|표준" />
           </Field>
         </FieldGroup>
 
-        {/* 이미지 */}
         <FieldGroup title="이미지">
           <Field label="image_url (구글 드라이브 공유 링크 또는 일반 URL)" full>
             <input
@@ -332,35 +327,19 @@ function MaterialEditor({ materialId }: { materialId: string }) {
               className="input"
               placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
             />
-            <p className="mt-1 text-[10px] text-zinc-500 leading-relaxed">
-              구글 드라이브 공유 링크 그대로 붙여넣어도 자동 변환됩니다.
-              {previewImageUrl && (
-                <>
-                  <br />
-                  정규화 URL: <span className="font-mono text-[10px] break-all">{previewImageUrl}</span>
-                </>
-              )}
-            </p>
           </Field>
-          {/* 이미지 미리보기 */}
-          {previewImageUrl ? (
+          {previewImageUrl && (
             <div className="sm:col-span-2 rounded-lg border border-zinc-200 overflow-hidden bg-zinc-50">
               <div className="aspect-[4/3] max-w-md mx-auto">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={previewImageUrl}
-                  alt={draft.brand + ' ' + draft.product_line}
+                  alt={(draft.brand ?? '') + ' ' + (draft.product_line ?? '')}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = 'none';
-                  }}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
-            </div>
-          ) : (
-            <div className="sm:col-span-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 p-6 text-center text-xs text-zinc-400">
-              이미지 URL을 입력하면 여기에 미리보기가 표시됩니다.
             </div>
           )}
         </FieldGroup>
