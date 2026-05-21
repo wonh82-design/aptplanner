@@ -239,6 +239,138 @@ export function MaterialOverrides({
     onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
   }
 
+  /**
+   * 특정 work_type을 scope에서 제외 (해당 scope 키 OFF).
+   * line_items가 자동으로 빠져서 자재 카드도 사라짐.
+   */
+  function excludeWorkType(wt: string) {
+    if (!scope || !onScopeChange || !property) return;
+    const visibleRooms = activeRooms(property) as RoomId[];
+    const nextRooms = { ...scope.rooms };
+    const nextGlobal = { ...scope.global };
+
+    // 룸 단위 work_type (모든 활성 룸의 키 OFF)
+    const ROOM_KEY_MAP: Record<string, 'flooring' | 'wallpaper' | 'molding' | 'sash' | 'aircon' | 'closet' | 'ceiling_fan'> = {
+      flooring: 'flooring',
+      wallpaper: 'wallpaper',
+      molding: 'molding',
+      window: 'sash',
+      aircon: 'aircon',
+      aircon_outdoor: 'aircon',
+      closet: 'closet',
+      ceiling_fan: 'ceiling_fan',
+    };
+    if (wt in ROOM_KEY_MAP) {
+      const k = ROOM_KEY_MAP[wt];
+      for (const r of visibleRooms) {
+        nextRooms[r] = { ...nextRooms[r], [k]: false };
+      }
+      onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+      return;
+    }
+
+    // 글로벌 단위 work_type
+    const GLOBAL_KEY_MAP: Record<string, keyof typeof nextGlobal> = {
+      base_work: 'demolition',
+      insulation: 'insulation',
+      electrical_base: 'electrical_base',
+      electrical_switch: 'switch_outlet',
+      induction_line: 'induction_line',
+      plumbing_base: 'plumbing_base',
+      thermostat: 'thermostat',
+      plumbing_heating: 'heating_pipe',
+      silicon_labor: 'silicon',
+      balcony_floor_tile: 'balcony_floor_tile',
+      balcony_paint: 'balcony_paint',
+      sliding_door: 'middoor',
+      general_furniture: 'entry_furniture',
+      carpentry_base: 'carpentry_base',
+      carpentry_ceiling: 'carpentry_ceiling',
+    };
+    if (wt in GLOBAL_KEY_MAP) {
+      const k = GLOBAL_KEY_MAP[wt];
+      if (typeof nextGlobal[k] === 'boolean') {
+        (nextGlobal as Record<string, unknown>)[k] = false;
+      }
+      onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+      return;
+    }
+
+    // 특수 case
+    if (wt === 'carpentry_partition') {
+      nextGlobal.partition_length = 0;
+      onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+      return;
+    }
+    if (wt === 'door_no_frame') {
+      nextGlobal.no_door_frame = false;
+      onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+      return;
+    }
+
+    // 매핑 없는 work_type (baseboard, turning_door 등) — 직접 제외 불가
+    // (baseboard는 wallpaper OFF로 자동 제외, turning_door/expansion은 Step 1)
+  }
+
+  /**
+   * 번들 단위 제외 — 번들의 모든 work_type을 OFF.
+   */
+  function excludeBundle(bundle: WorkBundle) {
+    if (!scope || !onScopeChange || !property) return;
+    const visibleRooms = activeRooms(property) as RoomId[];
+    const nextRooms = { ...scope.rooms };
+    const nextGlobal = { ...scope.global };
+
+    switch (bundle.id) {
+      case 'bath':
+        nextGlobal.common_bath_set = false;
+        nextGlobal.master_bath_set = false;
+        break;
+      case 'kitchen':
+        nextGlobal.kitchen_set = false;
+        break;
+      case 'lighting':
+        nextGlobal.lighting = false;
+        break;
+      case 'aircon':
+        for (const r of visibleRooms) nextRooms[r] = { ...nextRooms[r], aircon: false };
+        break;
+      case 'ceiling_fan':
+        for (const r of visibleRooms) nextRooms[r] = { ...nextRooms[r], ceiling_fan: false };
+        break;
+      case 'closet':
+        for (const r of visibleRooms) nextRooms[r] = { ...nextRooms[r], closet: false };
+        break;
+      case 'balcony':
+        nextGlobal.balcony_floor_tile = false;
+        nextGlobal.balcony_paint = false;
+        break;
+      case 'electrical':
+        nextGlobal.electrical_base = false;
+        nextGlobal.switch_outlet = false;
+        nextGlobal.induction_line = false;
+        break;
+      case 'plumbing':
+        nextGlobal.plumbing_base = false;
+        nextGlobal.thermostat = false;
+        nextGlobal.heating_pipe = false;
+        break;
+      case 'middoor':
+        nextGlobal.middoor = false;
+        nextGlobal.entry_furniture = false;
+        break;
+      case 'carpentry':
+        nextGlobal.carpentry_base = false;
+        nextGlobal.carpentry_ceiling = false;
+        nextGlobal.no_molding = false;
+        nextGlobal.no_door_frame = false;
+        nextGlobal.no_baseboard = false;
+        nextGlobal.partition_length = 0;
+        break;
+    }
+    onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+  }
+
   /** 그룹 활성 여부 */
   function isGroupActive(group: BigWorkGroup): boolean {
     if (!scope || !property) return false;
@@ -455,6 +587,7 @@ export function MaterialOverrides({
               onSelectMaterial={setMaterial}
               onClear={() => clearOverride(item.work.wt)}
               onShowDetail={() => setDetailWorkType(item.work.wt)}
+              onExclude={canEditScope ? () => excludeWorkType(item.work.wt) : undefined}
             />
           ) : (
             <BundleCard
@@ -468,6 +601,7 @@ export function MaterialOverrides({
               onSelectComponentGrade={(wt, g) => setGrade(wt, g)}
               onClearBundle={() => clearBundleOverride(item.bundle)}
               onShowDetail={(wt) => setDetailWorkType(wt)}
+              onExclude={canEditScope ? () => excludeBundle(item.bundle) : undefined}
               scope={scope}
               onScopeChange={onScopeChange}
             />
@@ -517,7 +651,7 @@ function isPrimaryMaterial(m: Material, allInGrade: Material[]): boolean {
  */
 function SingleCard({
   work, label, effectiveGrade: curGrade, effectiveMaterialId, hasOverride,
-  onSelectMaterial, onClear, onShowDetail,
+  onSelectMaterial, onClear, onShowDetail, onExclude,
 }: {
   work: WorkInfo;
   label: string;
@@ -527,6 +661,8 @@ function SingleCard({
   onSelectMaterial: (m: Material) => void;
   onClear: () => void;
   onShowDetail: () => void;
+  /** "이 공종 제외" 클릭 — 미전달 시 버튼 숨김 */
+  onExclude?: () => void;
 }) {
   // 그 work_type의 모든 자재 (현장시공 제외)
   const allMaterials = materialsFor(work.wt).filter((m) => m.brand !== '현장시공');
@@ -574,6 +710,9 @@ function SingleCard({
           )}
         </div>
       </div>
+
+      {/* 이 공종 제외 — 자재 카드 위에 라디오 형태로 노출 */}
+      {onExclude && <ExcludeRow onExclude={onExclude} />}
 
       {/* 자재 카드 — 한 행 가로 스크롤 (등급 순서 보존, 우측으로 스크롤하여 나머지 확인) */}
       {sortedMaterials.length === 0 ? (
@@ -756,7 +895,7 @@ function bundleMaterialSummary(works: WorkInfo[], grade: Grade): string {
 function BundleCard({
   bundle, works, totalSub, gradeSelection, effectiveGrade,
   onSelectBundleGrade, onSelectComponentGrade, onClearBundle,
-  onShowDetail,
+  onShowDetail, onExclude,
   scope, onScopeChange,
 }: {
   bundle: WorkBundle;
@@ -769,6 +908,8 @@ function BundleCard({
   onClearBundle: () => void;
   /** 번들 안의 특정 work_type을 자세히 보기 모달로 열기 */
   onShowDetail: (workType: string) => void;
+  /** "이 공종 제외" — 미전달 시 버튼 숨김 */
+  onExclude?: () => void;
   scope?: Scope;
   onScopeChange?: (s: Scope) => void;
 }) {
@@ -871,6 +1012,9 @@ function BundleCard({
           </div>
         </div>
       </div>
+
+      {/* 이 공종 제외 — 등급 행 위에 라디오 형태로 노출 */}
+      {onExclude && <ExcludeRow onExclude={onExclude} />}
 
       {/* 등급별 행 — 세트 합계 */}
       <div className="divide-y divide-zinc-100">
@@ -1219,6 +1363,34 @@ function BulkGradeButton({
         </>
       )}
     </div>
+  );
+}
+
+// =====================================================
+// ExcludeRow — '이 공종 제외' 라디오 형태 행. 가성비 위에 위치.
+//   클릭 시 onExclude 호출 → scope OFF → 카드 자동 사라짐.
+//   사용자는 상단 12 공종 칩 또는 공사범위 프리셋으로 다시 추가 가능.
+// =====================================================
+
+function ExcludeRow({ onExclude }: { onExclude: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onExclude}
+      className="w-full flex items-center gap-2 px-3 py-2 bg-zinc-50/60 hover:bg-red-50 border-b border-zinc-200/70 text-left transition group"
+      title="이 공종을 견적에서 빼고 카드를 닫습니다 (상단 공종 칩에서 다시 추가 가능)"
+    >
+      {/* 라디오 모양 — 클릭 시 채워질 듯한 인디케이터 */}
+      <span className="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full border-2 border-zinc-300 group-hover:border-red-400 transition">
+        <span className="block w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-red-400 transition" />
+      </span>
+      <span className="text-[11px] font-medium text-zinc-600 group-hover:text-red-700 transition">
+        이 공종 제외
+      </span>
+      <span className="ml-auto text-[10px] text-zinc-400 group-hover:text-red-500 transition">
+        견적에서 빼기
+      </span>
+    </button>
   );
 }
 
