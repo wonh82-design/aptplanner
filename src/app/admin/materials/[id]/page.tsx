@@ -32,7 +32,7 @@ export default function MaterialEditPage({ params }: { params: Promise<{ id: str
 }
 
 function MaterialEditor({ materialId }: { materialId: string }) {
-  const { fetchWithAuth, setToken } = useAdminToken();
+  const { token, hydrated, fetchWithAuth, setToken } = useAdminToken();
   const [allMaterials, setAllMaterials] = useState<Material[] | null>(null);
   const [draft, setDraft] = useState<Material | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +44,9 @@ function MaterialEditor({ materialId }: { materialId: string }) {
     json?: string;
   } | null>(null);
 
+  // hydrate 완료 + 토큰 있을 때만 fetch
   useEffect(() => {
+    if (!hydrated || !token) return;
     let cancelled = false;
     (async () => {
       try {
@@ -68,7 +70,7 @@ function MaterialEditor({ materialId }: { materialId: string }) {
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [materialId]);
+  }, [materialId, hydrated, token]);
 
   if (loading) {
     return <div className="px-6 py-12 text-center text-sm text-zinc-500">자재 데이터 불러오는 중…</div>;

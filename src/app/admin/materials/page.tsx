@@ -28,7 +28,7 @@ export default function MaterialsAdminPage() {
 }
 
 function MaterialsList() {
-  const { fetchWithAuth, setToken } = useAdminToken();
+  const { token, hydrated, fetchWithAuth, setToken } = useAdminToken();
   const [materials, setMaterials] = useState<Material[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -39,7 +39,9 @@ function MaterialsList() {
   const [query, setQuery] = useState('');
   const [onlyMissingImage, setOnlyMissingImage] = useState(false);
 
+  // hydrate 완료 + 토큰 있을 때만 fetch (AdminGate 통과한 후)
   useEffect(() => {
+    if (!hydrated || !token) return;
     let cancelled = false;
     (async () => {
       try {
@@ -60,7 +62,7 @@ function MaterialsList() {
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hydrated, token]);
 
   const categories = useMemo(() => {
     if (!materials) return [];
