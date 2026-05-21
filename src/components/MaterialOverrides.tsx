@@ -720,12 +720,22 @@ const MaterialCard = memo(function MaterialCard({
   const useDummy = !realUrl && shouldUseDummyImages();
   const imageUrl = realUrl || (useDummy ? placeholderImageUrl(material.material_id, 600) : null);
 
+  // 자재 카드는 자체 클릭 + 내부에 제조사 페이지 a 링크를 함께 포함 → button 중첩 방지 위해 div + role=button
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect();
+    }
+  };
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={handleKeyDown}
       aria-pressed={isSelected}
-      className={`group relative w-full flex flex-col rounded-lg border-2 overflow-hidden text-left transition-all active:scale-[0.99] ${
+      className={`group relative w-full flex flex-col rounded-lg border-2 overflow-hidden text-left transition-all active:scale-[0.99] cursor-pointer ${
         isSelected
           ? `${meta.ring.replace('ring-', 'border-')} ring-2 ${meta.ring} shadow-md`
           : 'border-zinc-200 hover:border-zinc-400 hover:shadow-sm'
@@ -757,10 +767,30 @@ const MaterialCard = memo(function MaterialCard({
         isDummy={useDummy && !realUrl}
       />
 
-      {/* 본문 — brand/product_line + spec + 가격 */}
+      {/* 본문 — brand/product_line + 제조사 링크 + spec + 가격 */}
       <div className="flex-1 px-2 py-1.5 flex flex-col gap-0.5">
-        <div className="text-[11px] font-bold text-zinc-900 leading-tight line-clamp-2 min-h-[2.4em]">
-          {material.brand} {material.product_line}
+        <div className="flex items-start justify-between gap-1">
+          <div className="text-[11px] font-bold text-zinc-900 leading-tight line-clamp-2 min-h-[2.4em] flex-1 min-w-0">
+            {material.brand} {material.product_line}
+          </div>
+          {material.vendor_url && (
+            <a
+              href={material.vendor_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              title="제조사 페이지 새 창으로 열기"
+              aria-label="제조사 페이지"
+              className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded border border-zinc-200 bg-white text-zinc-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 transition"
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
+          )}
         </div>
         {material.installer_spec && (
           <div className="text-[9.5px] text-zinc-500 leading-snug line-clamp-2" title={material.installer_spec}>
@@ -774,7 +804,7 @@ const MaterialCard = memo(function MaterialCard({
           </span>
         </div>
       </div>
-    </button>
+    </div>
   );
 });
 

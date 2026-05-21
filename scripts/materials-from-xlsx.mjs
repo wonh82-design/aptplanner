@@ -170,6 +170,15 @@ rows.forEach((r, idx) => {
     imageUrl = null;
   }
 
+  // vendor_url 정규화 (양끝 공백 제거)
+  let vendorUrl = r.vendor_url;
+  if (typeof vendorUrl === 'string') {
+    vendorUrl = vendorUrl.trim();
+    if (!vendorUrl) vendorUrl = null;
+  } else {
+    vendorUrl = null;
+  }
+
   // null→null, 빈 문자열도 null로 통일
   const nullable = (v) => {
     if (v === null || v === undefined) return null;
@@ -194,6 +203,7 @@ rows.forEach((r, idx) => {
     lookup_key: lookupKey || null,
     secondary_key: nullable(r.secondary_key),
     ...(imageUrl ? { image_url: imageUrl } : {}),
+    ...(vendorUrl ? { vendor_url: vendorUrl } : {}),
   });
 });
 

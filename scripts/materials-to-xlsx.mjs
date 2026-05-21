@@ -59,6 +59,7 @@ const COLUMNS = [
   'lookup_key',
   'secondary_key',
   'image_url',      // Phase 1에서 추가된 필드
+  'vendor_url',     // 제조사 페이지 URL (자재 카드의 ↗ 버튼)
 ];
 
 const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
@@ -99,6 +100,7 @@ const widths = [
   { wch: 22 },  // lookup_key
   { wch: 22 },  // secondary_key
   { wch: 48 },  // image_url
+  { wch: 48 },  // vendor_url
 ];
 ws['!cols'] = widths;
 
@@ -121,6 +123,7 @@ const readmeRows = [
   ['- primary_grade 는 가성비 / 표준 / 고급 / 단일등급 4가지 중 하나'],
   ['- lookup_key 형식: "{work_type}|{primary_grade}" (예: "flooring|표준")'],
   ['- image_url 은 구글 드라이브 공유 링크 또는 일반 https URL (자동 변환 처리)'],
+  ['- vendor_url 은 제조사 제품 페이지 URL — 자재 카드의 ↗ 버튼이 새 창으로 엶'],
   [''],
   ['신규 자재 추가 시'],
   ['1. 마지막 행 다음 빈 행에 입력'],

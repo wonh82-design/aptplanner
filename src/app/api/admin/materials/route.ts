@@ -85,6 +85,12 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       imageUrl = m.image_url.trim();
     }
 
+    // vendor_url 정규화 (제조사 페이지)
+    let vendorUrl: string | undefined;
+    if (typeof m.vendor_url === 'string' && m.vendor_url.trim()) {
+      vendorUrl = m.vendor_url.trim();
+    }
+
     const cleaned_row: Material = {
       material_id: id,
       work_type: String(m.work_type ?? '').trim(),
@@ -102,6 +108,7 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       lookup_key: lookupKey || null,
       secondary_key: nullable(m.secondary_key),
       ...(imageUrl ? { image_url: imageUrl } : {}),
+      ...(vendorUrl ? { vendor_url: vendorUrl } : {}),
     };
     cleaned.push(cleaned_row);
   });

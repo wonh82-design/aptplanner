@@ -37,6 +37,12 @@ export type Material = {
    * - 비어 있거나 null이면 모달에서 placeholder 표시
    */
   image_url?: string | null;
+  /**
+   * 제조사 제품 페이지 URL (옵셔널).
+   * 자재 카드의 '제조사 페이지' 버튼이 이 URL을 새 창으로 연다.
+   * 비어 있으면 버튼이 노출되지 않음.
+   */
+  vendor_url?: string | null;
 };
 
 /** 평형별 표준면적 (3베이 기준) */

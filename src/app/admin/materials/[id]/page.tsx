@@ -327,6 +327,19 @@ function MaterialEditor({ materialId }: { materialId: string }) {
           </Field>
         </FieldGroup>
 
+        {/* 외부 링크 */}
+        <FieldGroup title="외부 링크">
+          <Field label="제조사 페이지 URL (자재 카드의 ↗ 버튼이 새 창으로 엶)" full>
+            <input
+              type="url"
+              value={draft.vendor_url ?? ''}
+              onChange={(e) => updateField('vendor_url', e.target.value || null)}
+              className="input"
+              placeholder="https://www.lxhausys.com/kr/product/floor/..."
+            />
+          </Field>
+        </FieldGroup>
+
         {/* 이미지 */}
         <FieldGroup title="이미지">
           <Field label="image_url (구글 드라이브 공유 링크 또는 일반 URL)" full>
