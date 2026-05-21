@@ -22,7 +22,7 @@ import { activeRooms } from '@/lib/areas';
 import { BIG_WORK_GROUPS } from '@/lib/scope-meta';
 import type { Property, Scope, Quote, RoomId } from '@/lib/types';
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 type Props = {
   step: Step;

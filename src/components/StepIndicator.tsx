@@ -1,6 +1,6 @@
 'use client';
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 type Props = {
   current: Step;
@@ -11,10 +11,9 @@ type Props = {
 };
 
 const STEPS: { id: Step; label: string; short: string }[] = [
-  { id: 1, label: '우리집 현황', short: '현황' },
-  { id: 2, label: '공사 범위',   short: '범위' },
-  { id: 3, label: '자재 등급',   short: '등급' },
-  { id: 4, label: '공사비 결과', short: '결과' },
+  { id: 1, label: '우리집 현황',          short: '현황' },
+  { id: 2, label: '공종 및 자재 선택',    short: '자재' },
+  { id: 3, label: '공사비 결과',          short: '결과' },
 ];
 
 export function StepIndicator({ current, maxReached, onStepClick }: Props) {

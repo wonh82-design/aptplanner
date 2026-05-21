@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { PropertyForm } from '@/components/PropertyForm';
-import { ScopeMatrix } from '@/components/ScopeMatrix';
 import { MaterialOverrides } from '@/components/MaterialOverrides';
 import { QuotePanel } from '@/components/QuotePanel';
 import { StepIndicator } from '@/components/StepIndicator';
@@ -22,10 +21,10 @@ import { exportPagedPdf } from '@/lib/pdf/export';
 import { track } from '@/lib/analytics';
 import type { GradeSelection, Property, Scope } from '@/lib/types';
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
-const STORAGE_KEY = 'apt-planner:calc:v2';
-const STORAGE_VERSION = 2;
+const STORAGE_KEY = 'apt-planner:calc:v3';
+const STORAGE_VERSION = 3;
 
 /** 단일 세션 동안 변하지 않는 quote_id 생성 */
 function generateQuoteId(): string {
@@ -222,7 +221,7 @@ export default function CalcPage() {
               gradeLabel={grade.default}
               onJumpToStep={goTo}
               onNext={pyeongValid ? () => goTo(2) : undefined}
-              nextLabel="공사 범위"
+              nextLabel="공종 및 자재"
             />
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
               {restored && (
@@ -261,7 +260,7 @@ export default function CalcPage() {
               />
               {!pyeongValid && (
                 <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                  💡 평형을 먼저 입력해주세요. 입력하시면 공사 범위 선택으로 진행할 수 있습니다.
+                  💡 평형을 먼저 입력해주세요. 입력하시면 공종 및 자재 선택으로 진행할 수 있습니다.
                 </div>
               )}
               <div className="lg:hidden">
@@ -272,7 +271,7 @@ export default function CalcPage() {
                       disabled={!pyeongValid}
                       className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      공사 범위 선택 →
+                      공종 및 자재 선택 →
                     </button>
                   }
                 />
@@ -281,7 +280,7 @@ export default function CalcPage() {
           </div>
         )}
 
-        {/* ===== Step 2: 공사 범위 — 사이드바에 예상 공사비 출현 ===== */}
+        {/* ===== Step 2: 공종 및 자재 세부 선택 — 공사범위·등급·개별자재 통합 ===== */}
         {step === 2 && (
           <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
             <WizardSidebar
@@ -294,17 +293,19 @@ export default function CalcPage() {
               onPrev={() => goTo(1)}
               prevLabel="현황 수정"
               onNext={() => goTo(3)}
-              nextLabel="자재 등급"
+              nextLabel="최종 결과"
             />
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
-              {/* 모바일/태블릿 — 라이브 가격 배너 */}
               <div className="lg:hidden">
                 <LivePricePreview quote={quote} step={2} />
               </div>
-              <ScopeMatrix
+              <MaterialOverrides
+                quote={quote}
+                value={grade}
+                onChange={setGrade}
+                scope={scope}
+                onScopeChange={setScope}
                 property={property}
-                value={scope}
-                onChange={setScope}
                 onJumpToProperty={() => goTo(1)}
               />
 
@@ -315,49 +316,6 @@ export default function CalcPage() {
                   }
                   right={
                     <button onClick={() => goTo(3)} className="btn-primary">
-                      자재 등급 →
-                    </button>
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ===== Step 3: 자재 등급 — 사이드바 유지 ===== */}
-        {step === 3 && (
-          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
-            <WizardSidebar
-              step={3}
-              property={property}
-              scope={scope}
-              quote={quote}
-              gradeLabel={grade.default}
-              onJumpToStep={goTo}
-              onPrev={() => goTo(2)}
-              prevLabel="공사 범위"
-              onNext={() => goTo(4)}
-              nextLabel="최종 결과"
-            />
-            <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
-              <div className="lg:hidden">
-                <LivePricePreview quote={quote} step={3} />
-              </div>
-              <MaterialOverrides
-                quote={quote}
-                value={grade}
-                onChange={setGrade}
-                scope={scope}
-                onScopeChange={setScope}
-              />
-
-              <div className="lg:hidden">
-                <StepNav
-                  left={
-                    <button onClick={() => goTo(2)} className="btn-secondary">← 공사 범위</button>
-                  }
-                  right={
-                    <button onClick={() => goTo(4)} className="btn-primary">
                       최종 결과 보기 →
                     </button>
                   }
@@ -367,8 +325,8 @@ export default function CalcPage() {
           </div>
         )}
 
-        {/* ===== Step 4: 공사비 결과 — 풀폭 결과 페이지 ===== */}
-        {step === 4 && (
+        {/* ===== Step 3: 공사비 결과 — 풀폭 결과 페이지 ===== */}
+        {step === 3 && (
           <div className="max-w-5xl mx-auto flex flex-col gap-5">
             {scopeEmpty ? (
               <EmptyScopeNotice
@@ -402,7 +360,7 @@ export default function CalcPage() {
 
             <StepNav
               left={
-                <button onClick={() => goTo(3)} className="btn-secondary">← 등급 수정</button>
+                <button onClick={() => goTo(2)} className="btn-secondary">← 자재 수정</button>
               }
               right={
                 <button onClick={reset} className="btn-secondary">새로 시작</button>

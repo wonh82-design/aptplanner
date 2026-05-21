@@ -1,21 +1,28 @@
 'use client';
 
 import { memo, useMemo, useState } from 'react';
-import type { Grade, GradeSelection, Material, Quote, Scope } from '@/lib/types';
+import type { Grade, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort } from '@/lib/calculator';
-import { clampPartitionLength } from '@/lib/areas';
+import { activeRooms, clampPartitionLength } from '@/lib/areas';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
 import { WORK_BUNDLES, bundleForWorkType, type WorkBundle } from '@/lib/material-bundles';
+import { BIG_WORK_GROUPS, defaultRoomsForWork, type BigWorkGroup } from '@/lib/scope-meta';
+import { PRESETS } from '@/lib/scope-presets';
+import { track } from '@/lib/analytics';
 import { MaterialDetailModal } from './MaterialDetailModal';
 
 type Props = {
   quote: Quote;
   value: GradeSelection;
   onChange: (next: GradeSelection) => void;
-  /** 목공사 sub-work 토글에 필요 (carpentry bundle 전용) */
+  /** 공사범위 프리셋·12 큰공종 ON/OFF에 필요 */
   scope?: Scope;
   onScopeChange?: (s: Scope) => void;
+  /** 공사범위 프리셋·default 룸셋 결정에 필요 */
+  property?: Property;
+  /** 확장공사 카드 클릭 시 Step 1로 점프 */
+  onJumpToProperty?: () => void;
 };
 
 const GRADES: Grade[] = ['가성비', '표준', '고급'];
@@ -61,7 +68,11 @@ type DisplayItem =
   | { kind: 'single'; work: WorkInfo; label: string; firstIdx: number }
   | { kind: 'bundle'; bundle: WorkBundle; works: WorkInfo[]; sub: number; firstIdx: number };
 
-export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange }: Props) {
+export function MaterialOverrides({
+  quote, value, onChange,
+  scope, onScopeChange,
+  property, onJumpToProperty,
+}: Props) {
   // 기본은 모든 항목 펼침 — 사용자가 모든 공종·자재를 한눈에 보고 선택하도록.
   // '주요 5개만 보기' 토글로 다시 압축 가능.
   const [showAll, setShowAll] = useState(true);
@@ -69,6 +80,8 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
   const [detailWorkType, setDetailWorkType] = useState<string | null>(null);
   // 일괄 등급 선택 popover
   const [bulkOpen, setBulkOpen] = useState(false);
+  // 공사범위 프리셋 — 마지막 적용된 ID (시각적 강조용)
+  const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
 
   // 1) 견적에 등장하는 work_type 집계 (등장 순서·총 qty 보존)
   const workInfoList = useMemo(() => {
@@ -151,6 +164,101 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
     setBulkOpen(false);
   }
 
+  /**
+   * 공사범위 프리셋 적용 — scope 전체 일괄 변경.
+   * 확장 관련 필드(expansion_current/after)는 PRESETS.apply 안에서 그대로 보존됨.
+   */
+  function applyScopePreset(presetId: string) {
+    if (!scope || !onScopeChange || !property) return;
+    const preset = PRESETS.find((p) => p.id === presetId);
+    if (!preset) return;
+    track('select_preset', {
+      preset_id: preset.id,
+      preset_label: preset.label,
+      pyeong: property.pyeong,
+    });
+    onScopeChange(preset.apply(property, scope));
+    setAppliedPresetId(preset.id);
+  }
+
+  /**
+   * 큰 공종 그룹(BIG_WORK_GROUPS) ON/OFF 토글.
+   * 그룹 안의 globalKeys와 roomKeys를 일괄 변경. 확장은 Step 1로 점프.
+   */
+  function toggleGroup(group: BigWorkGroup) {
+    if (!scope || !onScopeChange || !property) return;
+    if (group.id === 'expansion') {
+      onJumpToProperty?.();
+      return;
+    }
+    const visibleRooms = activeRooms(property) as RoomId[];
+    const turnOn = !isGroupActive(group);
+    const nextRooms = { ...scope.rooms };
+    const nextGlobal = { ...scope.global };
+
+    // 목공사 — 카드 클릭 시: ON이면 기본 목공+천정만 ON
+    if (group.id === 'carpentry') {
+      if (turnOn) {
+        nextGlobal.carpentry_base = true;
+        nextGlobal.carpentry_ceiling = true;
+      } else {
+        nextGlobal.carpentry_base = false;
+        nextGlobal.carpentry_ceiling = false;
+        nextGlobal.no_molding = false;
+        nextGlobal.no_door_frame = false;
+        nextGlobal.no_baseboard = false;
+        nextGlobal.partition_length = 0;
+      }
+      onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+      return;
+    }
+
+    if (group.globalKeys) {
+      for (const k of group.globalKeys) {
+        const v = nextGlobal[k];
+        if (typeof v === 'boolean') {
+          (nextGlobal as Record<string, unknown>)[k] = turnOn;
+        }
+      }
+    }
+    if (group.roomKeys) {
+      for (const k of group.roomKeys) {
+        if (turnOn) {
+          let defaults: RoomId[] = defaultRoomsForWork(k, property, visibleRooms);
+          if (defaults.length === 0) defaults = visibleRooms.slice();
+          for (const r of visibleRooms) {
+            nextRooms[r] = { ...nextRooms[r], [k]: defaults.includes(r) };
+          }
+        } else {
+          for (const r of visibleRooms) {
+            nextRooms[r] = { ...nextRooms[r], [k]: false };
+          }
+        }
+      }
+    }
+    onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+  }
+
+  /** 그룹 활성 여부 */
+  function isGroupActive(group: BigWorkGroup): boolean {
+    if (!scope || !property) return false;
+    const visibleRooms = activeRooms(property) as RoomId[];
+    if (group.id === 'expansion') {
+      return visibleRooms.some((r) => {
+        const rs = scope.rooms[r];
+        return !!rs && rs.expansion_after && !rs.expansion_current;
+      });
+    }
+    if (group.id === 'carpentry') {
+      if (scope.global.partition_length > 0) return true;
+      if (group.globalKeys?.some((k) => scope.global[k])) return true;
+      return false;
+    }
+    if (group.globalKeys?.some((k) => scope.global[k])) return true;
+    if (group.roomKeys?.some((k) => visibleRooms.some((r) => Boolean(scope.rooms[r]?.[k])))) return true;
+    return false;
+  }
+
   /** 그 work_type에 현재 적용된 자재 ID (material_override 우선, 없으면 primary) */
   function effectiveMaterialIdOf(wt: string): string | null {
     const matOv = value.material_overrides[wt];
@@ -188,21 +296,144 @@ export function MaterialOverrides({ quote, value, onChange, scope, onScopeChange
     onChange({ ...value, overrides, material_overrides: matOv });
   }
 
+  // 공사범위 프리셋·12 공종 그룹 ON/OFF UI는 scope/property 전달 시에만 활성
+  const canEditScope = !!(scope && onScopeChange && property);
+
   return (
     <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <h2 className="text-base font-semibold">공종 및 자재 세부 선택</h2>
-        <div className="flex items-center gap-2 flex-wrap">
-          <BulkGradeButton
-            currentGrade={value.default}
-            isOpen={bulkOpen}
-            onToggleOpen={() => setBulkOpen((o) => !o)}
-            onSelect={setBulkGrade}
-            onClose={() => setBulkOpen(false)}
-          />
-          <span className="text-[11px] text-zinc-500">{displayItems.length}개 항목</span>
-        </div>
+        <span className="text-[11px] text-zinc-500">{displayItems.length}개 항목</span>
       </div>
+
+      {/* ===== 프리셋 행: 공사범위 + 일괄 등급 ===== */}
+      {canEditScope && (
+        <div className="mb-4 space-y-2.5">
+          {/* 공사범위 프리셋 */}
+          <div>
+            <div className="flex items-baseline gap-2 mb-1.5">
+              <span className="text-[11px] font-bold text-zinc-700">⚡ 공사범위 프리셋</span>
+              <span className="text-[10px] text-zinc-400">대표 시나리오 한 번에 적용</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+              {PRESETS.map((preset, idx) => {
+                const isApplied = appliedPresetId === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => applyScopePreset(preset.id)}
+                    className={`flex flex-col items-start gap-0.5 rounded-lg border-2 px-3 py-2 text-left transition active:scale-[0.98] ${
+                      isApplied
+                        ? 'border-emerald-400 bg-emerald-50/70 ring-1 ring-emerald-200'
+                        : 'border-zinc-200 bg-white hover:border-blue-400 hover:bg-blue-50/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 w-full">
+                      <span className={`text-[9px] font-mono font-bold ${isApplied ? 'text-emerald-700' : 'text-blue-600'}`}>
+                        PRESET {idx + 1}
+                      </span>
+                      {isApplied && (
+                        <span className="ml-auto text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded">
+                          ✓ 적용됨
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs font-semibold text-zinc-900">{preset.label}</span>
+                    <span className="text-[10px] text-zinc-500 leading-tight">{preset.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 자재등급 프리셋 + 일괄 토글 */}
+          <div>
+            <div className="flex items-baseline gap-2 mb-1.5">
+              <span className="text-[11px] font-bold text-zinc-700">🎨 자재 등급 프리셋</span>
+              <span className="text-[10px] text-zinc-400">모든 공종에 일괄 적용</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {(['가성비', '표준', '고급'] as Grade[]).map((g) => {
+                const meta = GRADE_META[g];
+                const selected = value.default === g;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setBulkGrade(g)}
+                    className={`px-3 py-2 rounded-lg border-2 text-left transition active:scale-[0.98] ${
+                      selected ? `${meta.ring.replace('ring-', 'border-')} ${meta.bg} ring-1 ${meta.ring}` : 'border-zinc-200 bg-white hover:border-zinc-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span className={`text-sm font-bold ${selected ? meta.color : 'text-zinc-700'}`}>{g}</span>
+                      {selected && (
+                        <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1 py-0.5 rounded whitespace-nowrap">현재</span>
+                      )}
+                    </div>
+                    <div className={`text-[10px] mt-0.5 ${selected ? meta.color : 'text-zinc-500'}`}>{meta.label}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 12 큰공종 ON/OFF 칩 */}
+          <div>
+            <div className="flex items-baseline gap-2 mb-1.5">
+              <span className="text-[11px] font-bold text-zinc-700">🛠 공종 선택</span>
+              <span className="text-[10px] text-zinc-400">시공 / 제외할 공종을 클릭으로 토글</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {BIG_WORK_GROUPS.map((group) => {
+                const active = isGroupActive(group);
+                return (
+                  <button
+                    key={group.id}
+                    type="button"
+                    onClick={() => toggleGroup(group)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border-2 text-xs font-semibold transition active:scale-[0.98] ${
+                      active
+                        ? 'border-blue-500 bg-blue-50 text-blue-900'
+                        : 'border-zinc-200 bg-zinc-50 text-zinc-400 hover:border-zinc-300'
+                    }`}
+                    title={group.desc}
+                  >
+                    <span className={`flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-sm border-2 ${
+                      active ? 'border-blue-600 bg-blue-600 text-white' : 'border-zinc-300 bg-white'
+                    }`}>
+                      {active && (
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 6.5L4.5 9L10 3" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </span>
+                    <span>{group.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[10px] text-zinc-500 leading-relaxed">
+              ※ '확장공사'는 우리집 현황의 발코니 확장 현황에서 공간별로 결정합니다.
+              칩 클릭 시 해당 단계로 이동.
+            </p>
+          </div>
+
+          {/* 고급 옵션: 자세한 등급 토글 popover */}
+          <div className="flex items-center gap-2 pt-1 border-t border-zinc-100">
+            <span className="text-[10px] text-zinc-500">고급:</span>
+            <BulkGradeButton
+              currentGrade={value.default}
+              isOpen={bulkOpen}
+              onToggleOpen={() => setBulkOpen((o) => !o)}
+              onSelect={setBulkGrade}
+              onClose={() => setBulkOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
       <p className="text-xs text-zinc-500 mb-4">
         공종마다 가성비·표준·고급의 <strong>주력 자재</strong>와 <strong>우리집 총공사비</strong>를 한눈에 비교하고 선택하세요.
         에어컨·조명·욕실·주방은 세트로 묶어 표시됩니다.
