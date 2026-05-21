@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { Property, RoomScope, Scope, RoomId, RegionId, AgeId } from '@/lib/types';
 import {
   recommendedRoomCount, exclusiveAreaM2, supplyAreaM2, outsideWindowArea, activeRooms,
-  clampPyeong, clampBalconyDepth,
+  clampBalconyDepth,
 } from '@/lib/areas';
 import { ROOM_META } from '@/lib/scope-meta';
 import { REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
@@ -44,6 +44,20 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
         : Math.round(value.pyeong * PYEONG_TO_EX_M2))
     : '';
 
+  /**
+   * 평형 입력 — 사용자가 자릿수를 한 자씩 자연스럽게 입력할 수 있도록 처리.
+   *
+   * 정책:
+   *  - 입력 중에는 상한(100평)만 적용. 비현실적 큰 값(예: 1억평)만 차단.
+   *  - 하한 보정 없음. 사용자가 직접 입력한 값을 그대로 존중.
+   *    (이전: clampPyeong이 즉시 min=6 으로 끌어올려서 "24"를 입력하려 해도
+   *     "2"→"6"→"64"로 변환되던 버그.
+   *     또한 onBlur 자동 보정도 사용자가 "20" 입력 중 "2"만 친 상태에서
+   *     포커스 빠지면 6으로 강제 변경되는 부작용이 있어 제거.)
+   *
+   * 6평 미만 비현실 값은 Step 2 진입 시 자연스러운 견적 0원/적은 견적으로
+   * 사용자가 인지하고 수정. UI는 입력 자체를 막지 않음.
+   */
   const handleInput = (raw: string) => {
     if (raw === '') {
       onChange({ ...value, pyeong: 0 });
@@ -51,9 +65,9 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
     }
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
-    // 입력을 평형 기준으로 환산 후 clamp [6, 100]
     const rawPy = inputMode === 'pyeong' ? n : n / PYEONG_TO_EX_M2;
-    const py = clampPyeong(rawPy);
+    // 상한만 적용
+    const py = Math.min(100, rawPy);
     onChange({
       ...value,
       pyeong: py,
