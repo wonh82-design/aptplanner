@@ -2,22 +2,52 @@
  * 자재마스터 조회 헬퍼.
  * (work_type, grade) → 주력 자재 1개를 결정.
  * 우선순위: tags에 '주력' 포함 → primary_grade 일치 → 첫 항목.
+ *
+ * ── 데이터 소스 ──
+ * 빌드 타임에 src/data/materials.json 을 seed 로 로드.
+ * 런타임에 MaterialsProvider(`src/lib/MaterialsProvider.tsx`)가 /api/materials
+ * 응답으로 setMaterials() 호출 → 내부 인덱스 갱신.
+ * 모든 helper 함수는 동기 시그니처 유지 — 컨슈머(calculator, UI) 변경 불필요.
  */
 import data from '@/data/materials.json';
 import type { Grade, Material } from './types';
 
-export const ALL_MATERIALS: Material[] = data as Material[];
+/**
+ * ALL_MATERIALS — in-place mutable 배열. setMaterials() 호출 시 splice 로 내용 교체.
+ * 외부에서 import 후 보관 중인 참조도 자동으로 새 데이터를 반영함.
+ */
+export const ALL_MATERIALS: Material[] = [...(data as Material[])];
+let byKey = new Map<string, Material[]>();
+let byId = new Map<string, Material>();
 
-const byKey = new Map<string, Material[]>();
-for (const m of ALL_MATERIALS) {
-  const k = `${m.work_type}|${m.primary_grade}`;
-  const arr = byKey.get(k) || [];
-  arr.push(m);
-  byKey.set(k, arr);
+function rebuildIndexes() {
+  byKey = new Map();
+  byId = new Map();
+  for (const m of ALL_MATERIALS) {
+    const k = `${m.work_type}|${m.primary_grade}`;
+    const arr = byKey.get(k) || [];
+    arr.push(m);
+    byKey.set(k, arr);
+    byId.set(m.material_id, m);
+  }
+}
+rebuildIndexes();
+
+/**
+ * 런타임 자재 갱신.
+ * MaterialsProvider 가 /api/materials fetch 결과로 호출.
+ * 호출 후 모든 helper(getMaterialById, getPrimaryMaterial, materialsFor 등)는
+ * 새 데이터를 반영한다.
+ */
+export function setMaterials(materials: Material[]): void {
+  ALL_MATERIALS.splice(0, ALL_MATERIALS.length, ...materials);
+  rebuildIndexes();
 }
 
-const byId = new Map<string, Material>();
-for (const m of ALL_MATERIALS) byId.set(m.material_id, m);
+/** 현재 메모리상 자재 전체 (편의 함수). */
+export function getAllMaterials(): Material[] {
+  return ALL_MATERIALS;
+}
 
 export function getMaterialById(id: string): Material | undefined {
   return byId.get(id);

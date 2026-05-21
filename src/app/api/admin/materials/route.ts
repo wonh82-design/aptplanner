@@ -3,18 +3,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Material } from '@/lib/types';
 import { isValidAdminToken, unauthorized } from '@/lib/admin-auth';
+import { isDbConfigured, getMaterials, saveMaterialsToDb } from '@/lib/db';
 
 /**
  * 관리자 자재마스터 API.
  *
- * GET     /api/admin/materials       — 현재 materials.json 전체 반환
+ * GET     /api/admin/materials       — 자재 전체 반환 (DB 우선, 폴백 materials.json)
  * PUT     /api/admin/materials       — body: { materials: Material[] } — 전체 교체
  *
  * 인증: 헤더 `x-admin-token` 이 `ADMIN_PASSWORD` 환경변수와 일치해야 함.
  *
- * 저장:
- *  - dev 환경 (process.env.NODE_ENV !== 'production'): fs.writeFile 로 직접 저장 → 다음 빌드부터 반영
- *  - production (Vercel read-only FS): 파일 쓰기 불가 → JSON 응답으로 반환 → 클라이언트에서 다운로드
+ * 저장 우선순위:
+ *  1. DATABASE_URL 설정 시 → Neon Postgres `materials_blob` 테이블 upsert (즉시 운영 반영)
+ *     + dev 환경이면 src/data/materials.json 도 함께 갱신 (git 백업)
+ *  2. DB 미설정 + dev → fs.writeFile (기존 동작)
+ *  3. DB 미설정 + prod → 다운로드 응답 (Vercel read-only fs)
  *
  * 검증:
  *  - material_id 중복 X
@@ -116,20 +119,33 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
   return { ok: true, data: cleaned };
 }
 
-// ===== GET — 현재 materials.json 반환 =====
+// ===== GET — 현재 자재 반환 =====
+// DB 설정 시: DB 우선 → 폴백 bundled JSON
+// DB 미설정 시: 로컬 materials.json 직접 읽기 (기존 동작)
 export async function GET(req: Request) {
   const token = req.headers.get('x-admin-token');
   if (!isValidAdminToken(token)) return unauthorized();
   try {
+    if (isDbConfigured()) {
+      const materials = await getMaterials();
+      return NextResponse.json({ ok: true, materials, source: 'db' });
+    }
     const raw = fs.readFileSync(MATERIALS_JSON, 'utf-8');
     const data = JSON.parse(raw);
-    return NextResponse.json({ ok: true, materials: data });
+    return NextResponse.json({ ok: true, materials: data, source: 'file' });
   } catch (e) {
     return NextResponse.json({ ok: false, error: 'read_failed', detail: String(e) }, { status: 500 });
   }
 }
 
 // ===== PUT — 전체 교체 =====
+// 저장 전략:
+//   1. DB 설정 시:
+//      → DB upsert (즉시 운영 반영)
+//      → 추가로 dev 환경이면 src/data/materials.json 도 동기화 (git 백업)
+//   2. DB 미설정 시 (기존 폴백):
+//      → dev: 파일 쓰기
+//      → prod: 다운로드 응답 (Vercel read-only fs)
 export async function PUT(req: Request) {
   const token = req.headers.get('x-admin-token');
   if (!isValidAdminToken(token)) return unauthorized();
@@ -144,11 +160,45 @@ export async function PUT(req: Request) {
   }
 
   const serialized = serializeMaterials(result.data);
-
   const isDev = process.env.NODE_ENV !== 'production';
+
+  // ── 1. DB 우선 저장 ──
+  if (isDbConfigured()) {
+    try {
+      await saveMaterialsToDb(result.data);
+    } catch (e) {
+      return NextResponse.json(
+        { ok: false, error: 'db_write_failed', detail: String(e) },
+        { status: 500 },
+      );
+    }
+
+    // dev 환경이면 로컬 JSON 도 함께 갱신 (git diff 로 변경 이력 추적 가능)
+    let fileWritten = false;
+    if (isDev) {
+      try {
+        try { fs.copyFileSync(MATERIALS_JSON, MATERIALS_JSON + '.bak'); } catch { /* ignore */ }
+        fs.writeFileSync(MATERIALS_JSON, serialized, 'utf-8');
+        fileWritten = true;
+      } catch {
+        // 파일 쓰기 실패해도 DB 는 이미 저장됨 — 치명적이지 않음
+      }
+    }
+
+    return NextResponse.json({
+      ok: true,
+      mode: 'db_saved',
+      count: result.data.length,
+      file_written: fileWritten,
+      message: fileWritten
+        ? '저장 완료. DB 와 로컬 materials.json 모두 갱신됨. 다음 페이지 로드부터 즉시 반영.'
+        : '저장 완료. DB 에 즉시 반영됨.',
+    });
+  }
+
+  // ── 2. DB 미설정 → 기존 폴백 ──
   if (isDev) {
     try {
-      // 백업 (안전)
       try { fs.copyFileSync(MATERIALS_JSON, MATERIALS_JSON + '.bak'); } catch { /* ignore */ }
       fs.writeFileSync(MATERIALS_JSON, serialized, 'utf-8');
       return NextResponse.json({
@@ -160,14 +210,14 @@ export async function PUT(req: Request) {
     } catch (e) {
       return NextResponse.json({ ok: false, error: 'write_failed', detail: String(e) }, { status: 500 });
     }
-  } else {
-    // Production read-only filesystem — 클라이언트에 JSON 반환해 다운로드하도록
-    return NextResponse.json({
-      ok: true,
-      mode: 'download_required',
-      count: result.data.length,
-      json: serialized,
-      message: 'Production 환경에서는 파일 쓰기가 불가합니다. 반환된 JSON을 다운로드해서 src/data/materials.json 에 교체 후 git commit 하세요.',
-    });
   }
+
+  // Production + DB 미설정 — 다운로드 폴백 유지 (DB 도입 전 호환)
+  return NextResponse.json({
+    ok: true,
+    mode: 'download_required',
+    count: result.data.length,
+    json: serialized,
+    message: 'DB 가 설정되지 않은 production 환경입니다. 반환된 JSON 을 다운로드해서 src/data/materials.json 에 교체하거나, DATABASE_URL 환경변수를 설정하세요.',
+  });
 }

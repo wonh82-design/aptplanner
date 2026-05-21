@@ -10,9 +10,11 @@
     "image-stats": "node scripts/image-stats.mjs",
     "image-checklist": "node scripts/phase1-build-checklist.mjs",
     "materials:sync": "node scripts/materials-from-xlsx.mjs",
-    "materials:export": "node scripts/materials-to-xlsx.mjs"
+    "materials:export": "node scripts/materials-to-xlsx.mjs",
+    "materials:db:migrate": "node scripts/materials-to-db.mjs"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@types/qrcode": "^1.5.6",
     "html2canvas-pro": "^2.0.2",
     "jspdf": "^4.2.1",
@@ -30,6 +32,7 @@
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vercel": "^54.3.0",
     "xlsx": "^0.18.5"
   }
 }
