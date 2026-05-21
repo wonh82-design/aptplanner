@@ -9,8 +9,10 @@
  *  - 마운트 시 GET /api/admin/materials 로 전체 자재 로드 → 해당 ID 찾기
  *  - 폼 편집
  *  - 저장 시 그 자재만 교체한 새 전체 배열을 PUT
- *  - 응답이 mode: 'file_written' 이면 즉시 적용 안내
- *  - mode: 'download_required' 이면 JSON 다운로드 버튼 노출
+ *  - 응답 mode 별 UI:
+ *    · 'db_saved'         → Neon DB upsert 성공 (즉시 운영 반영, 가장 일반적인 케이스)
+ *    · 'file_written'     → DB 미설정 dev 환경 — 로컬 JSON 파일 갱신
+ *    · 'download_required'→ DB 미설정 prod 환경 — JSON 다운로드 버튼 노출
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -43,7 +45,7 @@ function MaterialEditor({ materialId }: { materialId: string }) {
   const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState<{
-    mode: 'file_written' | 'download_required';
+    mode: 'db_saved' | 'file_written' | 'download_required';
     message: string;
     json?: string;
   } | null>(null);
@@ -215,28 +217,31 @@ function MaterialEditor({ materialId }: { materialId: string }) {
       </div>
 
       {/* 저장 결과 알림 */}
-      {saveResult && (
-        <div className={`mb-4 rounded-lg p-4 border ${
-          saveResult.mode === 'file_written'
-            ? 'bg-emerald-50 border-emerald-200'
-            : 'bg-amber-50 border-amber-200'
-        }`}>
-          <div className={`text-sm font-bold mb-1 ${
-            saveResult.mode === 'file_written' ? 'text-emerald-900' : 'text-amber-900'
+      {saveResult && (() => {
+        const isSuccess = saveResult.mode === 'db_saved' || saveResult.mode === 'file_written';
+        const title =
+          saveResult.mode === 'db_saved' ? '✓ DB 저장 완료 (즉시 반영)' :
+          saveResult.mode === 'file_written' ? '✓ 파일 저장 완료' :
+          '⚠ JSON 다운로드 필요';
+        return (
+          <div className={`mb-4 rounded-lg p-4 border ${
+            isSuccess ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'
           }`}>
-            {saveResult.mode === 'file_written' ? '✓ 파일 저장 완료' : '⚠ JSON 다운로드 필요'}
+            <div className={`text-sm font-bold mb-1 ${isSuccess ? 'text-emerald-900' : 'text-amber-900'}`}>
+              {title}
+            </div>
+            <div className="text-xs text-zinc-700 leading-relaxed">{saveResult.message}</div>
+            {saveResult.mode === 'download_required' && saveResult.json && (
+              <button
+                onClick={downloadJson}
+                className="mt-2 px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold"
+              >
+                materials.json 다운로드
+              </button>
+            )}
           </div>
-          <div className="text-xs text-zinc-700 leading-relaxed">{saveResult.message}</div>
-          {saveResult.mode === 'download_required' && saveResult.json && (
-            <button
-              onClick={downloadJson}
-              className="mt-2 px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold"
-            >
-              materials.json 다운로드
-            </button>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       {/* 폼 */}
       <div className="bg-white rounded-lg border border-zinc-200 p-5 sm:p-6 space-y-5">

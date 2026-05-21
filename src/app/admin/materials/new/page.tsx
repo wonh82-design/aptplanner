@@ -53,7 +53,7 @@ function NewMaterialForm() {
   const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState<{
-    mode: 'file_written' | 'download_required';
+    mode: 'db_saved' | 'file_written' | 'download_required';
     message: string;
     json?: string;
   } | null>(null);
@@ -203,28 +203,31 @@ function NewMaterialForm() {
       </div>
 
       {/* 저장 결과 */}
-      {saveResult && (
-        <div className={`mb-4 rounded-lg p-4 border ${
-          saveResult.mode === 'file_written'
-            ? 'bg-emerald-50 border-emerald-200'
-            : 'bg-amber-50 border-amber-200'
-        }`}>
-          <div className={`text-sm font-bold mb-1 ${
-            saveResult.mode === 'file_written' ? 'text-emerald-900' : 'text-amber-900'
+      {saveResult && (() => {
+        const isSuccess = saveResult.mode === 'db_saved' || saveResult.mode === 'file_written';
+        const title =
+          saveResult.mode === 'db_saved' ? '✓ DB 저장 완료 (즉시 반영)' :
+          saveResult.mode === 'file_written' ? '✓ 자재 추가 완료' :
+          '⚠ JSON 다운로드 필요';
+        return (
+          <div className={`mb-4 rounded-lg p-4 border ${
+            isSuccess ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'
           }`}>
-            {saveResult.mode === 'file_written' ? '✓ 자재 추가 완료' : '⚠ JSON 다운로드 필요'}
+            <div className={`text-sm font-bold mb-1 ${isSuccess ? 'text-emerald-900' : 'text-amber-900'}`}>
+              {title}
+            </div>
+            <div className="text-xs text-zinc-700">{saveResult.message}</div>
+            {saveResult.mode === 'download_required' && saveResult.json && (
+              <button
+                onClick={downloadJson}
+                className="mt-2 px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold"
+              >
+                materials.json 다운로드
+              </button>
+            )}
           </div>
-          <div className="text-xs text-zinc-700">{saveResult.message}</div>
-          {saveResult.mode === 'download_required' && saveResult.json && (
-            <button
-              onClick={downloadJson}
-              className="mt-2 px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold"
-            >
-              materials.json 다운로드
-            </button>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       <div className="bg-white rounded-lg border border-zinc-200 p-5 sm:p-6 space-y-5">
         <FieldGroup title="기본 정보">
