@@ -47,3 +47,6 @@ next-env.d.ts
 
 # materials:sync 가 안전을 위해 만드는 자동 백업
 src/data/*.bak
+
+# Claude Code 컨텍스트 파일 — 로컬에서만 참조, 깃에 올리지 않음
+CLAUDE.md
