@@ -237,7 +237,7 @@ function NewMaterialForm() {
           <Field label="material_id (충돌 시 변경)">
             <input value={draft.material_id} onChange={(e) => updateField('material_id', e.target.value)} className="input font-mono text-xs" />
           </Field>
-          <Field label="work_type">
+          <Field label="세부공종">
             <input
               value={draft.work_type}
               onChange={(e) => updateField('work_type', e.target.value)}
@@ -249,13 +249,13 @@ function NewMaterialForm() {
               {workTypeOptions.map((w) => <option key={w} value={w} />)}
             </datalist>
           </Field>
-          <Field label="카테고리">
+          <Field label="대공종">
             <input
               value={draft.category ?? ''}
               onChange={(e) => updateField('category', e.target.value || null)}
               className="input"
               list="category-options"
-              placeholder="기존 카테고리 선택 또는 새로 입력"
+              placeholder="기존 대공종 선택 또는 새로 입력"
             />
             <datalist id="category-options">
               {categoryOptions.map((c) => <option key={c} value={c} />)}
@@ -266,7 +266,13 @@ function NewMaterialForm() {
           </Field>
         </FieldGroup>
 
+        {/* 자재 정보 — 등급을 브랜드 왼쪽에 배치 */}
         <FieldGroup title="자재 정보">
+          <Field label="등급">
+            <select value={draft.primary_grade} onChange={(e) => updateField('primary_grade', e.target.value as Grade)} className="input">
+              {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
+            </select>
+          </Field>
           <Field label="브랜드">
             <input value={draft.brand ?? ''} onChange={(e) => updateField('brand', e.target.value || null)} className="input" />
           </Field>
@@ -290,11 +296,6 @@ function NewMaterialForm() {
               <option value="per_m">per_m (m)</option>
               <option value="per_ea">per_ea (개)</option>
               <option value="per_set">per_set (세트)</option>
-            </select>
-          </Field>
-          <Field label="등급">
-            <select value={draft.primary_grade} onChange={(e) => updateField('primary_grade', e.target.value as Grade)} className="input">
-              {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
           </Field>
           <Field label="자재가 (₩)">

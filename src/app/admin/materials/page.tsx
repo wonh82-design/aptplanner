@@ -5,7 +5,7 @@
  *
  * 기능:
  *  - 자재 224개를 테이블로 표시
- *  - 카테고리 / 등급 필터
+ *  - 대공종 / 등급 필터
  *  - brand / product_line / installer_spec 검색
  *  - 행 클릭 → 편집 페이지로 이동
  *  - "변경 사항 저장" — 편집한 자재들을 일괄 저장 (현재 페이지는 read-only, 편집은 상세 페이지)
@@ -233,7 +233,7 @@ function MaterialsList() {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold uppercase text-zinc-500 mb-1">카테고리</label>
+          <label className="block text-[10px] font-bold uppercase text-zinc-500 mb-1">대공종</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -276,12 +276,12 @@ function MaterialsList() {
               className="rounded-md border border-zinc-300 px-2 py-1.5 text-sm"
             >
               <option value="default|asc">기본 (등록 순)</option>
-              <option value="category|asc">카테고리 (가나다)</option>
-              <option value="category|desc">카테고리 (역순)</option>
+              <option value="category|asc">대공종 (가나다)</option>
+              <option value="category|desc">대공종 (역순)</option>
               <option value="grade|asc">등급 (가성비 → 고급)</option>
               <option value="grade|desc">등급 (고급 → 가성비)</option>
-              <option value="work_type|asc">공종명 ↑</option>
-              <option value="work_type|desc">공종명 ↓</option>
+              <option value="work_type|asc">세부공종 ↑</option>
+              <option value="work_type|desc">세부공종 ↓</option>
               <option value="brand|asc">브랜드 ↑</option>
               <option value="brand|desc">브랜드 ↓</option>
               <option value="price|asc">단가 낮은 순</option>
@@ -309,10 +309,10 @@ function MaterialsList() {
             <thead className="bg-zinc-50 border-b border-zinc-200">
               <tr>
                 <th className="px-3 py-2 text-left font-semibold text-zinc-600">ID</th>
-                <SortableTh label="카테고리" sortKey="category" current={sortKey} dir={sortDir} onClick={toggleSort} />
-                <SortableTh label="공종" sortKey="work_type" current={sortKey} dir={sortDir} onClick={toggleSort} />
-                <SortableTh label="브랜드 / 제품" sortKey="brand" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableTh label="대공종" sortKey="category" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableTh label="세부공종" sortKey="work_type" current={sortKey} dir={sortDir} onClick={toggleSort} />
                 <SortableTh label="등급" sortKey="grade" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableTh label="브랜드 / 제품" sortKey="brand" current={sortKey} dir={sortDir} onClick={toggleSort} />
                 <SortableTh label="합계 단가" sortKey="price" current={sortKey} dir={sortDir} onClick={toggleSort} align="right" />
                 <SortableTh label="이미지" sortKey="image" current={sortKey} dir={sortDir} onClick={toggleSort} align="center" />
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600"></th>
@@ -325,11 +325,11 @@ function MaterialsList() {
                   <td className="px-3 py-2 text-zinc-700">{m.category ?? '—'}</td>
                   <td className="px-3 py-2 text-zinc-700">{m.work_type}</td>
                   <td className="px-3 py-2">
-                    <div className="font-semibold text-zinc-900">{m.brand} {m.product_line}</div>
-                    <div className="text-[10px] text-zinc-500 truncate max-w-md">{m.installer_spec}</div>
+                    <GradeBadge grade={m.primary_grade} />
                   </td>
                   <td className="px-3 py-2">
-                    <GradeBadge grade={m.primary_grade} />
+                    <div className="font-semibold text-zinc-900">{m.brand} {m.product_line}</div>
+                    <div className="text-[10px] text-zinc-500 truncate max-w-md">{m.installer_spec}</div>
                   </td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900">
                     {m.total_unit_price.toLocaleString('ko-KR')}
