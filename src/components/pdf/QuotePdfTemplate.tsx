@@ -14,7 +14,7 @@
  * 라인 항목 상세 단가 표는 무료 PDF에서 제외 — 유료(인테리어 계획서)에서 제공.
  */
 
-import type { Quote, RoomId, RoomScope, Grade } from '@/lib/types';
+import type { Quote, RoomId, RoomScope, GradeGroup } from '@/lib/types';
 import { fmtKRW, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { PdfCover } from './PdfCover';
@@ -171,7 +171,7 @@ export function QuotePdfTemplate({ quote, gradeLabel, rootRef }: Props) {
 type MaterialRow = {
   wt: string;          // work_type
   label: string;       // 한글 라벨
-  effGrade: Grade;     // 실제 견적에 적용된 등급
+  effGrade: GradeGroup;     // 실제 견적에 적용된 등급 그룹
 };
 
 /**
@@ -184,7 +184,7 @@ function extractMaterialRows(quote: Quote): MaterialRow[] {
   for (const it of quote.line_items) {
     if (!it.material_id || seen.has(it.work_type)) continue;
     seen.add(it.work_type);
-    const overrideG = quote.grade.overrides[it.work_type] as Grade | undefined;
+    const overrideG = quote.grade.overrides[it.work_type] as GradeGroup | undefined;
     rows.push({
       wt: it.work_type,
       label: labelOf(it.work_type),
@@ -202,7 +202,7 @@ function chunkArr<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
-const GRADES_DISPLAY: Grade[] = ['가성비', '표준', '고급'];
+const GRADES_DISPLAY: GradeGroup[] = ['가성비', '표준', '고급'];
 
 /**
  * 공종별 선택 자재 테이블 — 한 페이지 분량.

@@ -7,15 +7,11 @@
     "brand": "구정마루",
     "product_line": "구정강",
     "installer_spec": "구정강 9.4×800×7.5T",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 22000.0,
     "labor_price": 12000.0,
     "total_unit_price": 34000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-FL-002",
@@ -25,9 +21,6 @@
     "brand": "LX하우시스",
     "product_line": "지인",
     "installer_spec": "LX 지인 8.0T",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_m2",
     "material_price": 12000.0,
     "labor_price": 12000.0,
@@ -42,9 +35,6 @@
     "brand": "한화L&C",
     "product_line": "한샘프리미엄",
     "installer_spec": "한화L&C 한샘프리미엄 8.0T",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_m2",
     "material_price": 15000.0,
     "labor_price": 12000.0,
@@ -59,9 +49,6 @@
     "brand": "동화자연마루",
     "product_line": "나투스진",
     "installer_spec": "동화자연마루 나투스진 8.0T",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_m2",
     "material_price": 22000.0,
     "labor_price": 13000.0,
@@ -76,15 +63,11 @@
     "brand": "구정마루",
     "product_line": "그랜드텍스처165",
     "installer_spec": "구정마루 그랜드텍스처 165 165×1200×7.5T",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 32000.0,
     "labor_price": 14000.0,
     "total_unit_price": 46000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-FL-006",
@@ -94,9 +77,6 @@
     "brand": "녹수",
     "product_line": "펠리체",
     "installer_spec": "녹수 펠리체 9.0T",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 22000.0,
     "labor_price": 14000.0,
@@ -111,9 +91,6 @@
     "brand": "구정마루",
     "product_line": "강화시리즈",
     "installer_spec": "구정마루 강화 12T",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 28000.0,
     "labor_price": 14000.0,
@@ -128,9 +105,6 @@
     "brand": "LX하우시스",
     "product_line": "헤링본",
     "installer_spec": "LX하우시스 강화 헤링본",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 35000.0,
     "labor_price": 20000.0,
@@ -145,9 +119,6 @@
     "brand": "동화자연마루",
     "product_line": "더원",
     "installer_spec": "동화자연마루 더원 165×1200×7.5T",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 40000.0,
     "labor_price": 16000.0,
@@ -162,15 +133,11 @@
     "brand": "LX하우시스",
     "product_line": "에디톤180",
     "installer_spec": "LX하우시스 에디톤 180×1220×5.0T",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 55000.0,
     "labor_price": 22000.0,
     "total_unit_price": 77000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-FL-011",
@@ -180,9 +147,6 @@
     "brand": "구정마루",
     "product_line": "헤링본",
     "installer_spec": "구정마루 헤링본 9.4×600×7.5T",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_m2",
     "material_price": 50000.0,
     "labor_price": 26000.0,
@@ -197,9 +161,6 @@
     "brand": "이건마루",
     "product_line": "골드",
     "installer_spec": "이건마루 골드 14×120×900",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_m2",
     "material_price": 65000.0,
     "labor_price": 26000.0,
@@ -214,9 +175,6 @@
     "brand": "구정마루",
     "product_line": "원목광폭",
     "installer_spec": "구정마루 원목 200폭",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_m2",
     "material_price": 78000.0,
     "labor_price": 30000.0,
@@ -231,15 +189,11 @@
     "brand": "개나리벽지",
     "product_line": "광폭합지",
     "installer_spec": "개나리벽지 광폭합지",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 3500.0,
     "labor_price": 4200.0,
     "total_unit_price": 7700.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-WP-002",
@@ -249,9 +203,6 @@
     "brand": "개나리벽지",
     "product_line": "일반합지",
     "installer_spec": "개나리벽지 일반합지",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_m2",
     "material_price": 3000.0,
     "labor_price": 4500.0,
@@ -266,9 +217,6 @@
     "brand": "삼화페인트",
     "product_line": "수성페인트",
     "installer_spec": "수성페인트 일반급 2회",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_m2",
     "material_price": 3500.0,
     "labor_price": 5000.0,
@@ -283,15 +231,11 @@
     "brand": "LX하우시스",
     "product_line": "베스띠",
     "installer_spec": "LX하우시스 베스띠",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 7000.0,
     "labor_price": 5500.0,
     "total_unit_price": 12500.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-WP-005",
@@ -301,9 +245,6 @@
     "brand": "LX하우시스",
     "product_line": "친환경합지",
     "installer_spec": "LX하우시스 친환경합지",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 4000.0,
     "labor_price": 4500.0,
@@ -318,9 +259,6 @@
     "brand": "LX하우시스",
     "product_line": "베스띠광폭",
     "installer_spec": "LX하우시스 베스띠 광폭",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 8500.0,
     "labor_price": 6000.0,
@@ -335,9 +273,6 @@
     "brand": "디아이디",
     "product_line": "항균실크",
     "installer_spec": "디아이디 항균실크",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 9000.0,
     "labor_price": 6000.0,
@@ -352,9 +287,6 @@
     "brand": "개나리벽지",
     "product_line": "패턴실크",
     "installer_spec": "개나리벽지 패턴실크",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 11000.0,
     "labor_price": 6500.0,
@@ -369,15 +301,11 @@
     "brand": "LX하우시스",
     "product_line": "디아망",
     "installer_spec": "LX하우시스 디아망",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 11000.0,
     "labor_price": 7000.0,
     "total_unit_price": 18000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-WP-010",
@@ -387,9 +315,6 @@
     "brand": "디아이디",
     "product_line": "프리미엄실크",
     "installer_spec": "디아이디 프리미엄실크",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_m2",
     "material_price": 19000.0,
     "labor_price": 8500.0,
@@ -404,9 +329,6 @@
     "brand": "벤자민무어",
     "product_line": "친환경무광",
     "installer_spec": "벤자민무어 친환경 무광",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_m2",
     "material_price": 8000.0,
     "labor_price": 6500.0,
@@ -421,15 +343,11 @@
     "brand": "비브랜드",
     "product_line": "표준PVC",
     "installer_spec": "PVC 평몰딩 표준",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 2200.0,
     "labor_price": 4000.0,
     "total_unit_price": 6200.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-MD-002",
@@ -439,9 +357,6 @@
     "brand": "비브랜드",
     "product_line": "슬림PVC",
     "installer_spec": "PVC 슬림 평몰딩",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_m",
     "material_price": 3800.0,
     "labor_price": 4800.0,
@@ -456,9 +371,6 @@
     "brand": "영림",
     "product_line": "각몰딩",
     "installer_spec": "영림 PVC 각몰딩",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_m",
     "material_price": 5500.0,
     "labor_price": 5500.0,
@@ -473,15 +385,11 @@
     "brand": "대성",
     "product_line": "MDF평몰딩",
     "installer_spec": "대성 MDF 평몰딩",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 7800.0,
     "labor_price": 6500.0,
     "total_unit_price": 14300.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-MD-005",
@@ -491,9 +399,6 @@
     "brand": "영림",
     "product_line": "MDF슬림",
     "installer_spec": "영림 MDF 슬림 도장",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m",
     "material_price": 9500.0,
     "labor_price": 7200.0,
@@ -508,15 +413,11 @@
     "brand": "영림",
     "product_line": "우드몰딩",
     "installer_spec": "영림 우드 평몰딩",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 14000.0,
     "labor_price": 8500.0,
     "total_unit_price": 22500.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-MD-007",
@@ -526,9 +427,6 @@
     "brand": "히든몰딩",
     "product_line": "마이너스",
     "installer_spec": "히든몰딩 마이너스",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_m",
     "material_price": 18500.0,
     "labor_price": 12000.0,
@@ -543,9 +441,6 @@
     "brand": "현장시공",
     "product_line": "무몰딩",
     "installer_spec": "몰딩 미시공 (목공·도배 추가비는 별도 라인으로 산정)",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_m",
     "material_price": 0.0,
     "labor_price": 0.0,
@@ -560,15 +455,11 @@
     "brand": "현장시공",
     "product_line": "무몰딩목공",
     "installer_spec": "무몰딩 토글 ON 시 목공사 추가비 (공급면적 ㎡당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-MX-002",
@@ -578,15 +469,11 @@
     "brand": "현장시공",
     "product_line": "무몰딩목공",
     "installer_spec": "무몰딩 토글 ON 시 목공사 추가비 (공급면적 ㎡당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-MX-003",
@@ -596,15 +483,11 @@
     "brand": "현장시공",
     "product_line": "무몰딩목공",
     "installer_spec": "무몰딩 토글 ON 시 목공사 추가비 (공급면적 ㎡당)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-MY-001",
@@ -614,15 +497,11 @@
     "brand": "현장시공",
     "product_line": "무몰딩도배",
     "installer_spec": "무몰딩 토글 ON 시 도배 인건비 추가 (공급면적 ㎡당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-MY-002",
@@ -632,15 +511,11 @@
     "brand": "현장시공",
     "product_line": "무몰딩도배",
     "installer_spec": "무몰딩 토글 ON 시 도배 인건비 추가 (공급면적 ㎡당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-MY-003",
@@ -650,15 +525,11 @@
     "brand": "현장시공",
     "product_line": "무몰딩도배",
     "installer_spec": "무몰딩 토글 ON 시 도배 인건비 추가 (공급면적 ㎡당)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BB-001",
@@ -668,15 +539,11 @@
     "brand": "현장시공",
     "product_line": "PVC4전일반",
     "installer_spec": "PVC 4전 걸레받이 일반급 (자재+인건비, 공급면적 ㎡당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 1200.0,
     "labor_price": 1200.0,
     "total_unit_price": 2400.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BB-002",
@@ -686,15 +553,11 @@
     "brand": "현장시공",
     "product_line": "PVC4전표준",
     "installer_spec": "PVC 4전 걸레받이 표준급 (자재+인건비, 공급면적 ㎡당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 2000.0,
     "labor_price": 1500.0,
     "total_unit_price": 3500.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BB-003",
@@ -704,15 +567,11 @@
     "brand": "현장시공",
     "product_line": "무걸레받이",
     "installer_spec": "무걸레받이 (목공·도배 추가비는 별도 라인으로 산정)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BX-001",
@@ -722,15 +581,11 @@
     "brand": "현장시공",
     "product_line": "무걸레목공",
     "installer_spec": "무걸레받이 선택 시 목공사 추가비 (공급면적 ㎡당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BX-002",
@@ -740,15 +595,11 @@
     "brand": "현장시공",
     "product_line": "무걸레목공",
     "installer_spec": "무걸레받이 선택 시 목공사 추가비 (공급면적 ㎡당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BX-003",
@@ -758,15 +609,11 @@
     "brand": "현장시공",
     "product_line": "무걸레목공",
     "installer_spec": "무걸레받이 선택 시 목공사 추가비 (공급면적 ㎡당)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BY-001",
@@ -776,15 +623,11 @@
     "brand": "현장시공",
     "product_line": "무걸레도배",
     "installer_spec": "무걸레받이 선택 시 도배 인건비 추가 (공급면적 ㎡당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BY-002",
@@ -794,15 +637,11 @@
     "brand": "현장시공",
     "product_line": "무걸레도배",
     "installer_spec": "무걸레받이 선택 시 도배 인건비 추가 (공급면적 ㎡당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BY-003",
@@ -812,15 +651,11 @@
     "brand": "현장시공",
     "product_line": "무걸레도배",
     "installer_spec": "무걸레받이 선택 시 도배 인건비 추가 (공급면적 ㎡당)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BJ-001",
@@ -830,15 +665,11 @@
     "brand": "사제",
     "product_line": "인조일반",
     "installer_spec": "인조대리석 일반 (욕실 젠다이)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 180000.0,
     "labor_price": 80000.0,
     "total_unit_price": 260000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BJ-002",
@@ -848,15 +679,11 @@
     "brand": "사제",
     "product_line": "인조광택",
     "installer_spec": "인조대리석 광택 (욕실 젠다이)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 280000.0,
     "labor_price": 100000.0,
     "total_unit_price": 380000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BJ-003",
@@ -866,15 +693,11 @@
     "brand": "사제",
     "product_line": "천연석",
     "installer_spec": "천연석 카운터 (욕실 젠다이)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 580000.0,
     "labor_price": 150000.0,
     "total_unit_price": 730000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BW-001",
@@ -884,15 +707,11 @@
     "brand": "현장시공",
     "product_line": "고뫄스2회",
     "installer_spec": "액체방수 1차 + 고뫄스 2회 보강 시공",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 13000.0,
     "labor_price": 12000.0,
     "total_unit_price": 25000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BW-002",
@@ -902,15 +721,11 @@
     "brand": "아덱스",
     "product_line": "탄성도막",
     "installer_spec": "액체방수 + 무기질탄성도막방수 (아덱스급)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 23000.0,
     "labor_price": 17000.0,
     "total_unit_price": 40000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BW-003",
@@ -920,15 +735,11 @@
     "brand": "아덱스",
     "product_line": "탄성도막정밀",
     "installer_spec": "액체방수 + 무기질탄성도막 (아덱스급) + 정밀 시공",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 25000.0,
     "labor_price": 20000.0,
     "total_unit_price": 45000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BT-001",
@@ -938,15 +749,11 @@
     "brand": "포스코타일",
     "product_line": "300x600",
     "installer_spec": "300×600각 욕실 타일 (자재만, 인건비는 통합 타일팀)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 12000.0,
     "labor_price": 0.0,
     "total_unit_price": 12000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BT-002",
@@ -956,15 +763,11 @@
     "brand": "포세린",
     "product_line": "600",
     "installer_spec": "600×600각 포세린 타일 (자재만, 인건비는 통합 타일팀)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 30000.0,
     "labor_price": 0.0,
     "total_unit_price": 30000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BT-003",
@@ -974,15 +777,11 @@
     "brand": "포세린",
     "product_line": "900",
     "installer_spec": "900×900각 포세린 대형 타일 (자재만, 인건비는 통합 타일팀)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 42000.0,
     "labor_price": 0.0,
     "total_unit_price": 42000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BZ-001",
@@ -992,15 +791,11 @@
     "brand": "현장시공",
     "product_line": "코너비드",
     "installer_spec": "코너비드 마감 (둘레 m, 인건비는 통합 타일팀에 포함)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BZ-002",
@@ -1010,15 +805,11 @@
     "brand": "현장시공",
     "product_line": "졸리컷",
     "installer_spec": "졸리컷 정밀 마감 (둘레 m, 인건비는 통합 타일팀에 포함)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BZ-003",
@@ -1028,15 +819,11 @@
     "brand": "현장시공",
     "product_line": "졸리컷광택",
     "installer_spec": "졸리컷+광택 마감 (둘레 m, 인건비는 통합 타일팀에 포함)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BU-001",
@@ -1046,15 +833,11 @@
     "brand": "현장시공",
     "product_line": "백시멘트",
     "installer_spec": "일반 백시멘트 줄눈 자재 (시공은 타일팀)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 1500.0,
     "labor_price": 0.0,
     "total_unit_price": 1500.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BU-002",
@@ -1064,15 +847,11 @@
     "brand": "아덱스",
     "product_line": "FG4",
     "installer_spec": "아덱스 FG4 시멘트계 줄눈 자재 (시공은 타일팀)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 4000.0,
     "labor_price": 0.0,
     "total_unit_price": 4000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BU-003",
@@ -1082,15 +861,11 @@
     "brand": "MAPEI",
     "product_line": "Kerapoxy",
     "installer_spec": "MAPEI Kerapoxy 에폭시 줄눈 자재 (시공은 타일팀)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 30000.0,
     "labor_price": 0.0,
     "total_unit_price": 30000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BP-001",
@@ -1100,15 +875,11 @@
     "brand": "현장시공",
     "product_line": "조적",
     "installer_spec": "벽돌 조적 + 페인트 마감",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 350000.0,
     "labor_price": 250000.0,
     "total_unit_price": 600000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BP-002",
@@ -1118,15 +889,11 @@
     "brand": "유리시공",
     "product_line": "슬라이딩",
     "installer_spec": "유리 슬라이딩 도어 파티션",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 750000.0,
     "labor_price": 320000.0,
     "total_unit_price": 1070000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BP-003",
@@ -1136,15 +903,11 @@
     "brand": "유리시공",
     "product_line": "무프레임",
     "installer_spec": "워크인 유리 무프레임 파티션",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1250000.0,
     "labor_price": 450000.0,
     "total_unit_price": 1700000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BG-001",
@@ -1154,15 +917,11 @@
     "brand": "사제",
     "product_line": "SMC",
     "installer_spec": "SMC 욕실 천정 마감 + 단열·방수 (자재만)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 50000.0,
     "labor_price": 0.0,
     "total_unit_price": 50000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BG-002",
@@ -1172,15 +931,11 @@
     "brand": "사제",
     "product_line": "이노솔",
     "installer_spec": "이노솔 욕실 천정 마감 + 단열·방수 (자재만)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 75000.0,
     "labor_price": 0.0,
     "total_unit_price": 75000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BG-003",
@@ -1190,15 +945,11 @@
     "brand": "현장시공",
     "product_line": "석고도장",
     "installer_spec": "석고보드위 도장 + 단열·방수 보강 (자재만)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 110000.0,
     "labor_price": 0.0,
     "total_unit_price": 110000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BS-001",
@@ -1208,15 +959,11 @@
     "brand": "이누스",
     "product_line": "베이직",
     "installer_spec": "이누스 베이직 세면대 + 거울 (자재만)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 280000.0,
     "labor_price": 0.0,
     "total_unit_price": 280000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BS-002",
@@ -1226,15 +973,11 @@
     "brand": "대림바스",
     "product_line": "마디스",
     "installer_spec": "대림바스 마디스 세면대 + 거울 (자재만)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 650000.0,
     "labor_price": 0.0,
     "total_unit_price": 650000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BS-003",
@@ -1244,15 +987,11 @@
     "brand": "아메리칸스탠다드",
     "product_line": "프리미엄",
     "installer_spec": "아메리칸스탠다드 세면대 + 거울 (자재만)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 850000.0,
     "labor_price": 0.0,
     "total_unit_price": 850000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BR-001",
@@ -1262,15 +1001,11 @@
     "brand": "대림",
     "product_line": "일반",
     "installer_spec": "대림 일반 수전 (세면+샤워, 자재만)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 95000.0,
     "labor_price": 0.0,
     "total_unit_price": 95000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BR-002",
@@ -1280,15 +1015,11 @@
     "brand": "이누스",
     "product_line": "표준",
     "installer_spec": "이누스 표준 수전 세트 (세면+샤워, 자재만)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 250000.0,
     "labor_price": 0.0,
     "total_unit_price": 250000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BR-003",
@@ -1298,15 +1029,11 @@
     "brand": "아메리칸스탠다드",
     "product_line": "프리미엄",
     "installer_spec": "아메리칸스탠다드 수전 세트 (자재만)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 380000.0,
     "labor_price": 0.0,
     "total_unit_price": 380000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BL-001",
@@ -1316,15 +1043,11 @@
     "brand": "대림",
     "product_line": "베이직",
     "installer_spec": "대림 베이직 양변기 (자재만)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 280000.0,
     "labor_price": 0.0,
     "total_unit_price": 280000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BL-002",
@@ -1334,15 +1057,11 @@
     "brand": "이누스",
     "product_line": "표준",
     "installer_spec": "이누스 표준 양변기 (자재만)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 610000.0,
     "labor_price": 0.0,
     "total_unit_price": 610000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BL-003",
@@ -1352,15 +1071,11 @@
     "brand": "아메리칸스탠다드",
     "product_line": "프리미엄",
     "installer_spec": "아메리칸스탠다드 양변기 (자재만)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 850000.0,
     "labor_price": 0.0,
     "total_unit_price": 850000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BA-001",
@@ -1370,15 +1085,11 @@
     "brand": "대림",
     "product_line": "대림표준",
     "installer_spec": "대림 OR 이누스급 set (수건걸이+변기솔+청소수전, 자재만)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 110000.0,
     "labor_price": 0.0,
     "total_unit_price": 110000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BA-002",
@@ -1388,9 +1099,6 @@
     "brand": "국산",
     "product_line": "비브랜드",
     "installer_spec": "국산 비브랜드 set (수건걸이+변기솔+청소수전, 자재만)",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_set",
     "material_price": 50000.0,
     "labor_price": 0.0,
@@ -1405,15 +1113,11 @@
     "brand": "아메리칸스탠다드",
     "product_line": "아메리칸set",
     "installer_spec": "아메리칸스탠다드급 set (수건걸이+변기솔+청소수전, 자재만)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 260000.0,
     "labor_price": 0.0,
     "total_unit_price": 260000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BA-004",
@@ -1423,15 +1127,11 @@
     "brand": "그로헤",
     "product_line": "수입최고급",
     "installer_spec": "그로헤·한스그로헤급 수입 최고급 set (수건걸이+변기솔+청소수전, 자재만)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 580000.0,
     "labor_price": 0.0,
     "total_unit_price": 580000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-BI-001",
@@ -1441,15 +1141,11 @@
     "brand": "현장시공",
     "product_line": "욕실설치",
     "installer_spec": "욕실 1개소 설치 인건비 (수전·양변기·세면대·악세사리·SMC 등 통합)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 0.0,
     "labor_price": 300000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-BI-002",
@@ -1459,15 +1155,11 @@
     "brand": "현장시공",
     "product_line": "욕실설치",
     "installer_spec": "욕실 1개소 설치 인건비 (수전·양변기·세면대·악세사리·SMC 등 통합)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 0.0,
     "labor_price": 300000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-BI-003",
@@ -1477,15 +1169,11 @@
     "brand": "현장시공",
     "product_line": "욕실설치",
     "installer_spec": "욕실 1개소 설치 인건비 (수전·양변기·세면대·악세사리·SMC 등 통합)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 0.0,
     "labor_price": 300000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-TL-001",
@@ -1495,15 +1183,11 @@
     "brand": "현장시공",
     "product_line": "코너비드팀",
     "installer_spec": "타일 시공 1팀(타일러+데모도 2인) 1일 — 코너비드 일반 시공",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 500000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-TL-002",
@@ -1513,15 +1197,11 @@
     "brand": "현장시공",
     "product_line": "졸리컷팀",
     "installer_spec": "타일 시공 1팀(타일러+데모도 2인) 1일 — 졸리컷 정밀 시공",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 550000.0,
     "total_unit_price": 550000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-TL-003",
@@ -1531,15 +1211,11 @@
     "brand": "현장시공",
     "product_line": "졸리컷광택팀",
     "installer_spec": "타일 시공 1팀(타일러+데모도 2인) 1일 — 졸리컷+광택 마감 정밀",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 600000.0,
     "total_unit_price": 600000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-KM-001",
@@ -1549,15 +1225,11 @@
     "brand": "중국수입",
     "product_line": "600중국",
     "installer_spec": "600각 중국산 타일 백패널 (자재만, 인건비는 통합 타일팀)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 35000.0,
     "labor_price": 0.0,
     "total_unit_price": 35000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-KM-002",
@@ -1567,15 +1239,11 @@
     "brand": "중국수입",
     "product_line": "800중국",
     "installer_spec": "800각 중국산 타일 백패널 (자재만, 인건비는 통합 타일팀)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 60000.0,
     "labor_price": 0.0,
     "total_unit_price": 60000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-KM-003",
@@ -1585,15 +1253,11 @@
     "brand": "이태리수입",
     "product_line": "800이태리",
     "installer_spec": "800각 이태리 수입 타일 백패널 (자재만, 인건비는 통합 타일팀)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 120000.0,
     "labor_price": 0.0,
     "total_unit_price": 120000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-KP-001",
@@ -1603,15 +1267,11 @@
     "brand": "LX하이막스",
     "product_line": "하이막스",
     "installer_spec": "인조대리석 하이막스급 (가성비)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 280000.0,
     "labor_price": 100000.0,
     "total_unit_price": 380000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-KP-002",
@@ -1621,15 +1281,11 @@
     "brand": "LX하이막스",
     "product_line": "하이막스표준",
     "installer_spec": "인조대리석 하이막스 상위급 (표준)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 360000.0,
     "labor_price": 120000.0,
     "total_unit_price": 480000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-KP-003",
@@ -1639,15 +1295,11 @@
     "brand": "Caesarstone",
     "product_line": "칸스톤",
     "installer_spec": "칸스톤(Caesarstone) 엔지니어드 스톤 상판 — 추천",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 450000.0,
     "labor_price": 150000.0,
     "total_unit_price": 600000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-KP-004",
@@ -1657,9 +1309,6 @@
     "brand": "Laminam",
     "product_line": "세라믹이태리",
     "installer_spec": "이태리 수입 세라믹 슬라브 (Laminam·Neolith급) 상판",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_m",
     "material_price": 950000.0,
     "labor_price": 200000.0,
@@ -1674,15 +1323,11 @@
     "brand": "국산",
     "product_line": "일반",
     "installer_spec": "국산 일반 경첩2+손잡이1+레일 (논댐핑)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 13000.0,
     "labor_price": 4000.0,
     "total_unit_price": 17000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-KH-002",
@@ -1692,15 +1337,11 @@
     "brand": "국산",
     "product_line": "댐핑",
     "installer_spec": "국산 댐핑 경첩2+손잡이1+레일",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 25000.0,
     "labor_price": 6000.0,
     "total_unit_price": 31000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-KH-003",
@@ -1710,15 +1351,11 @@
     "brand": "Blum",
     "product_line": "클립톱",
     "installer_spec": "Blum 클립톱2+손잡이1+탠덤박스",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 75000.0,
     "labor_price": 10000.0,
     "total_unit_price": 85000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-KO-001",
@@ -1728,15 +1365,11 @@
     "brand": "하츠",
     "product_line": "ABL300",
     "installer_spec": "하츠(Haatz) ABL-300 상부장 매립 히든형 후드 (자재만)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 200000.0,
     "labor_price": 0.0,
     "total_unit_price": 200000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-KO-002",
@@ -1746,15 +1379,11 @@
     "brand": "하츠",
     "product_line": "Classic",
     "installer_spec": "하츠(Haatz) Classic 노출형 표준 후드 (자재만)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 400000.0,
     "labor_price": 0.0,
     "total_unit_price": 400000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-KO-003",
@@ -1764,15 +1393,11 @@
     "brand": "휘슬러",
     "product_line": "SilentEdition",
     "installer_spec": "휘슬러(Fissler) SilentEdition 노출형 프리미엄 후드 (자재만)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1000000.0,
     "labor_price": 0.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-KS-001",
@@ -1782,15 +1407,11 @@
     "brand": "백조싱크",
     "product_line": "SBN845",
     "installer_spec": "백조싱크 SBN-845 STS304 단조 일반형 (자재만)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 200000.0,
     "labor_price": 0.0,
     "total_unit_price": 200000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-KS-002",
@@ -1800,15 +1421,11 @@
     "brand": "백조싱크",
     "product_line": "RA7848",
     "installer_spec": "백조싱크 라피네 RA-7848 프리미엄 (자재만)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 450000.0,
     "labor_price": 0.0,
     "total_unit_price": 450000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-KS-003",
@@ -1818,15 +1435,11 @@
     "brand": "Blanco",
     "product_line": "SUBLINE500",
     "installer_spec": "블랑코(Blanco) SUBLINE 500-U 언더마운트 수입 (자재만)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1200000.0,
     "labor_price": 0.0,
     "total_unit_price": 1200000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-SD-001",
@@ -1836,15 +1449,11 @@
     "brand": "영림",
     "product_line": "보급3연동",
     "installer_spec": "영림 보급형 3연동",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 950000.0,
     "labor_price": 320000.0,
     "total_unit_price": 1270000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-SD-002",
@@ -1854,9 +1463,6 @@
     "brand": "예림",
     "product_line": "보급양개",
     "installer_spec": "예림 양개 보급형",
-    "tags": [
-      "가성비"
-    ],
     "unit_type": "per_ea",
     "material_price": 1100000.0,
     "labor_price": 380000.0,
@@ -1871,15 +1477,11 @@
     "brand": "영림",
     "product_line": "시그니처3연동",
     "installer_spec": "영림 시그니처 3연동",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1650000.0,
     "labor_price": 480000.0,
     "total_unit_price": 2130000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-SD-004",
@@ -1889,9 +1491,6 @@
     "brand": "예림",
     "product_line": "한지3연동",
     "installer_spec": "예림 한지 3연동",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_ea",
     "material_price": 1950000.0,
     "labor_price": 520000.0,
@@ -1906,15 +1505,11 @@
     "brand": "영림",
     "product_line": "알루슬라이딩",
     "installer_spec": "영림 알루미늄 슬라이딩",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 2800000.0,
     "labor_price": 650000.0,
     "total_unit_price": 3450000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-GF-001",
@@ -1924,15 +1519,11 @@
     "brand": "비브랜드",
     "product_line": "일반현관장",
     "installer_spec": "비브랜드 일반 현관장",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 480000.0,
     "labor_price": 180000.0,
     "total_unit_price": 660000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-GF-002",
@@ -1942,15 +1533,11 @@
     "brand": "한샘",
     "product_line": "신발키큰장",
     "installer_spec": "한샘 신발장+키큰장 풀세트",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1250000.0,
     "labor_price": 280000.0,
     "total_unit_price": 1530000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-GF-003",
@@ -1960,9 +1547,6 @@
     "brand": "한샘",
     "product_line": "일반현관장",
     "installer_spec": "한샘 일반 현관장",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_ea",
     "material_price": 850000.0,
     "labor_price": 220000.0,
@@ -1977,9 +1561,6 @@
     "brand": "리바트",
     "product_line": "TV장",
     "installer_spec": "리바트 거실 TV장",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_ea",
     "material_price": 1650000.0,
     "labor_price": 350000.0,
@@ -1994,15 +1575,11 @@
     "brand": "한샘",
     "product_line": "시그니처현관",
     "installer_spec": "한샘 시그니처 현관장",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 2200000.0,
     "labor_price": 420000.0,
     "total_unit_price": 2620000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-GF-006",
@@ -2012,9 +1589,6 @@
     "brand": "한샘",
     "product_line": "거실풀세트",
     "installer_spec": "한샘 거실 TV장+장식장 풀세트",
-    "tags": [
-      "고급"
-    ],
     "unit_type": "per_ea",
     "material_price": 3500000.0,
     "labor_price": 580000.0,
@@ -2029,15 +1603,11 @@
     "brand": "비브랜드",
     "product_line": "2인치일반",
     "installer_spec": "일반 2인치 LED 다운라이트 (가성비)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 5000.0,
     "labor_price": 3000.0,
     "total_unit_price": 8000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-LD-002",
@@ -2047,15 +1617,11 @@
     "brand": "필립스",
     "product_line": "2인치표준",
     "installer_spec": "표준 2인치 LED 다운라이트 (필립스급)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 8000.0,
     "labor_price": 4000.0,
     "total_unit_price": 12000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-LD-003",
@@ -2065,15 +1631,11 @@
     "brand": "오스람",
     "product_line": "2인치디자인",
     "installer_spec": "디자인 2인치 LED 다운라이트 (오스람·디자인급)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 13000.0,
     "labor_price": 5000.0,
     "total_unit_price": 18000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-LV-001",
@@ -2083,15 +1645,11 @@
     "brand": "현장시공",
     "product_line": "거실간접_가성비",
     "installer_spec": "가성비 등급에서는 미적용",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-LV-002",
@@ -2101,15 +1659,11 @@
     "brand": "현장시공",
     "product_line": "거실간접",
     "installer_spec": "거실 천정·코니스 LED 간접조명 (자재+인건비)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-LV-003",
@@ -2119,15 +1673,11 @@
     "brand": "현장시공",
     "product_line": "거실간접고급",
     "installer_spec": "거실 천정·코니스 LED 간접조명 (자재+인건비)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-LH-001",
@@ -2137,15 +1687,11 @@
     "brand": "현장시공",
     "product_line": "욕실간접_가성비",
     "installer_spec": "가성비 등급에서는 미적용",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-LH-002",
@@ -2155,15 +1701,11 @@
     "brand": "현장시공",
     "product_line": "욕실간접",
     "installer_spec": "욕실당 LED 간접조명 (자재+인건비)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 90000.0,
     "labor_price": 60000.0,
     "total_unit_price": 150000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-LH-003",
@@ -2173,15 +1715,11 @@
     "brand": "현장시공",
     "product_line": "욕실간접고급",
     "installer_spec": "욕실당 LED 간접조명 (자재+인건비)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 90000.0,
     "labor_price": 60000.0,
     "total_unit_price": 150000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-LE-001",
@@ -2191,15 +1729,11 @@
     "brand": "현장시공",
     "product_line": "거실마그네틱_가성비",
     "installer_spec": "가성비/표준에서는 미적용",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-LE-002",
@@ -2209,15 +1743,11 @@
     "brand": "현장시공",
     "product_line": "거실마그네틱_표준",
     "installer_spec": "가성비/표준에서는 미적용",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-LE-003",
@@ -2227,15 +1757,11 @@
     "brand": "현장시공",
     "product_line": "거실마그네틱",
     "installer_spec": "거실 마그네틱 라인조명 (자재+인건비+목공비)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 600000.0,
     "labor_price": 400000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-LF-001",
@@ -2245,15 +1771,11 @@
     "brand": "현장시공",
     "product_line": "주방마그네틱_가성비",
     "installer_spec": "가성비/표준에서는 미적용",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-LF-002",
@@ -2263,15 +1785,11 @@
     "brand": "현장시공",
     "product_line": "주방마그네틱_표준",
     "installer_spec": "가성비/표준에서는 미적용",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-LF-003",
@@ -2281,15 +1799,11 @@
     "brand": "현장시공",
     "product_line": "주방마그네틱",
     "installer_spec": "주방 마그네틱 라인조명 (자재+인건비+목공비)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-WD-001",
@@ -2299,15 +1813,11 @@
     "brand": "KCC창호",
     "product_line": "PVC이중창가성비",
     "installer_spec": "KCC창호 PVC 이중창 (단열재 50T + 사다리차·부대비 포함)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 145000.0,
     "labor_price": 80000.0,
     "total_unit_price": 225000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-WD-002",
@@ -2317,15 +1827,11 @@
     "brand": "LX하우시스",
     "product_line": "수퍼세이브",
     "installer_spec": "LX하우시스 수퍼세이브 이중창 (단열재 50T + 사다리차·부대비 포함)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 200000.0,
     "labor_price": 90000.0,
     "total_unit_price": 290000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-WD-003",
@@ -2335,9 +1841,6 @@
     "brand": "LX하우시스",
     "product_line": "SLS460",
     "installer_spec": "LX하우시스 SLS-460 시스템 (단열재 70T + 사다리차·부대비 포함)",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m2",
     "material_price": 245000.0,
     "labor_price": 100000.0,
@@ -2352,15 +1855,11 @@
     "brand": "이건창호",
     "product_line": "EAGON",
     "installer_spec": "이건창호 EAGON 시스템 (단열재 70T + 외벽 단열 보강 + 사다리차·부대비 포함)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 400000.0,
     "labor_price": 100000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-AC-001",
@@ -2370,15 +1869,11 @@
     "brand": "LG",
     "product_line": "휘센6평",
     "installer_spec": "LG 휘센 벽걸이 6평형",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 850000.0,
     "labor_price": 280000.0,
     "total_unit_price": 1130000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-AC-002",
@@ -2388,15 +1883,11 @@
     "brand": "삼성",
     "product_line": "무풍1Way",
     "installer_spec": "삼성 무풍 1Way",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1650000.0,
     "labor_price": 550000.0,
     "total_unit_price": 2200000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-AC-003",
@@ -2406,15 +1897,11 @@
     "brand": "LG",
     "product_line": "휘센4Way",
     "installer_spec": "LG 휘센 천장형 4Way",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 2200000.0,
     "labor_price": 700000.0,
     "total_unit_price": 2900000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-AO-001",
@@ -2424,15 +1911,11 @@
     "brand": "LG",
     "product_line": "보급멀티",
     "installer_spec": "LG 보급형 멀티 실외기 4룸 대응",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1200000.0,
     "labor_price": 250000.0,
     "total_unit_price": 1450000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-AO-002",
@@ -2442,15 +1925,11 @@
     "brand": "LG",
     "product_line": "휘센멀티",
     "installer_spec": "LG 휘센 멀티 실외기 5룸 대응",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1800000.0,
     "labor_price": 320000.0,
     "total_unit_price": 2120000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-AO-003",
@@ -2460,15 +1939,11 @@
     "brand": "삼성",
     "product_line": "인버터멀티",
     "installer_spec": "삼성 인버터 멀티 실외기 6룸 대응",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 2500000.0,
     "labor_price": 380000.0,
     "total_unit_price": 2880000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-CL-001",
@@ -2478,15 +1953,11 @@
     "brand": "사제",
     "product_line": "사제LPM",
     "installer_spec": "사제 슬라이딩 LPM 도어",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 480000.0,
     "labor_price": 180000.0,
     "total_unit_price": 660000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-CL-002",
@@ -2496,15 +1967,11 @@
     "brand": "한샘",
     "product_line": "슬라이딩LPM",
     "installer_spec": "한샘 슬라이딩 LPM (2.4m)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 720000.0,
     "labor_price": 220000.0,
     "total_unit_price": 940000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-CL-003",
@@ -2514,9 +1981,6 @@
     "brand": "리바트",
     "product_line": "시스템PET",
     "installer_spec": "리바트 시스템 옷장 PET",
-    "tags": [
-      "표준"
-    ],
     "unit_type": "per_m",
     "material_price": 950000.0,
     "labor_price": 280000.0,
@@ -2531,15 +1995,11 @@
     "brand": "한샘",
     "product_line": "시그니처우레탄",
     "installer_spec": "한샘 시그니처 우레탄 도장",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 1450000.0,
     "labor_price": 380000.0,
     "total_unit_price": 1830000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-CF-001",
@@ -2549,15 +2009,11 @@
     "brand": "비브랜드",
     "product_line": "일반실링",
     "installer_spec": "sove ver2 132cm",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 150000.0,
     "labor_price": 150000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-CF-002",
@@ -2567,15 +2023,11 @@
     "brand": "수입 일반",
     "product_line": "루씨에어",
     "installer_spec": "레이더3 132cm",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 580000.0,
     "labor_price": 150000.0,
     "total_unit_price": 730000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-CF-003",
@@ -2585,15 +2037,11 @@
     "brand": "수입 고급",
     "product_line": "에어라트론",
     "installer_spec": "AE3 126cm",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 950000.0,
     "labor_price": 180000.0,
     "total_unit_price": 1130000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-CB-001",
@@ -2603,15 +2051,11 @@
     "brand": "현장시공",
     "product_line": "기본세팅",
     "installer_spec": "목공사 발생 시 기본 출장·세팅 (목수팀 1회)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-CB-002",
@@ -2621,15 +2065,11 @@
     "brand": "현장시공",
     "product_line": "기본세팅",
     "installer_spec": "목공사 발생 시 기본 출장·세팅 (목수팀 1회)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-CB-003",
@@ -2639,15 +2079,11 @@
     "brand": "현장시공",
     "product_line": "기본세팅",
     "installer_spec": "목공사 발생 시 기본 출장·세팅 (목수팀 1회)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-CC-001",
@@ -2657,15 +2093,11 @@
     "brand": "현장시공",
     "product_line": "평탄화",
     "installer_spec": "우물천정→평천정 전환 (거실 면적 기준 평당 4만원)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 12085.0,
     "total_unit_price": 12085.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-CC-002",
@@ -2675,15 +2107,11 @@
     "brand": "현장시공",
     "product_line": "평탄화",
     "installer_spec": "우물천정→평천정 전환 (거실 면적 기준 평당 4만원)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 12085.0,
     "total_unit_price": 12085.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-CC-003",
@@ -2693,15 +2121,11 @@
     "brand": "현장시공",
     "product_line": "평탄화",
     "installer_spec": "우물천정→평천정 전환 (거실 면적 기준 평당 4만원)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 12085.0,
     "total_unit_price": 12085.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-CN-001",
@@ -2711,15 +2135,11 @@
     "brand": "현장시공",
     "product_line": "구조변경",
     "installer_spec": "가벽 신설/철거 등 구조 변경 (거실 면적 기준 평당 6만원)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 18127.0,
     "total_unit_price": 18127.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-CN-002",
@@ -2729,15 +2149,11 @@
     "brand": "현장시공",
     "product_line": "구조변경",
     "installer_spec": "가벽 신설/철거 등 구조 변경 (거실 면적 기준 평당 6만원)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 18127.0,
     "total_unit_price": 18127.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-CN-003",
@@ -2747,15 +2163,11 @@
     "brand": "현장시공",
     "product_line": "구조변경",
     "installer_spec": "가벽 신설/철거 등 구조 변경 (거실 면적 기준 평당 6만원)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 0.0,
     "labor_price": 18127.0,
     "total_unit_price": 18127.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-VT-001",
@@ -2765,15 +2177,11 @@
     "brand": "중국수입",
     "product_line": "300각중국",
     "installer_spec": "300×300각 중국산 포세린 (자재만, 시공은 통합 타일팀)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 8000.0,
     "labor_price": 0.0,
     "total_unit_price": 8000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-VT-002",
@@ -2783,15 +2191,11 @@
     "brand": "중국수입",
     "product_line": "600각중국",
     "installer_spec": "600×600각 중국산 포세린 (자재만, 시공은 통합 타일팀)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 15000.0,
     "labor_price": 0.0,
     "total_unit_price": 15000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-VT-003",
@@ -2801,15 +2205,11 @@
     "brand": "이태리수입",
     "product_line": "600각이태리",
     "installer_spec": "600×600각 이태리 수입 포세린 (자재만, 시공은 통합 타일팀)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 35000.0,
     "labor_price": 0.0,
     "total_unit_price": 35000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-VP-001",
@@ -2819,15 +2219,11 @@
     "brand": "삼화",
     "product_line": "수성일반",
     "installer_spec": "삼화·KCC급 수성 페인트 일반 (자재+인건비, ㎡당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 8000.0,
     "labor_price": 9000.0,
     "total_unit_price": 17000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-VP-002",
@@ -2837,15 +2233,11 @@
     "brand": "노루",
     "product_line": "친환경수성",
     "installer_spec": "노루·디아이디급 친환경 수성 페인트 (자재+인건비, ㎡당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 25000.0,
     "labor_price": 16000.0,
     "total_unit_price": 41000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-VP-003",
@@ -2855,15 +2247,11 @@
     "brand": "벤자민무어",
     "product_line": "프리미엄친환경",
     "installer_spec": "벤자민무어·던에드워즈급 프리미엄 친환경 (자재+인건비, ㎡당)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 60000.0,
     "labor_price": 28000.0,
     "total_unit_price": 88000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-ES-001",
@@ -2873,15 +2261,11 @@
     "brand": "국산",
     "product_line": "일반",
     "installer_spec": "국산 일반 매입 스위치+콘센트 평균 (1ea 기준, 자재+인건비)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 4500.0,
     "labor_price": 4500.0,
     "total_unit_price": 9000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-ES-002",
@@ -2891,15 +2275,11 @@
     "brand": "Legrand",
     "product_line": "Mosaic",
     "installer_spec": "Legrand Mosaic급 스위치+콘센트 평균 (1ea 기준, 자재+인건비)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 14000.0,
     "labor_price": 9000.0,
     "total_unit_price": 23000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-ES-003",
@@ -2909,15 +2289,11 @@
     "brand": "JUNG",
     "product_line": "LS990",
     "installer_spec": "JUNG LS990·수입 프리미엄 스위치+콘센트 평균 (1ea 기준)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 32000.0,
     "labor_price": 12000.0,
     "total_unit_price": 44000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-IN-001",
@@ -2927,15 +2303,11 @@
     "brand": "현장시공",
     "product_line": "인덕션전용선",
     "installer_spec": "인덕션 220V 전용선 신설 (분전반→주방, 자재+인건비)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 200000.0,
     "labor_price": 300000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-IN-002",
@@ -2945,15 +2317,11 @@
     "brand": "현장시공",
     "product_line": "인덕션전용선",
     "installer_spec": "인덕션 220V 전용선 신설 (분전반→주방, 자재+인건비)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 200000.0,
     "labor_price": 300000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-IN-003",
@@ -2963,15 +2331,11 @@
     "brand": "현장시공",
     "product_line": "인덕션전용선",
     "installer_spec": "인덕션 220V 전용선 신설 (분전반→주방, 자재+인건비)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 200000.0,
     "labor_price": 300000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-EX-001",
@@ -2981,15 +2345,11 @@
     "brand": "현장시공",
     "product_line": "기본확장",
     "installer_spec": "확장부 철거+단열재 30T+배관 연장+미장(평탄화) — 샷시는 별도 공종에서 자동 산정 (m²당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 70000.0,
     "labor_price": 50000.0,
     "total_unit_price": 120000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-EX-002",
@@ -2999,15 +2359,11 @@
     "brand": "현장시공",
     "product_line": "표준확장",
     "installer_spec": "확장부 철거+단열 50T+배관 연장+미장 정밀 — 샷시는 별도 공종에서 자동 산정 (m²당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 90000.0,
     "labor_price": 70000.0,
     "total_unit_price": 160000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-EX-003",
@@ -3017,15 +2373,11 @@
     "brand": "현장시공",
     "product_line": "고급확장",
     "installer_spec": "확장부 철거+이중 단열(70T+우레탄)+배관 연장+평탄화 정밀 — 샷시 별도 (m²당)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 120000.0,
     "labor_price": 100000.0,
     "total_unit_price": 220000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-DM-001",
@@ -3035,15 +2387,11 @@
     "brand": "현장시공",
     "product_line": "철거",
     "installer_spec": "철거 표준 시공",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 6500.0,
     "labor_price": 0.0,
     "total_unit_price": 6500.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-DM-002",
@@ -3053,15 +2401,11 @@
     "brand": "현장시공",
     "product_line": "철거",
     "installer_spec": "철거 표준 시공+분리",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 8000.0,
     "labor_price": 0.0,
     "total_unit_price": 8000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-DM-003",
@@ -3071,15 +2415,11 @@
     "brand": "현장시공",
     "product_line": "철거",
     "installer_spec": "철거 정밀 분리수거",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 10000.0,
     "labor_price": 0.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-IS-001",
@@ -3089,15 +2429,11 @@
     "brand": "현장시공",
     "product_line": "단열",
     "installer_spec": "30T 단열재 기본",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 9000.0,
     "labor_price": 6000.0,
     "total_unit_price": 15000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-IS-002",
@@ -3107,15 +2443,11 @@
     "brand": "현장시공",
     "product_line": "단열",
     "installer_spec": "50T 발포 단열재 표준 시공",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 20000.0,
     "labor_price": 10000.0,
     "total_unit_price": 30000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-IS-003",
@@ -3125,15 +2457,11 @@
     "brand": "현장시공",
     "product_line": "단열",
     "installer_spec": "경질우레탄 70T",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 22000.0,
     "labor_price": 11000.0,
     "total_unit_price": 33000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-EP-001",
@@ -3143,15 +2471,11 @@
     "brand": "현장시공",
     "product_line": "신고대행",
     "installer_spec": "도면 작성 + 구청 발코니 확장 신고 대행 (일식)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-EP-002",
@@ -3161,15 +2485,11 @@
     "brand": "현장시공",
     "product_line": "신고대행",
     "installer_spec": "도면 작성 + 구청 발코니 확장 신고 대행 (일식)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-EP-003",
@@ -3179,15 +2499,11 @@
     "brand": "현장시공",
     "product_line": "신고대행",
     "installer_spec": "도면 작성 + 구청 발코니 확장 신고 대행 (일식)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-EB-001",
@@ -3197,15 +2513,11 @@
     "brand": "현장시공",
     "product_line": "전기기본",
     "installer_spec": "전기 분전반 점검+기존 회로 정비+안전기본 (공급면적 ㎡당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-EB-002",
@@ -3215,15 +2527,11 @@
     "brand": "현장시공",
     "product_line": "전기기본",
     "installer_spec": "전기 분전반 점검+기존 회로 정비+안전기본 (공급면적 ㎡당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-EB-003",
@@ -3233,15 +2541,11 @@
     "brand": "현장시공",
     "product_line": "전기기본",
     "installer_spec": "전기 분전반 점검+기존 회로 정비+안전기본 (공급면적 ㎡당)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-PB-001",
@@ -3251,15 +2555,11 @@
     "brand": "현장시공",
     "product_line": "설비기본",
     "installer_spec": "급수/배수 점검+기존 배관 정비+밸브 교체 등 기본 (공급면적 ㎡당)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-PB-002",
@@ -3269,15 +2569,11 @@
     "brand": "현장시공",
     "product_line": "설비기본",
     "installer_spec": "급수/배수 점검+기존 배관 정비+밸브 교체 (공급면적 ㎡당)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-PB-003",
@@ -3287,15 +2583,11 @@
     "brand": "현장시공",
     "product_line": "설비기본",
     "installer_spec": "급수/배수 점검+기존 배관 정비+밸브 교체+정밀 (공급면적 ㎡당)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m2",
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-DP-001",
@@ -3305,15 +2597,11 @@
     "brand": "현장시공",
     "product_line": "분배기교체",
     "installer_spec": "난방 분배기 교체 (실+직류) 1세트",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-DP-002",
@@ -3323,15 +2611,11 @@
     "brand": "현장시공",
     "product_line": "분배기교체",
     "installer_spec": "난방 분배기 교체 (실+직류) 1세트",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-DP-003",
@@ -3341,15 +2625,11 @@
     "brand": "현장시공",
     "product_line": "분배기교체",
     "installer_spec": "난방 분배기 교체 (실+직류) 1세트",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-PR-001",
@@ -3359,15 +2639,11 @@
     "brand": "현장시공",
     "product_line": "배관변경",
     "installer_spec": "주방·욕실 등 배관 위치 변경 (1식)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 100000.0,
     "labor_price": 400000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-PR-002",
@@ -3377,15 +2653,11 @@
     "brand": "현장시공",
     "product_line": "배관변경",
     "installer_spec": "주방·욕실 등 배관 위치 변경 (1식)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 100000.0,
     "labor_price": 400000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-PR-003",
@@ -3395,15 +2667,11 @@
     "brand": "현장시공",
     "product_line": "배관변경",
     "installer_spec": "주방·욕실 등 배관 위치 변경+정밀 (1식)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 100000.0,
     "labor_price": 400000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-TR-001",
@@ -3413,15 +2681,11 @@
     "brand": "하니웰",
     "product_line": "일반디지털",
     "installer_spec": "하니웰/세영하이텍 일반 디지털 (자재+인건비)",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 50000.0,
     "labor_price": 30000.0,
     "total_unit_price": 80000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-TR-002",
@@ -3431,15 +2695,11 @@
     "brand": "경동시스템",
     "product_line": "BCM300",
     "installer_spec": "경동시스템 BCM-300 또는 대림 스마트 (자재+인건비)",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 150000.0,
     "labor_price": 50000.0,
     "total_unit_price": 200000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-TR-003",
@@ -3449,15 +2709,11 @@
     "brand": "SiHAS",
     "product_line": "BCM300W",
     "installer_spec": "SiHAS BCM-300-W 시즌2 또는 아카라 통합 (자재+인건비)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 350000.0,
     "labor_price": 80000.0,
     "total_unit_price": 430000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-SI-LAB-001",
@@ -3467,15 +2723,11 @@
     "brand": "현장시공",
     "product_line": "실리콘인건비",
     "installer_spec": "34평 기준 25만 (별도 발주 시) — 부위별 시공자 통합",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 250000.0,
     "total_unit_price": 250000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-SI-LAB-002",
@@ -3485,15 +2737,11 @@
     "brand": "현장시공",
     "product_line": "실리콘인건비",
     "installer_spec": "34평 기준 40만 (별도 발주) — 전문 실리콘 시공",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 400000.0,
     "total_unit_price": 400000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-SI-LAB-003",
@@ -3503,15 +2751,11 @@
     "brand": "현장시공",
     "product_line": "실리콘인건비",
     "installer_spec": "34평 기준 55만 (전문 시공자 별도 발주)",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 0.0,
     "labor_price": 550000.0,
     "total_unit_price": 550000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-SI-MAT-001",
@@ -3521,15 +2765,11 @@
     "brand": "현장시공",
     "product_line": "일반실리콘",
     "installer_spec": "영진 일반 라인 카트리지 4천원 — 욕실 항균 X, 가성비 한정",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 100000.0,
     "labor_price": 0.0,
     "total_unit_price": 100000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-SI-MAT-002",
@@ -3539,15 +2779,11 @@
     "brand": "현장시공",
     "product_line": "고급실리콘",
     "installer_spec": "영진 바이오 카트리지 5~6천원 — 국산 점유율 1위, 항균 5년+",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 135000.0,
     "labor_price": 0.0,
     "total_unit_price": 135000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-SI-MAT-003",
@@ -3557,15 +2793,11 @@
     "brand": "현장시공",
     "product_line": "고급실리콘",
     "installer_spec": "글로벌 1위 카트리지 9~12천원 — 호텔·병원 시방서, 항균 10년+",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 175000.0,
     "labor_price": 0.0,
     "total_unit_price": 175000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-SI-MOD-001",
@@ -3575,15 +2807,11 @@
     "brand": "현장시공",
     "product_line": "영진비초산",
     "installer_spec": "영진 비초산 라인 — 외부 노출 5~7년 내구",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 52500.0,
     "labor_price": 0.0,
     "total_unit_price": 52500.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-SI-MOD-002",
@@ -3593,15 +2821,11 @@
     "brand": "현장시공",
     "product_line": "영진MS",
     "installer_spec": "영진 변성실리콘 MS 라인 — 외기·옥상 등 내구 10년",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 72500.0,
     "labor_price": 0.0,
     "total_unit_price": 72500.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-SI-MOD-003",
@@ -3611,15 +2835,11 @@
     "brand": "현장시공",
     "product_line": "Dow변성",
     "installer_spec": "Dow 변성실리콘 — 외기 내구 15년+, 시공 시방서",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_set",
     "material_price": 92500.0,
     "labor_price": 0.0,
     "total_unit_price": 92500.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-ETC-001",
@@ -3629,10 +2849,6 @@
     "brand": "현장시공",
     "product_line": "표준 보양",
     "installer_spec": "층간 보양재(골판지, 보양테이프) + 시공 일식. 모든 평형 공통.",
-    "tags": [
-      "단일등급",
-      "주력"
-    ],
     "unit_type": "set",
     "material_price": 200000.0,
     "labor_price": 400000.0,
@@ -3647,10 +2863,6 @@
     "brand": "현장시공",
     "product_line": "표준 행정대행",
     "installer_spec": "관리사무소 등기·동의서 배포·회수 일식. 평형 무관.",
-    "tags": [
-      "단일등급",
-      "주력"
-    ],
     "unit_type": "set",
     "material_price": 0.0,
     "labor_price": 600000.0,
@@ -3665,10 +2877,6 @@
     "brand": "현장시공",
     "product_line": "표준 청소",
     "installer_spec": "입주 전 마무리 청소. 마룻결, 욕실 줄눈, 창틀 세부 청소.",
-    "tags": [
-      "단일등급",
-      "주력"
-    ],
     "unit_type": "평",
     "material_price": 5000.0,
     "labor_price": 15000.0,
@@ -3683,15 +2891,11 @@
     "brand": "현장시공",
     "product_line": "사제 제작",
     "installer_spec": "몸체: E1 MDF LPM, 도어: 영림급 PET보드 + PUR 엣지 마감",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 850000.0,
     "labor_price": 300000.0,
     "total_unit_price": 1150000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-KT-002",
@@ -3701,15 +2905,11 @@
     "brand": "현장시공",
     "product_line": "사제 제작",
     "installer_spec": "몸체: E0 MDF LPM(친환경), 도어: 한솔 스토리보드 + 제로조인트 마감",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 1330000.0,
     "labor_price": 370000.0,
     "total_unit_price": 1700000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-KT-003",
@@ -3719,15 +2919,11 @@
     "brand": "한샘",
     "product_line": "유로900급",
     "installer_spec": "몸체: E0 MDF LPM(친환경), 도어: 한샘 유로900 MDF 우레탄 도장",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_m",
     "material_price": 1650000.0,
     "labor_price": 450000.0,
     "total_unit_price": 2100000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-TD-001",
@@ -3737,15 +2933,11 @@
     "brand": "KCC창호",
     "product_line": "LiV Suite",
     "installer_spec": "KCC창호 LiV Suite 시스템 터닝도어. 슬라이딩+여닫이 복합 구조. 16mm 복층유리.",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 800000.0,
     "labor_price": 400000.0,
     "total_unit_price": 1200000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-TD-002",
@@ -3755,15 +2947,11 @@
     "brand": "LX하우시스",
     "product_line": "LSS-30 (일반)",
     "installer_spec": "LX하우시스 LSS-30. 24mm 로이복층유리, 알루미늄 프레임.",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 1300000.0,
     "labor_price": 500000.0,
     "total_unit_price": 1800000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-TD-003",
@@ -3773,15 +2961,11 @@
     "brand": "LX하우시스",
     "product_line": "PRESTIGE",
     "installer_spec": "LX PRESTIGE. 28mm 트리플 로이유리, 강화 단열 알루미늄 프레임.",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 2200000.0,
     "labor_price": 600000.0,
     "total_unit_price": 2800000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-DF-001",
@@ -3791,15 +2975,11 @@
     "brand": "영림",
     "product_line": "가구필름",
     "installer_spec": "영림 가구필름 + 시공 일식.",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 70000.0,
     "labor_price": 70000.0,
     "total_unit_price": 140000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-DF-002",
@@ -3809,15 +2989,11 @@
     "brand": "LX하우시스",
     "product_line": "BENIF 일반",
     "installer_spec": "LX BENIF 일반.",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 120000.0,
     "labor_price": 100000.0,
     "total_unit_price": 220000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-DF-003",
@@ -3827,15 +3003,11 @@
     "brand": "LX하우시스",
     "product_line": "BENIF 고급",
     "installer_spec": "LX BENIF 고급 + 무광.",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 180000.0,
     "labor_price": 140000.0,
     "total_unit_price": 320000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-DR-001",
@@ -3845,15 +3017,11 @@
     "brand": "현장시공",
     "product_line": "12mm 일반 문선",
     "installer_spec": "MDF 멤브레인 + 12mm 일반 문선.",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 250000.0,
     "labor_price": 200000.0,
     "total_unit_price": 450000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-DR-002",
@@ -3863,15 +3031,11 @@
     "brand": "현장시공",
     "product_line": "9mm 슬림 문선",
     "installer_spec": "MDF 멤브레인 + 9mm 슬림 문선.",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 320000.0,
     "labor_price": 230000.0,
     "total_unit_price": 550000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-DR-003",
@@ -3881,15 +3045,11 @@
     "brand": "현장시공",
     "product_line": "무문선 (히든)",
     "installer_spec": "무문선 매입형 문틀 + 평면 도어.",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 400000.0,
     "labor_price": 300000.0,
     "total_unit_price": 700000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-DO-001",
@@ -3899,15 +3059,11 @@
     "brand": "현장시공",
     "product_line": "문짝 단독 (가성비)",
     "installer_spec": "기존 문틀 유지 + 문짝만 교체. 멤브레인 도어.",
-    "tags": [
-      "가성비",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 120000.0,
     "labor_price": 100000.0,
     "total_unit_price": 220000.0,
-    "primary_grade": "가성비"
+    "primary_grade": "가성비 추천"
   },
   {
     "material_id": "MAT-DO-002",
@@ -3917,15 +3073,11 @@
     "brand": "현장시공",
     "product_line": "문짝 단독 (표준)",
     "installer_spec": "기존 문틀 유지 + 문짝 교체. PET 시트 도어.",
-    "tags": [
-      "표준",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 180000.0,
     "labor_price": 120000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "표준"
+    "primary_grade": "표준 추천"
   },
   {
     "material_id": "MAT-DO-003",
@@ -3935,15 +3087,11 @@
     "brand": "현장시공",
     "product_line": "문짝 단독 (고급)",
     "installer_spec": "기존 문틀 유지 + 문짝 교체. 우레탄 도장 도어.",
-    "tags": [
-      "고급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 270000.0,
     "labor_price": 150000.0,
     "total_unit_price": 420000.0,
-    "primary_grade": "고급"
+    "primary_grade": "고급 추천"
   },
   {
     "material_id": "MAT-NL-001",
@@ -3953,10 +3101,6 @@
     "brand": "현장시공",
     "product_line": "무문선 매입 보강",
     "installer_spec": "무문선 도어 시공 시 추가 목공 마감.",
-    "tags": [
-      "단일등급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 20000.0,
     "labor_price": 30000.0,
@@ -3971,10 +3115,6 @@
     "brand": "현장시공",
     "product_line": "무문선 마감 도배",
     "installer_spec": "무문선 도어 주변 도배 정밀 마감.",
-    "tags": [
-      "단일등급",
-      "주력"
-    ],
     "unit_type": "per_ea",
     "material_price": 15000.0,
     "labor_price": 35000.0,
@@ -3989,10 +3129,6 @@
     "brand": "현장시공",
     "product_line": "엑셀파이프 전체 교체",
     "installer_spec": "난방 엑셀파이프 + 분배기 연결부 전체 교체. 공급면적 평당 산정.",
-    "tags": [
-      "단일등급",
-      "주력"
-    ],
     "unit_type": "평",
     "material_price": 200000.0,
     "labor_price": 100000.0,

@@ -17,9 +17,10 @@
  * 확장·가벽 신설·구청 신고·문틀교체 등 조건부 항목은 후속 단계에서 추가.
  */
 import type {
-  Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade,
+  Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade, GradeGroup,
   RegionId, AgeId,
 } from './types';
+import { gradeGroupOf } from './types';
 import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
@@ -74,8 +75,8 @@ function roundToHundredK(n: number): number {
   return Math.round(n / 100_000) * 100_000;
 }
 
-/** 그레이드 결정: override > default */
-function effectiveGrade(work: string, sel: GradeSelection): Grade {
+/** 그레이드 그룹 결정: override > default (사용자 선택값) */
+function effectiveGrade(work: string, sel: GradeSelection): GradeGroup {
   return sel.overrides[work] ?? sel.default;
 }
 
@@ -106,7 +107,8 @@ function lineItem(
     category: labelOf(workType),
     unit_type: unit,
     qty: round2(qty),
-    grade: mat.primary_grade,
+    // LineItem.grade 는 GradeGroup(4) — mat.primary_grade 가 7가지 중 하나이므로 그룹으로 변환
+    grade: gradeGroupOf(mat.primary_grade as Grade),
     material_id: mat.material_id,
     material_label: mat.installer_spec || `${mat.brand ?? ''} ${mat.product_line ?? ''}`.trim(),
     unit_price: unitPrice,

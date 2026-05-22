@@ -20,7 +20,12 @@ import { normalizeImageUrl } from '@/lib/image-utils';
 import { AdminGate } from '../../AdminGate';
 import { useAdminToken } from '../../useAdminToken';
 
-const GRADES: Grade[] = ['가성비', '표준', '고급', '단일등급'];
+const GRADES: Grade[] = [
+  '가성비 추천', '가성비',
+  '표준 추천', '표준',
+  '고급 추천', '고급',
+  '단일등급',
+];
 
 export default function NewMaterialPage() {
   return (
@@ -66,7 +71,6 @@ function NewMaterialForm() {
     brand: null,
     product_line: null,
     installer_spec: null,
-    tags: [],
     unit_type: 'per_m2',
     material_price: 0,
     labor_price: 0,
@@ -274,14 +278,6 @@ function NewMaterialForm() {
               onChange={(e) => updateField('installer_spec', e.target.value || null)}
               rows={2}
               className="input resize-y"
-            />
-          </Field>
-          <Field label="tags (콤마 구분)">
-            <input
-              value={draft.tags.join(', ')}
-              onChange={(e) => updateField('tags', e.target.value.split(',').map((t) => t.trim()).filter(Boolean))}
-              className="input"
-              placeholder="표준, 주력"
             />
           </Field>
         </FieldGroup>

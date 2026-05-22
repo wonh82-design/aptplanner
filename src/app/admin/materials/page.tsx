@@ -17,7 +17,12 @@ import type { Grade, Material } from '@/lib/types';
 import { AdminGate } from '../AdminGate';
 import { useAdminToken } from '../useAdminToken';
 
-const GRADES: Grade[] = ['가성비', '표준', '고급', '단일등급'];
+const GRADES: Grade[] = [
+  '가성비 추천', '가성비',
+  '표준 추천', '표준',
+  '고급 추천', '고급',
+  '단일등급',
+];
 
 export default function MaterialsAdminPage() {
   return (
@@ -126,9 +131,12 @@ function MaterialsList() {
   }, [materials, category, grade, query, onlyMissingImage]);
 
   // === 정렬 ===
-  // 등급은 사용자 정의 순서: 가성비 → 표준 → 고급 → 단일등급
+  // 등급은 사용자 정의 순서: 가성비 추천 → 가성비 → 표준 추천 → 표준 → 고급 추천 → 고급 → 단일등급
   const GRADE_ORDER: Record<Grade, number> = {
-    '가성비': 0, '표준': 1, '고급': 2, '단일등급': 3,
+    '가성비 추천': 0, '가성비': 1,
+    '표준 추천': 2, '표준': 3,
+    '고급 추천': 4, '고급': 5,
+    '단일등급': 6,
   };
   const sorted = useMemo(() => {
     if (sortKey === 'default') return filtered;
@@ -321,10 +329,7 @@ function MaterialsList() {
                     <div className="text-[10px] text-zinc-500 truncate max-w-md">{m.installer_spec}</div>
                   </td>
                   <td className="px-3 py-2">
-                    <GradeBadge
-                      grade={m.primary_grade}
-                      isPrimary={(m.tags ?? []).includes('주력')}
-                    />
+                    <GradeBadge grade={m.primary_grade} />
                   </td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900">
                     {m.total_unit_price.toLocaleString('ko-KR')}
@@ -394,18 +399,18 @@ function SortableTh({
   );
 }
 
-function GradeBadge({ grade, isPrimary }: { grade: Grade; isPrimary: boolean }) {
+function GradeBadge({ grade }: { grade: Grade }) {
+  // 그룹별 색 + "추천" 자재는 별 표시
+  const isRecommended = grade === '가성비 추천' || grade === '표준 추천' || grade === '고급 추천';
   const color =
-    grade === '가성비' ? 'bg-emerald-100 text-emerald-700' :
-    grade === '표준' ? 'bg-blue-100 text-blue-700' :
-    grade === '고급' ? 'bg-amber-100 text-amber-700' :
+    grade === '가성비 추천' || grade === '가성비' ? 'bg-emerald-100 text-emerald-700' :
+    grade === '표준 추천' || grade === '표준' ? 'bg-blue-100 text-blue-700' :
+    grade === '고급 추천' || grade === '고급' ? 'bg-amber-100 text-amber-700' :
     'bg-zinc-100 text-zinc-700';
   return (
     <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${color}`}>
+      {isRecommended && <span className="text-[9px]">★</span>}
       <span>{grade}</span>
-      {isPrimary && (
-        <span className="text-[9px] font-extrabold opacity-90">★ 추천</span>
-      )}
     </span>
   );
 }

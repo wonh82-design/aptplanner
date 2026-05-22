@@ -50,7 +50,6 @@ const COLUMNS = [
   'brand',
   'product_line',
   'installer_spec',
-  'tags',           // 콤마 구분 문자열로 직렬화
   'unit_type',
   'material_price',
   'labor_price',
@@ -68,10 +67,6 @@ const rows = [COLUMNS];
 for (const m of data) {
   const row = COLUMNS.map((col) => {
     const v = m[col];
-    if (col === 'tags') {
-      // 배열 → 콤마 구분 문자열
-      return Array.isArray(v) ? v.join(',') : '';
-    }
     if (v === null || v === undefined) return '';
     return v;
   });
@@ -89,7 +84,6 @@ const widths = [
   { wch: 14 },  // brand
   { wch: 22 },  // product_line
   { wch: 50 },  // installer_spec
-  { wch: 16 },  // tags
   { wch: 10 },  // unit_type
   { wch: 12 },  // material_price
   { wch: 12 },  // labor_price
@@ -114,9 +108,9 @@ const readmeRows = [
   [''],
   ['주의사항'],
   ['- material_id 는 변경 금지 (다른 자재 참조 깨질 수 있음)'],
-  ['- tags 는 콤마 구분 (예: "표준,주력")'],
   ['- total_unit_price 는 material_price + labor_price 와 일치해야 함 (sync 시 검증)'],
-  ['- primary_grade 는 가성비 / 표준 / 고급 / 단일등급 4가지 중 하나'],
+  ['- primary_grade 7가지: 가성비 추천 / 가성비 / 표준 추천 / 표준 / 고급 추천 / 고급 / 단일등급'],
+  ['  "X 추천" 자재는 그 그룹에서 견적에 자동 우선 선택되는 대표 자재 마커'],
   ['- image_url 은 구글 드라이브 공유 링크 또는 일반 https URL (자동 변환 처리)'],
   ['- vendor_url 은 제조사 제품 페이지 URL — 자재 카드의 ↗ 버튼이 새 창으로 엶'],
   [''],

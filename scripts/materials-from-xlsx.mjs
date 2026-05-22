@@ -13,12 +13,12 @@
  * 검증 (엄격):
  *   - 필수 컬럼 누락 → 에러
  *   - material_id 중복 → 에러
- *   - primary_grade 유효 값(가성비/표준/고급/단일등급) → 에러
+ *   - primary_grade 유효 값(가성비 추천/가성비/표준 추천/표준/고급 추천/고급/단일등급) → 에러
  *   - total_unit_price = material_price + labor_price → 에러 (±1원 허용)
- *   - tags 문자열 콤마 분리 → 배열
  *
- * 참고: 엑셀에 lookup_key / secondary_key 컬럼이 있어도 무시됨 (deprecated).
- *       work_type + primary_grade + sub_category 에서 동적으로 계산 가능한 중복 필드라 제거됨.
+ * 참고: 엑셀의 lookup_key / secondary_key / tags 컬럼이 있어도 무시됨 (deprecated).
+ *       - lookup_key/secondary_key: work_type + primary_grade 에서 동적 계산 가능
+ *       - tags: '주력' 마커가 primary_grade 의 "X 추천" 접미사로 흡수됨
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -56,7 +56,12 @@ const DEFAULT_XLSX = path.join(ROOT, 'data/source/materials_master.xlsx');
 const xlsxPath = process.env.APT_MATERIALS_XLSX || DEFAULT_XLSX;
 const jsonPath = path.join(ROOT, 'src/data/materials.json');
 
-const VALID_GRADES = new Set(['가성비', '표준', '고급', '단일등급']);
+const VALID_GRADES = new Set([
+  '가성비 추천', '가성비',
+  '표준 추천', '표준',
+  '고급 추천', '고급',
+  '단일등급',
+]);
 const REQUIRED_COLUMNS = [
   'material_id', 'work_type', 'unit_type', 'primary_grade',
   'material_price', 'labor_price', 'total_unit_price',
@@ -147,16 +152,6 @@ rows.forEach((r, idx) => {
     }
   }
 
-  // tags 콤마 분리 → 배열
-  let tags = [];
-  if (r.tags === null || r.tags === undefined || r.tags === '') {
-    tags = [];
-  } else if (Array.isArray(r.tags)) {
-    tags = r.tags;
-  } else {
-    tags = String(r.tags).split(',').map((t) => t.trim()).filter(Boolean);
-  }
-
   // image_url 정규화 (양끝 공백 제거)
   let imageUrl = r.image_url;
   if (typeof imageUrl === 'string') {
@@ -190,7 +185,6 @@ rows.forEach((r, idx) => {
     brand: nullable(r.brand),
     product_line: nullable(r.product_line),
     installer_spec: nullable(r.installer_spec),
-    tags,
     unit_type: String(r.unit_type ?? '').trim(),
     material_price: matPrice,
     labor_price: labPrice,

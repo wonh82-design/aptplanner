@@ -14,7 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildQuote } from '../src/lib/calculator';
-import type { Property, Scope, GradeSelection, Grade, RoomScope } from '../src/lib/types';
+import type { Property, Scope, GradeSelection, GradeGroup, RoomScope } from '../src/lib/types';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -37,12 +37,12 @@ function v5Scope(): Scope {
   };
 }
 
-function makeGrade(g: Grade): GradeSelection { return { default: g, overrides: {}, material_overrides: {} }; }
+function makeGrade(g: GradeGroup): GradeSelection { return { default: g, overrides: {}, material_overrides: {} }; }
 
 type FixtureScenario = {
   name: string;
   pyeong: number;
-  grade: Grade;
+  grade: GradeGroup;
   excel_grand_total: number;
 };
 type Fixture = {
@@ -66,7 +66,7 @@ const fixture: Fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf-8'));
 type Scenario = {
   name: string;
   property: Property;
-  grade: Grade;
+  grade: GradeGroup;
   excel_grand_total: number;
 };
 

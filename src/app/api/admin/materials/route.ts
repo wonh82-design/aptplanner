@@ -25,7 +25,12 @@ import { isDbConfigured, getMaterials, saveMaterialsToDb } from '@/lib/db';
  *  - total_unit_price = material_price + labor_price (±1원)
  */
 
-const VALID_GRADES = new Set(['가성비', '표준', '고급', '단일등급']);
+const VALID_GRADES = new Set([
+  '가성비 추천', '가성비',
+  '표준 추천', '표준',
+  '고급 추천', '고급',
+  '단일등급',
+]);
 const MATERIALS_JSON = path.resolve(process.cwd(), 'src/data/materials.json');
 
 /** 정수 가격 필드는 .0 trailing zero 보존 + Windows CRLF — 기존 파일 포맷과 호환 */
@@ -65,11 +70,6 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
     } else if (Math.abs(total - (matPrice + labPrice)) > 1) {
       errors.push(`행 ${idx + 1} (${id}): total ${total} ≠ material(${matPrice}) + labor(${labPrice})`);
     }
-    // tags 정규화
-    let tags: string[] = [];
-    if (Array.isArray(m.tags)) tags = (m.tags as unknown[]).map(String);
-    else if (typeof m.tags === 'string') tags = (m.tags as string).split(',').map((t) => t.trim()).filter(Boolean);
-
     const nullable = (v: unknown): string | null => {
       if (v === null || v === undefined) return null;
       const s = String(v).trim();
@@ -96,7 +96,6 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       brand: nullable(m.brand),
       product_line: nullable(m.product_line),
       installer_spec: nullable(m.installer_spec),
-      tags,
       unit_type: String(m.unit_type ?? '').trim(),
       material_price: Number.isFinite(matPrice) ? matPrice : 0,
       labor_price: Number.isFinite(labPrice) ? labPrice : 0,

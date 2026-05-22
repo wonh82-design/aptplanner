@@ -1,7 +1,11 @@
 /**
  * 자재마스터 조회 헬퍼.
- * (work_type, grade) → 주력 자재 1개를 결정.
- * 우선순위: tags에 '주력' 포함 → primary_grade 일치 → 첫 항목.
+ * (work_type, gradeGroup) → "X 추천" 자재 우선, 없으면 그 그룹 내 첫 자재.
+ *
+ * Grade(7) 와 GradeGroup(4) 의 관계:
+ *  - 자재의 primary_grade 는 7가지 ('가성비 추천' | '가성비' | '표준 추천' | '표준' | ...)
+ *  - 사용자가 선택하는 등급은 4가지 GradeGroup ('가성비' | '표준' | '고급' | '단일등급')
+ *  - getPrimaryMaterial 은 GradeGroup 을 받아 그 그룹 내에서 추천 우선 선택
  *
  * ── 데이터 소스 ──
  * 빌드 타임에 src/data/materials.json 을 seed 로 로드.
@@ -10,7 +14,8 @@
  * 모든 helper 함수는 동기 시그니처 유지 — 컨슈머(calculator, UI) 변경 불필요.
  */
 import data from '@/data/materials.json';
-import type { Grade, Material } from './types';
+import type { Grade, GradeGroup, Material } from './types';
+import { gradeGroupOf, isRecommendedGrade } from './types';
 
 /**
  * ALL_MATERIALS — in-place mutable 배열. setMaterials() 호출 시 splice 로 내용 교체.
@@ -24,7 +29,10 @@ function rebuildIndexes() {
   byKey = new Map();
   byId = new Map();
   for (const m of ALL_MATERIALS) {
-    const k = `${m.work_type}|${m.primary_grade}`;
+    // 그룹 단위로 인덱싱 — 사용자는 GradeGroup(4가지) 단위로 선택하기 때문.
+    // "가성비 추천" + "가성비" 둘 다 key="flooring|가성비" 로 들어감.
+    const group = gradeGroupOf(m.primary_grade as Grade);
+    const k = `${m.work_type}|${group}`;
     const arr = byKey.get(k) || [];
     arr.push(m);
     byKey.set(k, arr);
@@ -53,41 +61,50 @@ export function getMaterialById(id: string): Material | undefined {
   return byId.get(id);
 }
 
-/** 해당 공종·등급의 주력 자재 (없으면 단일등급 / 다른 등급 폴백) */
-export function getPrimaryMaterial(workType: string, grade: Grade): Material | null {
-  const candidates: Material[] = [];
-  const direct = byKey.get(`${workType}|${grade}`);
-  if (direct?.length) candidates.push(...direct);
-  // 폴백 1: 단일등급
-  const single = byKey.get(`${workType}|단일등급`);
-  if (single?.length) candidates.push(...single);
-  // 폴백 2: 등급 무관 (이 공종의 모든 자재)
-  if (candidates.length === 0) {
-    for (const m of ALL_MATERIALS) if (m.work_type === workType) candidates.push(m);
+/**
+ * 해당 공종·등급그룹의 대표 자재 1개를 결정.
+ * 우선순위:
+ *  1. 해당 그룹 내 "X 추천" 자재 (예: "표준 추천")
+ *  2. 해당 그룹 내 첫 자재
+ *  3. 단일등급 폴백
+ *  4. 등급 무관 폴백 (그 공종의 아무 자재)
+ */
+export function getPrimaryMaterial(workType: string, group: GradeGroup): Material | null {
+  // 1+2. 해당 그룹 candidates
+  const direct = byKey.get(`${workType}|${group}`) ?? [];
+  if (direct.length > 0) {
+    const recommended = direct.find((m) => isRecommendedGrade(m.primary_grade as Grade));
+    return recommended || direct[0];
   }
-  if (candidates.length === 0) return null;
-  // 우선순위: tags '주력' 포함 → 첫 항목
-  const main = candidates.find(m => m.tags?.includes('주력'));
-  return main || candidates[0];
+  // 3. 단일등급 폴백
+  const single = byKey.get(`${workType}|단일등급`) ?? [];
+  if (single.length > 0) return single[0];
+  // 4. 등급 무관 폴백
+  for (const m of ALL_MATERIALS) if (m.work_type === workType) return m;
+  return null;
 }
 
-/** 해당 공종의 등급 옵션 목록 (UI 드롭다운용) */
-export function gradeOptionsFor(workType: string): Grade[] {
-  const set = new Set<Grade>();
+/** 해당 공종의 등급 그룹 옵션 목록 (UI 드롭다운용 — 사용자 선택지) */
+export function gradeOptionsFor(workType: string): GradeGroup[] {
+  const set = new Set<GradeGroup>();
   for (const m of ALL_MATERIALS) {
-    if (m.work_type === workType) set.add(m.primary_grade);
+    if (m.work_type === workType) set.add(gradeGroupOf(m.primary_grade as Grade));
   }
   return Array.from(set);
 }
 
-/** 해당 공종의 모든 자재 (등급순, sub_category순 정렬) */
+/** 해당 공종의 모든 자재 (등급그룹순 → 추천우선 → sub_category순 정렬) */
 export function materialsFor(workType: string): Material[] {
-  const list = ALL_MATERIALS.filter(m => m.work_type === workType);
-  const gradeOrder: Record<string, number> = { '가성비': 0, '표준': 1, '고급': 2, '단일등급': 3 };
+  const list = ALL_MATERIALS.filter((m) => m.work_type === workType);
+  const groupOrder: Record<string, number> = { '가성비': 0, '표준': 1, '고급': 2, '단일등급': 3 };
   return list.slice().sort((a, b) => {
-    const ga = gradeOrder[a.primary_grade] ?? 99;
-    const gb = gradeOrder[b.primary_grade] ?? 99;
+    const ga = groupOrder[gradeGroupOf(a.primary_grade as Grade)] ?? 99;
+    const gb = groupOrder[gradeGroupOf(b.primary_grade as Grade)] ?? 99;
     if (ga !== gb) return ga - gb;
+    // 같은 그룹 내에서는 "추천" 자재 우선
+    const ra = isRecommendedGrade(a.primary_grade as Grade) ? 0 : 1;
+    const rb = isRecommendedGrade(b.primary_grade as Grade) ? 0 : 1;
+    if (ra !== rb) return ra - rb;
     return (a.sub_category ?? '').localeCompare(b.sub_category ?? '');
   });
 }

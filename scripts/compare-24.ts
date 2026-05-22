@@ -1,5 +1,5 @@
 import { buildQuote } from '../src/lib/calculator';
-import type { Property, Scope, GradeSelection, Grade, RoomScope } from '../src/lib/types';
+import type { Property, Scope, GradeSelection, GradeGroup, RoomScope } from '../src/lib/types';
 
 function makeRoom(opts: Partial<RoomScope> = {}): RoomScope {
   return { expansion_current: false, expansion_after: false, flooring: false, wallpaper: false, molding: false, aircon: false, closet: false, ceiling_fan: false, sash: false, ...opts };
@@ -22,7 +22,7 @@ function v5Scope(): Scope {
 const q = buildQuote(
   { pyeong: 24, bay: 3, rooms: 3, common_bath: 1, master_bath: 1, balcony_depth_m: 1.5, region: 'gyeonggi', age: '15-30' },
   v5Scope(),
-  { default: '표준' as Grade, overrides: {}, material_overrides: {} },
+  { default: '표준' as GradeGroup, overrides: {}, material_overrides: {} },
 );
 console.log(`24평 표준 합계: ${q.totals.grand_total_raw.toLocaleString()}원\n`);
 for (const it of q.line_items) {

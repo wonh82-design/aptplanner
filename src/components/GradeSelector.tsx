@@ -1,8 +1,8 @@
 'use client';
 
-import type { Grade, GradeSelection } from '@/lib/types';
+import type { GradeGroup, GradeSelection } from '@/lib/types';
 
-const GRADES: { value: Grade; label: string; desc: string; tone: string }[] = [
+const GRADES: { value: GradeGroup; label: string; desc: string; tone: string }[] = [
   { value: '가성비', label: '가성비', desc: '실속·경제형',     tone: 'bg-emerald-50 border-emerald-300 text-emerald-900' },
   { value: '표준',   label: '표준',   desc: '주류·균형형',     tone: 'bg-blue-50 border-blue-300 text-blue-900' },
   { value: '고급',   label: '고급',   desc: '프리미엄·하이엔드', tone: 'bg-amber-50 border-amber-300 text-amber-900' },

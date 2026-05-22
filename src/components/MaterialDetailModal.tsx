@@ -14,14 +14,15 @@
  */
 
 import { useState } from 'react';
-import type { Grade, Material } from '@/lib/types';
+import type { Grade, GradeGroup, Material } from '@/lib/types';
+import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
 import { fmtKRWShort } from '@/lib/calculator';
 
-const GRADES: Grade[] = ['가성비', '표준', '고급'];
+const GRADES: GradeGroup[] = ['가성비', '표준', '고급'];
 
-const GRADE_META: Record<Grade, { color: string; bg: string; ring: string; label: string; desc: string }> = {
+const GRADE_META: Record<GradeGroup, { color: string; bg: string; ring: string; label: string; desc: string }> = {
   '가성비': {
     color: 'text-emerald-700', bg: 'bg-emerald-50', ring: 'ring-emerald-300',
     label: '실속·경제형',
@@ -46,8 +47,8 @@ const GRADE_META: Record<Grade, { color: string; bg: string; ring: string; label
 
 type Props = {
   workType: string;
-  /** 현재 견적에 적용된 등급 — 카드 강조용 */
-  currentGrade: Grade;
+  /** 현재 견적에 적용된 등급 그룹 — 카드 강조용 */
+  currentGrade: GradeGroup;
   onClose: () => void;
 };
 
@@ -149,7 +150,7 @@ export function MaterialDetailModal({ workType, currentGrade, onClose }: Props) 
 function GradeCard({
   grade, workType, material, isCurrent,
 }: {
-  grade: Grade;
+  grade: GradeGroup;
   workType: string;
   material: Material | null;
   isCurrent: boolean;

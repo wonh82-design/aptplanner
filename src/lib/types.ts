@@ -6,7 +6,38 @@
  *  - JSON in, JSON out (LLM 단계에서도 유지)
  */
 
-export type Grade = '가성비' | '표준' | '고급' | '단일등급';
+/**
+ * Grade — 자재마스터의 primary_grade 값. 7가지.
+ * "X 추천" 은 그 등급 그룹 안에서 시스템이 자동으로 우선 선택하는 자재 마커.
+ */
+export type Grade =
+  | '가성비 추천' | '가성비'
+  | '표준 추천' | '표준'
+  | '고급 추천' | '고급'
+  | '단일등급';
+
+/**
+ * GradeGroup — 사용자가 견적 화면에서 선택하는 등급. 4가지.
+ * 같은 그룹 안에 "추천" 자재가 있으면 그것이 견적에 자동 선택됨.
+ */
+export type GradeGroup = '가성비' | '표준' | '고급' | '단일등급';
+
+/**
+ * Grade(7) → GradeGroup(4) 변환.
+ * "표준 추천" → "표준" 같이 "X 추천" 의 추천 접미사를 제거.
+ */
+export function gradeGroupOf(g: Grade): GradeGroup {
+  if (g === '가성비 추천') return '가성비';
+  if (g === '표준 추천') return '표준';
+  if (g === '고급 추천') return '고급';
+  return g; // 가성비/표준/고급/단일등급 그대로
+}
+
+/** "X 추천" 인 자재인지 — 추천 우선 선택 + 배지 표시용. */
+export function isRecommendedGrade(g: Grade): boolean {
+  return g === '가성비 추천' || g === '표준 추천' || g === '고급 추천';
+}
+
 export type YesNo = 'Y' | 'N' | '-';
 
 export type RoomId = '거실' | '주방' | '안방' | '작은방1' | '작은방2' | '작은방3';
@@ -21,7 +52,6 @@ export type Material = {
   brand: string | null;
   product_line: string | null;
   installer_spec: string | null;     // 시공자용 풀스펙
-  tags: string[];
   unit_type: string;                  // per_m2 / per_m / per_ea / per_set
   material_price: number;
   labor_price: number;
@@ -115,11 +145,11 @@ export type Scope = {
   global: GlobalScope;
 };
 
-/** 등급·자재 선택 */
+/** 등급·자재 선택 — 사용자가 견적 화면에서 선택하는 값 (GradeGroup 4가지 단위) */
 export type GradeSelection = {
-  default: Grade;                                       // 전체 일괄 등급
-  overrides: Partial<Record<string, Grade>>;            // work_type → grade
-  material_overrides: Partial<Record<string, string>>;  // work_type → material_id (등급 내 특정 자재)
+  default: GradeGroup;                                       // 전체 일괄 등급
+  overrides: Partial<Record<string, GradeGroup>>;            // work_type → gradeGroup
+  material_overrides: Partial<Record<string, string>>;       // work_type → material_id (그룹 내 특정 자재)
 };
 
 /** 산출된 견적 한 줄 */
@@ -130,7 +160,7 @@ export type LineItem = {
   category: string;            // '바닥재' 같은 한글 라벨
   unit_type: string;
   qty: number;
-  grade: Grade;
+  grade: GradeGroup;
   material_id: string | null;
   material_label: string;      // installer_spec
   unit_price: number;

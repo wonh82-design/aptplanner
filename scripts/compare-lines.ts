@@ -2,7 +2,7 @@
  * 30평 표준·24평 표준 케이스의 라인별 상세 출력 — 엑셀과 비교 분석용.
  */
 import { buildQuote } from '../src/lib/calculator';
-import type { Property, Scope, GradeSelection, Grade, RoomScope } from '../src/lib/types';
+import type { Property, Scope, GradeSelection, GradeGroup, RoomScope } from '../src/lib/types';
 
 function makeRoom(opts: Partial<RoomScope> = {}): RoomScope {
   return {
@@ -51,9 +51,9 @@ function makeProperty(pyeong: number): Property {
   };
 }
 
-function gr(g: Grade): GradeSelection { return { default: g, overrides: {}, material_overrides: {} }; }
+function gr(g: GradeGroup): GradeSelection { return { default: g, overrides: {}, material_overrides: {} }; }
 
-for (const [pyeong, grade] of [[30, '표준'], [24, '표준']] as [number, Grade][]) {
+for (const [pyeong, grade] of [[30, '표준'], [24, '표준']] as [number, GradeGroup][]) {
   const q = buildQuote(makeProperty(pyeong), v5Scope(), gr(grade));
   console.log(`\n━━━ ${pyeong}평 / ${grade} 등급 ━━━`);
   console.log(`총: ${q.totals.grand_total_raw.toLocaleString()}원 (라인 ${q.line_items.length}개)\n`);

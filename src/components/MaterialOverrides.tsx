@@ -1,7 +1,8 @@
 'use client';
 
 import { memo, useMemo, useState } from 'react';
-import type { Grade, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
+import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
+import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength } from '@/lib/areas';
@@ -25,9 +26,10 @@ type Props = {
   onJumpToProperty?: () => void;
 };
 
-const GRADES: Grade[] = ['가성비', '표준', '고급'];
+// 사용자가 선택하는 등급 그룹 3개 (단일등급은 자동 폴백)
+const GRADES: GradeGroup[] = ['가성비', '표준', '고급'];
 
-const GRADE_META: Record<Grade, { color: string; bg: string; ring: string; label: string }> = {
+const GRADE_META: Record<GradeGroup, { color: string; bg: string; ring: string; label: string }> = {
   '가성비':   { color: 'text-emerald-700', bg: 'bg-emerald-50',  ring: 'ring-emerald-300',  label: '실속·경제형' },
   '표준':     { color: 'text-blue-700',    bg: 'bg-blue-50',     ring: 'ring-blue-300',     label: '주류·균형형' },
   '고급':     { color: 'text-amber-700',   bg: 'bg-amber-50',    ring: 'ring-amber-300',    label: '프리미엄' },
@@ -133,11 +135,11 @@ export function MaterialOverrides({
   const TOP_N = 5;
   const visible = showAll ? displayItems : displayItems.slice(0, TOP_N);
 
-  const effectiveGrade = (wt: string): Grade =>
-    (value.overrides[wt] as Grade) ?? value.default;
+  const effectiveGrade = (wt: string): GradeGroup =>
+    (value.overrides[wt] as GradeGroup) ?? value.default;
 
   /** 단일 work_type 등급 변경 */
-  function setGrade(wt: string, g: Grade) {
+  function setGrade(wt: string, g: GradeGroup) {
     const overrides = { ...value.overrides, [wt]: g };
     const matOv = { ...value.material_overrides };
     delete matOv[wt];
@@ -146,11 +148,12 @@ export function MaterialOverrides({
 
   /**
    * 특정 자재로 직접 변경 — material_overrides[wt] 설정.
-   * overrides[wt]도 그 자재의 등급으로 함께 설정해서 UI 등급 표시 일관성 유지.
+   * overrides[wt]도 그 자재의 등급 그룹으로 설정해서 UI 등급 표시 일관성 유지.
    */
   function setMaterial(material: Material) {
     const wt = material.work_type;
-    const overrides = { ...value.overrides, [wt]: material.primary_grade };
+    const group = gradeGroupOf(material.primary_grade as Grade);
+    const overrides = { ...value.overrides, [wt]: group };
     const matOv = { ...value.material_overrides, [wt]: material.material_id };
     onChange({ ...value, overrides, material_overrides: matOv });
   }
@@ -159,7 +162,7 @@ export function MaterialOverrides({
    * 일괄 등급 변경 — 모든 work_type에 같은 등급 적용.
    * 모든 overrides·material_overrides를 초기화하여 default 등급만 남긴다.
    */
-  function setBulkGrade(g: Grade) {
+  function setBulkGrade(g: GradeGroup) {
     onChange({ default: g, overrides: {}, material_overrides: {} });
     setBulkOpen(false);
   }
@@ -400,7 +403,7 @@ export function MaterialOverrides({
   }
 
   /** Bundle 등급 일괄 변경 — 내부 모든 work_type에 같은 등급 + material override 해제 */
-  function setBundleGrade(bundle: WorkBundle, g: Grade) {
+  function setBundleGrade(bundle: WorkBundle, g: GradeGroup) {
     const overrides = { ...value.overrides };
     const matOv = { ...value.material_overrides };
     for (const wt of bundle.workTypes) {
@@ -486,7 +489,7 @@ export function MaterialOverrides({
               <span className="text-[10px] text-zinc-400">모든 공종에 일괄 적용</span>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
-              {(['가성비', '표준', '고급'] as Grade[]).map((g) => {
+              {(['가성비', '표준', '고급'] as GradeGroup[]).map((g) => {
                 const meta = GRADE_META[g];
                 const selected = value.default === g;
                 return (
@@ -583,12 +586,12 @@ export function MaterialOverrides({
 // =====================================================
 
 /**
- * 같은 등급 내 '추천(primary)' 판정 — tags에 '주력' 포함 자재가 primary.
- * 없으면 등급 내 첫 번째 자재가 primary.
+ * 같은 등급그룹 내 '추천(primary)' 판정 — primary_grade 가 "X 추천" 인 자재가 primary.
+ * 없으면 그룹 내 첫 번째 자재가 primary.
  */
 function isPrimaryMaterial(m: Material, allInGrade: Material[]): boolean {
-  const primaries = allInGrade.filter((x) => x.tags?.includes('주력'));
-  if (primaries.length > 0) return primaries[0].material_id === m.material_id;
+  const recommended = allInGrade.filter((x) => isRecommendedGrade(x.primary_grade as Grade));
+  if (recommended.length > 0) return recommended[0].material_id === m.material_id;
   return allInGrade[0]?.material_id === m.material_id;
 }
 
@@ -603,7 +606,7 @@ function SingleCard({
 }: {
   work: WorkInfo;
   label: string;
-  effectiveGrade: Grade;
+  effectiveGrade: GradeGroup;
   effectiveMaterialId: string | null;
   hasOverride: boolean;
   onSelectMaterial: (m: Material) => void;
@@ -615,19 +618,19 @@ function SingleCard({
   // 그 work_type의 모든 자재 (현장시공 제외)
   const allMaterials = materialsFor(work.wt).filter((m) => m.brand !== '현장시공');
 
-  // 등급별 그룹핑 → 각 등급 안에서 primary 먼저 정렬
+  // 등급 그룹별 그룹핑 → 각 그룹 안에서 추천(primary) 먼저 정렬
   const sortedMaterials = (() => {
-    const byGrade = new Map<Grade, Material[]>();
+    const byGroup = new Map<GradeGroup, Material[]>();
     for (const m of allMaterials) {
-      const g = m.primary_grade;
-      if (!byGrade.has(g)) byGrade.set(g, []);
-      byGrade.get(g)!.push(m);
+      const group = gradeGroupOf(m.primary_grade as Grade);
+      if (!byGroup.has(group)) byGroup.set(group, []);
+      byGroup.get(group)!.push(m);
     }
     const out: Array<{ material: Material; isPrimary: boolean }> = [];
-    for (const g of (['가성비', '표준', '고급', '단일등급'] as Grade[])) {
-      const list = byGrade.get(g) ?? [];
+    for (const g of (['가성비', '표준', '고급', '단일등급'] as GradeGroup[])) {
+      const list = byGroup.get(g) ?? [];
       // primary 먼저
-      const primaryIdx = list.findIndex((m) => m.tags?.includes('주력'));
+      const primaryIdx = list.findIndex((m) => isRecommendedGrade(m.primary_grade as Grade));
       const ordered = primaryIdx >= 0
         ? [list[primaryIdx], ...list.filter((_, i) => i !== primaryIdx)]
         : list;
@@ -714,7 +717,9 @@ const MaterialCard = memo(function MaterialCard({
   totalQty: number;
   onSelect: () => void;
 }) {
-  const meta = GRADE_META[material.primary_grade];
+  // 색상은 그룹 기준 (가성비/표준/고급/단일등급) — "표준 추천" 도 표준 색
+  const meta = GRADE_META[gradeGroupOf(material.primary_grade as Grade)];
+  const isRecommended = isRecommendedGrade(material.primary_grade as Grade);
   const homeTotal = Math.round(totalQty * material.total_unit_price);
   const realUrl = normalizeImageUrl(material.image_url ?? null, 600);
   const useDummy = !realUrl && shouldUseDummyImages();
@@ -741,16 +746,12 @@ const MaterialCard = memo(function MaterialCard({
           : 'border-zinc-200 hover:border-zinc-400 hover:shadow-sm'
       }`}
     >
-      {/* 상단 등급 배지 */}
+      {/* 상단 등급 배지 — 자재의 primary_grade 그대로 표시 (예: "표준 추천", "고급") */}
       <div className={`${meta.bg} px-2 py-1 flex items-center gap-1 border-b ${
         isSelected ? meta.ring.replace('ring-', 'border-') : 'border-zinc-200'
       }`}>
+        {isRecommended && <span className={`text-[10px] ${meta.color}`}>★</span>}
         <span className={`text-[10px] font-bold ${meta.color}`}>{material.primary_grade}</span>
-        {isPrimary && (
-          <span className={`text-[9px] font-bold px-1 py-0 rounded ${meta.color} bg-white/70 border ${meta.ring.replace('ring-', 'border-')} whitespace-nowrap`}>
-            추천
-          </span>
-        )}
         {isSelected && (
           <span className="ml-auto flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white">
             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden>
@@ -848,7 +849,7 @@ function MaterialCardImage({ url, alt, isDummy = false }: { url: string | null; 
 // installer_spec(시공자용 풀스펙)을 우선 사용하고, 없으면 brand+product_line으로 폴백.
 // 같은 라벨이 중복되면 제거(예: 욕실 풀세트의 동일 브랜드 묶음).
 // =====================================================
-function bundleMaterialSummary(works: WorkInfo[], grade: Grade): string {
+function bundleMaterialSummary(works: WorkInfo[], grade: GradeGroup): string {
   const seen = new Set<string>();
   const parts: string[] = [];
   for (const w of works) {
@@ -878,9 +879,9 @@ function BundleCard({
   works: WorkInfo[];
   totalSub: number;
   gradeSelection: GradeSelection;
-  effectiveGrade: (wt: string) => Grade;
-  onSelectBundleGrade: (g: Grade) => void;
-  onSelectComponentGrade: (wt: string, g: Grade) => void;
+  effectiveGrade: (wt: string) => GradeGroup;
+  onSelectBundleGrade: (g: GradeGroup) => void;
+  onSelectComponentGrade: (wt: string, g: GradeGroup) => void;
   onClearBundle: () => void;
   /** 번들 안의 특정 work_type을 자세히 보기 모달로 열기 */
   onShowDetail: (workType: string) => void;
@@ -894,7 +895,7 @@ function BundleCard({
   // 세트 effective grade: 모든 work_type이 같은 등급이면 그 등급, 아니면 'mixed'
   const grades = works.map(w => effectiveGrade(w.wt));
   const uniqueGrades = new Set(grades);
-  const bundleGrade: Grade | 'mixed' = uniqueGrades.size === 1 ? grades[0] : 'mixed';
+  const bundleGrade: GradeGroup | 'mixed' = uniqueGrades.size === 1 ? grades[0] : 'mixed';
 
   // 사용자가 등급/자재 override 했는지
   const hasAnyOverride = works.some(w =>
@@ -904,7 +905,7 @@ function BundleCard({
 
   // 각 등급별 세트 합계 — works가 바뀌지 않는 한 캐시
   const totalsByGrade = useMemo(() => {
-    const out: Record<Grade, number> = { '가성비': 0, '표준': 0, '고급': 0, '단일등급': 0 };
+    const out: Record<GradeGroup, number> = { '가성비': 0, '표준': 0, '고급': 0, '단일등급': 0 };
     for (const g of GRADES) {
       let t = 0;
       for (const w of works) {
@@ -915,7 +916,7 @@ function BundleCard({
     }
     return out;
   }, [works]);
-  const bundleTotalAtGrade = (g: Grade) => totalsByGrade[g];
+  const bundleTotalAtGrade = (g: GradeGroup) => totalsByGrade[g];
 
   return (
     <div className={`rounded-lg border ${hasAnyOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
@@ -1218,8 +1219,8 @@ function ComponentRow({
   work, effectiveGrade, onSelectGrade, onShowDetail,
 }: {
   work: WorkInfo;
-  effectiveGrade: Grade;
-  onSelectGrade: (g: Grade) => void;
+  effectiveGrade: GradeGroup;
+  onSelectGrade: (g: GradeGroup) => void;
   onShowDetail: () => void;
 }) {
   const label = labelOf(work.wt);
@@ -1268,10 +1269,10 @@ function ComponentRow({
 function BulkGradeButton({
   currentGrade, isOpen, onToggleOpen, onSelect, onClose,
 }: {
-  currentGrade: Grade;
+  currentGrade: GradeGroup;
   isOpen: boolean;
   onToggleOpen: () => void;
-  onSelect: (g: Grade) => void;
+  onSelect: (g: GradeGroup) => void;
   onClose: () => void;
 }) {
   const meta = GRADE_META[currentGrade];
@@ -1305,7 +1306,7 @@ function BulkGradeButton({
               </div>
             </div>
             <div className="p-1.5 space-y-1">
-              {(['가성비', '표준', '고급'] as Grade[]).map((g) => {
+              {(['가성비', '표준', '고급'] as GradeGroup[]).map((g) => {
                 const m = GRADE_META[g];
                 const selected = currentGrade === g;
                 return (
