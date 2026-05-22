@@ -27,8 +27,6 @@ export type Material = {
   labor_price: number;
   total_unit_price: number;
   primary_grade: Grade;
-  lookup_key: string | null;          // "flooring|표준" 등
-  secondary_key: string | null;       // "강마루|표준" 등
   /**
    * 자재 이미지 URL (옵셔널).
    * - 구글 드라이브 공유 링크 (https://drive.google.com/file/d/{ID}/view) 그대로 넣어도 됨

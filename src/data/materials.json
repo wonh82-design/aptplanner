@@ -15,9 +15,7 @@
     "material_price": 22000.0,
     "labor_price": 12000.0,
     "total_unit_price": 34000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "flooring|가성비",
-    "secondary_key": "강마루|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-FL-002",
@@ -34,9 +32,7 @@
     "material_price": 12000.0,
     "labor_price": 12000.0,
     "total_unit_price": 24000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "flooring|가성비",
-    "secondary_key": "장판|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-FL-003",
@@ -53,9 +49,7 @@
     "material_price": 15000.0,
     "labor_price": 12000.0,
     "total_unit_price": 27000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "flooring|가성비",
-    "secondary_key": "장판|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-FL-004",
@@ -72,9 +66,7 @@
     "material_price": 22000.0,
     "labor_price": 13000.0,
     "total_unit_price": 35000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "flooring|가성비",
-    "secondary_key": "강화마루|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-FL-005",
@@ -92,9 +84,7 @@
     "material_price": 32000.0,
     "labor_price": 14000.0,
     "total_unit_price": 46000.0,
-    "primary_grade": "표준",
-    "lookup_key": "flooring|표준",
-    "secondary_key": "강마루|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-FL-006",
@@ -111,9 +101,7 @@
     "material_price": 22000.0,
     "labor_price": 14000.0,
     "total_unit_price": 36000.0,
-    "primary_grade": "표준",
-    "lookup_key": "flooring|표준",
-    "secondary_key": "장판|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-FL-007",
@@ -130,9 +118,7 @@
     "material_price": 28000.0,
     "labor_price": 14000.0,
     "total_unit_price": 42000.0,
-    "primary_grade": "표준",
-    "lookup_key": "flooring|표준",
-    "secondary_key": "강화마루|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-FL-008",
@@ -149,9 +135,7 @@
     "material_price": 35000.0,
     "labor_price": 20000.0,
     "total_unit_price": 55000.0,
-    "primary_grade": "표준",
-    "lookup_key": "flooring|표준",
-    "secondary_key": "강화마루|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-FL-009",
@@ -168,9 +152,7 @@
     "material_price": 40000.0,
     "labor_price": 16000.0,
     "total_unit_price": 56000.0,
-    "primary_grade": "표준",
-    "lookup_key": "flooring|표준",
-    "secondary_key": "강마루|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-FL-010",
@@ -188,9 +170,7 @@
     "material_price": 55000.0,
     "labor_price": 22000.0,
     "total_unit_price": 77000.0,
-    "primary_grade": "고급",
-    "lookup_key": "flooring|고급",
-    "secondary_key": "강마루|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-FL-011",
@@ -207,9 +187,7 @@
     "material_price": 50000.0,
     "labor_price": 26000.0,
     "total_unit_price": 76000.0,
-    "primary_grade": "고급",
-    "lookup_key": "flooring|고급",
-    "secondary_key": "강마루|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-FL-012",
@@ -226,9 +204,7 @@
     "material_price": 65000.0,
     "labor_price": 26000.0,
     "total_unit_price": 91000.0,
-    "primary_grade": "고급",
-    "lookup_key": "flooring|고급",
-    "secondary_key": "원목마루|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-FL-013",
@@ -245,9 +221,7 @@
     "material_price": 78000.0,
     "labor_price": 30000.0,
     "total_unit_price": 108000.0,
-    "primary_grade": "고급",
-    "lookup_key": "flooring|고급",
-    "secondary_key": "원목마루|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-WP-001",
@@ -265,9 +239,7 @@
     "material_price": 3500.0,
     "labor_price": 4200.0,
     "total_unit_price": 7700.0,
-    "primary_grade": "가성비",
-    "lookup_key": "wallpaper|가성비",
-    "secondary_key": "합지|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-WP-002",
@@ -284,9 +256,7 @@
     "material_price": 3000.0,
     "labor_price": 4500.0,
     "total_unit_price": 7500.0,
-    "primary_grade": "가성비",
-    "lookup_key": "wallpaper|가성비",
-    "secondary_key": "합지|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-WP-003",
@@ -303,9 +273,7 @@
     "material_price": 3500.0,
     "labor_price": 5000.0,
     "total_unit_price": 8500.0,
-    "primary_grade": "가성비",
-    "lookup_key": "wallpaper|가성비",
-    "secondary_key": "수성도장|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-WP-004",
@@ -323,9 +291,7 @@
     "material_price": 7000.0,
     "labor_price": 5500.0,
     "total_unit_price": 12500.0,
-    "primary_grade": "표준",
-    "lookup_key": "wallpaper|표준",
-    "secondary_key": "실크|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-WP-005",
@@ -342,9 +308,7 @@
     "material_price": 4000.0,
     "labor_price": 4500.0,
     "total_unit_price": 8500.0,
-    "primary_grade": "표준",
-    "lookup_key": "wallpaper|표준",
-    "secondary_key": "합지|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-WP-006",
@@ -361,9 +325,7 @@
     "material_price": 8500.0,
     "labor_price": 6000.0,
     "total_unit_price": 14500.0,
-    "primary_grade": "표준",
-    "lookup_key": "wallpaper|표준",
-    "secondary_key": "실크|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-WP-007",
@@ -380,9 +342,7 @@
     "material_price": 9000.0,
     "labor_price": 6000.0,
     "total_unit_price": 15000.0,
-    "primary_grade": "표준",
-    "lookup_key": "wallpaper|표준",
-    "secondary_key": "실크|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-WP-008",
@@ -399,9 +359,7 @@
     "material_price": 11000.0,
     "labor_price": 6500.0,
     "total_unit_price": 17500.0,
-    "primary_grade": "표준",
-    "lookup_key": "wallpaper|표준",
-    "secondary_key": "실크|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-WP-009",
@@ -419,9 +377,7 @@
     "material_price": 11000.0,
     "labor_price": 7000.0,
     "total_unit_price": 18000.0,
-    "primary_grade": "고급",
-    "lookup_key": "wallpaper|고급",
-    "secondary_key": "실크|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-WP-010",
@@ -438,9 +394,7 @@
     "material_price": 19000.0,
     "labor_price": 8500.0,
     "total_unit_price": 27500.0,
-    "primary_grade": "고급",
-    "lookup_key": "wallpaper|고급",
-    "secondary_key": "실크|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-WP-011",
@@ -457,9 +411,7 @@
     "material_price": 8000.0,
     "labor_price": 6500.0,
     "total_unit_price": 14500.0,
-    "primary_grade": "고급",
-    "lookup_key": "wallpaper|고급",
-    "secondary_key": "친환경도장|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-MD-001",
@@ -477,9 +429,7 @@
     "material_price": 2200.0,
     "labor_price": 4000.0,
     "total_unit_price": 6200.0,
-    "primary_grade": "가성비",
-    "lookup_key": "molding|가성비",
-    "secondary_key": "PVC|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-MD-002",
@@ -496,9 +446,7 @@
     "material_price": 3800.0,
     "labor_price": 4800.0,
     "total_unit_price": 8600.0,
-    "primary_grade": "가성비",
-    "lookup_key": "molding|가성비",
-    "secondary_key": "PVC|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-MD-003",
@@ -515,9 +463,7 @@
     "material_price": 5500.0,
     "labor_price": 5500.0,
     "total_unit_price": 11000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "molding|가성비",
-    "secondary_key": "PVC|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-MD-004",
@@ -535,9 +481,7 @@
     "material_price": 7800.0,
     "labor_price": 6500.0,
     "total_unit_price": 14300.0,
-    "primary_grade": "표준",
-    "lookup_key": "molding|표준",
-    "secondary_key": "MDF|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-MD-005",
@@ -554,9 +498,7 @@
     "material_price": 9500.0,
     "labor_price": 7200.0,
     "total_unit_price": 16700.0,
-    "primary_grade": "표준",
-    "lookup_key": "molding|표준",
-    "secondary_key": "MDF|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-MD-006",
@@ -574,9 +516,7 @@
     "material_price": 14000.0,
     "labor_price": 8500.0,
     "total_unit_price": 22500.0,
-    "primary_grade": "고급",
-    "lookup_key": "molding|고급",
-    "secondary_key": "우드|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-MD-007",
@@ -593,9 +533,7 @@
     "material_price": 18500.0,
     "labor_price": 12000.0,
     "total_unit_price": 30500.0,
-    "primary_grade": "고급",
-    "lookup_key": "molding|고급",
-    "secondary_key": "마이너스|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-MD-008",
@@ -612,9 +550,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "고급",
-    "lookup_key": "molding|고급",
-    "secondary_key": "무몰딩|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-MX-001",
@@ -632,9 +568,7 @@
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "molding_carpentry|가성비",
-    "secondary_key": "무몰딩|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-MX-002",
@@ -652,9 +586,7 @@
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "표준",
-    "lookup_key": "molding_carpentry|표준",
-    "secondary_key": "무몰딩|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-MX-003",
@@ -672,9 +604,7 @@
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "고급",
-    "lookup_key": "molding_carpentry|고급",
-    "secondary_key": "무몰딩|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-MY-001",
@@ -692,9 +622,7 @@
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "molding_wallpaper|가성비",
-    "secondary_key": "무몰딩|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-MY-002",
@@ -712,9 +640,7 @@
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "표준",
-    "lookup_key": "molding_wallpaper|표준",
-    "secondary_key": "무몰딩|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-MY-003",
@@ -732,9 +658,7 @@
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "고급",
-    "lookup_key": "molding_wallpaper|고급",
-    "secondary_key": "무몰딩|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BB-001",
@@ -752,9 +676,7 @@
     "material_price": 1200.0,
     "labor_price": 1200.0,
     "total_unit_price": 2400.0,
-    "primary_grade": "가성비",
-    "lookup_key": "baseboard|가성비",
-    "secondary_key": "PVC4전|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BB-002",
@@ -772,9 +694,7 @@
     "material_price": 2000.0,
     "labor_price": 1500.0,
     "total_unit_price": 3500.0,
-    "primary_grade": "표준",
-    "lookup_key": "baseboard|표준",
-    "secondary_key": "PVC4전|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BB-003",
@@ -792,9 +712,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "고급",
-    "lookup_key": "baseboard|고급",
-    "secondary_key": "무걸레받이|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BX-001",
@@ -812,9 +730,7 @@
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "baseboard_carpentry|가성비",
-    "secondary_key": "무걸레받이|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BX-002",
@@ -832,9 +748,7 @@
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "표준",
-    "lookup_key": "baseboard_carpentry|표준",
-    "secondary_key": "무걸레받이|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BX-003",
@@ -852,9 +766,7 @@
     "material_price": 0.0,
     "labor_price": 10000.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "고급",
-    "lookup_key": "baseboard_carpentry|고급",
-    "secondary_key": "무걸레받이|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BY-001",
@@ -872,9 +784,7 @@
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "baseboard_wallpaper|가성비",
-    "secondary_key": "무걸레받이|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BY-002",
@@ -892,9 +802,7 @@
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "표준",
-    "lookup_key": "baseboard_wallpaper|표준",
-    "secondary_key": "무걸레받이|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BY-003",
@@ -912,9 +820,7 @@
     "material_price": 0.0,
     "labor_price": 5000.0,
     "total_unit_price": 5000.0,
-    "primary_grade": "고급",
-    "lookup_key": "baseboard_wallpaper|고급",
-    "secondary_key": "무걸레받이|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BJ-001",
@@ -932,9 +838,7 @@
     "material_price": 180000.0,
     "labor_price": 80000.0,
     "total_unit_price": 260000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_jendai|가성비",
-    "secondary_key": "인조대리석|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BJ-002",
@@ -952,9 +856,7 @@
     "material_price": 280000.0,
     "labor_price": 100000.0,
     "total_unit_price": 380000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_jendai|표준",
-    "secondary_key": "인조대리석|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BJ-003",
@@ -972,9 +874,7 @@
     "material_price": 580000.0,
     "labor_price": 150000.0,
     "total_unit_price": 730000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_jendai|고급",
-    "secondary_key": "천연석|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BW-001",
@@ -992,9 +892,7 @@
     "material_price": 13000.0,
     "labor_price": 12000.0,
     "total_unit_price": 25000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_waterproof|가성비",
-    "secondary_key": "고뫄스|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BW-002",
@@ -1012,9 +910,7 @@
     "material_price": 23000.0,
     "labor_price": 17000.0,
     "total_unit_price": 40000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_waterproof|표준",
-    "secondary_key": "아덱스|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BW-003",
@@ -1032,9 +928,7 @@
     "material_price": 25000.0,
     "labor_price": 20000.0,
     "total_unit_price": 45000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_waterproof|고급",
-    "secondary_key": "아덱스정밀|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BT-001",
@@ -1052,9 +946,7 @@
     "material_price": 12000.0,
     "labor_price": 0.0,
     "total_unit_price": 12000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_tile|가성비",
-    "secondary_key": "300×600각|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BT-002",
@@ -1072,9 +964,7 @@
     "material_price": 30000.0,
     "labor_price": 0.0,
     "total_unit_price": 30000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_tile|표준",
-    "secondary_key": "600각|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BT-003",
@@ -1092,9 +982,7 @@
     "material_price": 42000.0,
     "labor_price": 0.0,
     "total_unit_price": 42000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_tile|고급",
-    "secondary_key": "900각|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BZ-001",
@@ -1112,9 +1000,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_tile_method|가성비",
-    "secondary_key": "코너비드|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BZ-002",
@@ -1132,9 +1018,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_tile_method|표준",
-    "secondary_key": "졸리컷|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BZ-003",
@@ -1152,9 +1036,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_tile_method|고급",
-    "secondary_key": "졸리컷+|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BU-001",
@@ -1172,9 +1054,7 @@
     "material_price": 1500.0,
     "labor_price": 0.0,
     "total_unit_price": 1500.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_grout|가성비",
-    "secondary_key": "백시멘트|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BU-002",
@@ -1192,9 +1072,7 @@
     "material_price": 4000.0,
     "labor_price": 0.0,
     "total_unit_price": 4000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_grout|표준",
-    "secondary_key": "아덱스FG4|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BU-003",
@@ -1212,9 +1090,7 @@
     "material_price": 30000.0,
     "labor_price": 0.0,
     "total_unit_price": 30000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_grout|고급",
-    "secondary_key": "케라폭시|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BP-001",
@@ -1232,9 +1108,7 @@
     "material_price": 350000.0,
     "labor_price": 250000.0,
     "total_unit_price": 600000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_brick|가성비",
-    "secondary_key": "조적|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BP-002",
@@ -1252,9 +1126,7 @@
     "material_price": 750000.0,
     "labor_price": 320000.0,
     "total_unit_price": 1070000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_partition|표준",
-    "secondary_key": "유리슬라이딩|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BP-003",
@@ -1272,9 +1144,7 @@
     "material_price": 1250000.0,
     "labor_price": 450000.0,
     "total_unit_price": 1700000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_partition|고급",
-    "secondary_key": "유리무프레임|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BG-001",
@@ -1292,9 +1162,7 @@
     "material_price": 50000.0,
     "labor_price": 0.0,
     "total_unit_price": 50000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_ceiling|가성비",
-    "secondary_key": "SMC|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BG-002",
@@ -1312,9 +1180,7 @@
     "material_price": 75000.0,
     "labor_price": 0.0,
     "total_unit_price": 75000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_ceiling|표준",
-    "secondary_key": "이노솔|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BG-003",
@@ -1332,9 +1198,7 @@
     "material_price": 110000.0,
     "labor_price": 0.0,
     "total_unit_price": 110000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_ceiling|고급",
-    "secondary_key": "석고도장|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BS-001",
@@ -1352,9 +1216,7 @@
     "material_price": 280000.0,
     "labor_price": 0.0,
     "total_unit_price": 280000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_basin|가성비",
-    "secondary_key": "이누스|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BS-002",
@@ -1372,9 +1234,7 @@
     "material_price": 650000.0,
     "labor_price": 0.0,
     "total_unit_price": 650000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_basin|표준",
-    "secondary_key": "대림바스|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BS-003",
@@ -1392,9 +1252,7 @@
     "material_price": 850000.0,
     "labor_price": 0.0,
     "total_unit_price": 850000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_basin|고급",
-    "secondary_key": "아메리칸|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BR-001",
@@ -1412,9 +1270,7 @@
     "material_price": 95000.0,
     "labor_price": 0.0,
     "total_unit_price": 95000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_faucet|가성비",
-    "secondary_key": "대림|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BR-002",
@@ -1432,9 +1288,7 @@
     "material_price": 250000.0,
     "labor_price": 0.0,
     "total_unit_price": 250000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_faucet|표준",
-    "secondary_key": "이누스|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BR-003",
@@ -1452,9 +1306,7 @@
     "material_price": 380000.0,
     "labor_price": 0.0,
     "total_unit_price": 380000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_faucet|고급",
-    "secondary_key": "아메리칸|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BL-001",
@@ -1472,9 +1324,7 @@
     "material_price": 280000.0,
     "labor_price": 0.0,
     "total_unit_price": 280000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_toilet|가성비",
-    "secondary_key": "대림|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BL-002",
@@ -1492,9 +1342,7 @@
     "material_price": 610000.0,
     "labor_price": 0.0,
     "total_unit_price": 610000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_toilet|표준",
-    "secondary_key": "이누스|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BL-003",
@@ -1512,9 +1360,7 @@
     "material_price": 850000.0,
     "labor_price": 0.0,
     "total_unit_price": 850000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_toilet|고급",
-    "secondary_key": "아메리칸|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BA-001",
@@ -1532,9 +1378,7 @@
     "material_price": 110000.0,
     "labor_price": 0.0,
     "total_unit_price": 110000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_accessory|가성비",
-    "secondary_key": "대림급|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BA-002",
@@ -1551,9 +1395,7 @@
     "material_price": 50000.0,
     "labor_price": 0.0,
     "total_unit_price": 50000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_accessory|가성비",
-    "secondary_key": "비브랜드|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BA-003",
@@ -1571,9 +1413,7 @@
     "material_price": 260000.0,
     "labor_price": 0.0,
     "total_unit_price": 260000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_accessory|표준",
-    "secondary_key": "아메리칸|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BA-004",
@@ -1591,9 +1431,7 @@
     "material_price": 580000.0,
     "labor_price": 0.0,
     "total_unit_price": 580000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_accessory|고급",
-    "secondary_key": "수입최고급|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-BI-001",
@@ -1611,9 +1449,7 @@
     "material_price": 0.0,
     "labor_price": 300000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "bath_install|가성비",
-    "secondary_key": "표준|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-BI-002",
@@ -1631,9 +1467,7 @@
     "material_price": 0.0,
     "labor_price": 300000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "표준",
-    "lookup_key": "bath_install|표준",
-    "secondary_key": "표준|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-BI-003",
@@ -1651,9 +1485,7 @@
     "material_price": 0.0,
     "labor_price": 300000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "고급",
-    "lookup_key": "bath_install|고급",
-    "secondary_key": "표준|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-TL-001",
@@ -1671,9 +1503,7 @@
     "material_price": 0.0,
     "labor_price": 500000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "tile_labor|가성비",
-    "secondary_key": "1팀(2명)/일|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-TL-002",
@@ -1691,9 +1521,7 @@
     "material_price": 0.0,
     "labor_price": 550000.0,
     "total_unit_price": 550000.0,
-    "primary_grade": "표준",
-    "lookup_key": "tile_labor|표준",
-    "secondary_key": "1팀(2명)/일|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-TL-003",
@@ -1711,9 +1539,7 @@
     "material_price": 0.0,
     "labor_price": 600000.0,
     "total_unit_price": 600000.0,
-    "primary_grade": "고급",
-    "lookup_key": "tile_labor|고급",
-    "secondary_key": "1팀(2명)/일|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-KM-001",
@@ -1731,9 +1557,7 @@
     "material_price": 35000.0,
     "labor_price": 0.0,
     "total_unit_price": 35000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "kitchen_midway|가성비",
-    "secondary_key": "타일|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-KM-002",
@@ -1751,9 +1575,7 @@
     "material_price": 60000.0,
     "labor_price": 0.0,
     "total_unit_price": 60000.0,
-    "primary_grade": "표준",
-    "lookup_key": "kitchen_midway|표준",
-    "secondary_key": "타일|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-KM-003",
@@ -1771,9 +1593,7 @@
     "material_price": 120000.0,
     "labor_price": 0.0,
     "total_unit_price": 120000.0,
-    "primary_grade": "고급",
-    "lookup_key": "kitchen_midway|고급",
-    "secondary_key": "타일|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-KP-001",
@@ -1791,9 +1611,7 @@
     "material_price": 280000.0,
     "labor_price": 100000.0,
     "total_unit_price": 380000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "kitchen_top|가성비",
-    "secondary_key": "인조대리석|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-KP-002",
@@ -1811,9 +1629,7 @@
     "material_price": 360000.0,
     "labor_price": 120000.0,
     "total_unit_price": 480000.0,
-    "primary_grade": "표준",
-    "lookup_key": "kitchen_top|표준",
-    "secondary_key": "인조대리석|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-KP-003",
@@ -1831,9 +1647,7 @@
     "material_price": 450000.0,
     "labor_price": 150000.0,
     "total_unit_price": 600000.0,
-    "primary_grade": "고급",
-    "lookup_key": "kitchen_top|고급",
-    "secondary_key": "엔지니어드|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-KP-004",
@@ -1850,9 +1664,7 @@
     "material_price": 950000.0,
     "labor_price": 200000.0,
     "total_unit_price": 1150000.0,
-    "primary_grade": "고급",
-    "lookup_key": "kitchen_top|고급",
-    "secondary_key": "세라믹|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-KH-001",
@@ -1870,9 +1682,7 @@
     "material_price": 13000.0,
     "labor_price": 4000.0,
     "total_unit_price": 17000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "kitchen_hardware|가성비",
-    "secondary_key": "국산|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-KH-002",
@@ -1890,9 +1700,7 @@
     "material_price": 25000.0,
     "labor_price": 6000.0,
     "total_unit_price": 31000.0,
-    "primary_grade": "표준",
-    "lookup_key": "kitchen_hardware|표준",
-    "secondary_key": "국산|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-KH-003",
@@ -1910,9 +1718,7 @@
     "material_price": 75000.0,
     "labor_price": 10000.0,
     "total_unit_price": 85000.0,
-    "primary_grade": "고급",
-    "lookup_key": "kitchen_hardware|고급",
-    "secondary_key": "블럼|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-KO-001",
@@ -1930,9 +1736,7 @@
     "material_price": 200000.0,
     "labor_price": 0.0,
     "total_unit_price": 200000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "kitchen_hood|가성비",
-    "secondary_key": "히든|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-KO-002",
@@ -1950,9 +1754,7 @@
     "material_price": 400000.0,
     "labor_price": 0.0,
     "total_unit_price": 400000.0,
-    "primary_grade": "표준",
-    "lookup_key": "kitchen_hood|표준",
-    "secondary_key": "노출|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-KO-003",
@@ -1970,9 +1772,7 @@
     "material_price": 1000000.0,
     "labor_price": 0.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "고급",
-    "lookup_key": "kitchen_hood|고급",
-    "secondary_key": "수입급|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-KS-001",
@@ -1990,9 +1790,7 @@
     "material_price": 200000.0,
     "labor_price": 0.0,
     "total_unit_price": 200000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "kitchen_sink|가성비",
-    "secondary_key": "백조|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-KS-002",
@@ -2010,9 +1808,7 @@
     "material_price": 450000.0,
     "labor_price": 0.0,
     "total_unit_price": 450000.0,
-    "primary_grade": "표준",
-    "lookup_key": "kitchen_sink|표준",
-    "secondary_key": "백조|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-KS-003",
@@ -2030,9 +1826,7 @@
     "material_price": 1200000.0,
     "labor_price": 0.0,
     "total_unit_price": 1200000.0,
-    "primary_grade": "고급",
-    "lookup_key": "kitchen_sink|고급",
-    "secondary_key": "수입급|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-SD-001",
@@ -2050,9 +1844,7 @@
     "material_price": 950000.0,
     "labor_price": 320000.0,
     "total_unit_price": 1270000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "sliding_door|가성비",
-    "secondary_key": "보급|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-SD-002",
@@ -2069,9 +1861,7 @@
     "material_price": 1100000.0,
     "labor_price": 380000.0,
     "total_unit_price": 1480000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "sliding_door|가성비",
-    "secondary_key": "보급|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-SD-003",
@@ -2089,9 +1879,7 @@
     "material_price": 1650000.0,
     "labor_price": 480000.0,
     "total_unit_price": 2130000.0,
-    "primary_grade": "표준",
-    "lookup_key": "sliding_door|표준",
-    "secondary_key": "표준|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-SD-004",
@@ -2108,9 +1896,7 @@
     "material_price": 1950000.0,
     "labor_price": 520000.0,
     "total_unit_price": 2470000.0,
-    "primary_grade": "표준",
-    "lookup_key": "sliding_door|표준",
-    "secondary_key": "표준|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-SD-005",
@@ -2128,9 +1914,7 @@
     "material_price": 2800000.0,
     "labor_price": 650000.0,
     "total_unit_price": 3450000.0,
-    "primary_grade": "고급",
-    "lookup_key": "sliding_door|고급",
-    "secondary_key": "고급|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-GF-001",
@@ -2148,9 +1932,7 @@
     "material_price": 480000.0,
     "labor_price": 180000.0,
     "total_unit_price": 660000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "general_furniture|가성비",
-    "secondary_key": "현관장|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-GF-002",
@@ -2168,9 +1950,7 @@
     "material_price": 1250000.0,
     "labor_price": 280000.0,
     "total_unit_price": 1530000.0,
-    "primary_grade": "표준",
-    "lookup_key": "general_furniture|표준",
-    "secondary_key": "현관장|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-GF-003",
@@ -2187,9 +1967,7 @@
     "material_price": 850000.0,
     "labor_price": 220000.0,
     "total_unit_price": 1070000.0,
-    "primary_grade": "표준",
-    "lookup_key": "general_furniture|표준",
-    "secondary_key": "현관장|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-GF-004",
@@ -2206,9 +1984,7 @@
     "material_price": 1650000.0,
     "labor_price": 350000.0,
     "total_unit_price": 2000000.0,
-    "primary_grade": "표준",
-    "lookup_key": "general_furniture|표준",
-    "secondary_key": "거실|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-GF-005",
@@ -2226,9 +2002,7 @@
     "material_price": 2200000.0,
     "labor_price": 420000.0,
     "total_unit_price": 2620000.0,
-    "primary_grade": "고급",
-    "lookup_key": "general_furniture|고급",
-    "secondary_key": "현관장|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-GF-006",
@@ -2245,9 +2019,7 @@
     "material_price": 3500000.0,
     "labor_price": 580000.0,
     "total_unit_price": 4080000.0,
-    "primary_grade": "고급",
-    "lookup_key": "general_furniture|고급",
-    "secondary_key": "거실|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-LD-001",
@@ -2265,9 +2037,7 @@
     "material_price": 5000.0,
     "labor_price": 3000.0,
     "total_unit_price": 8000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "lighting_downlight|가성비",
-    "secondary_key": "2인치|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-LD-002",
@@ -2285,9 +2055,7 @@
     "material_price": 8000.0,
     "labor_price": 4000.0,
     "total_unit_price": 12000.0,
-    "primary_grade": "표준",
-    "lookup_key": "lighting_downlight|표준",
-    "secondary_key": "2인치|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-LD-003",
@@ -2305,9 +2073,7 @@
     "material_price": 13000.0,
     "labor_price": 5000.0,
     "total_unit_price": 18000.0,
-    "primary_grade": "고급",
-    "lookup_key": "lighting_downlight|고급",
-    "secondary_key": "2인치|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-LV-001",
@@ -2325,9 +2091,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비",
-    "lookup_key": "lighting_indirect_living|가성비",
-    "secondary_key": "간접|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-LV-002",
@@ -2345,9 +2109,7 @@
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "표준",
-    "lookup_key": "lighting_indirect_living|표준",
-    "secondary_key": "간접|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-LV-003",
@@ -2365,9 +2127,7 @@
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급",
-    "lookup_key": "lighting_indirect_living|고급",
-    "secondary_key": "간접|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-LH-001",
@@ -2385,9 +2145,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비",
-    "lookup_key": "lighting_indirect_bath|가성비",
-    "secondary_key": "간접|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-LH-002",
@@ -2405,9 +2163,7 @@
     "material_price": 90000.0,
     "labor_price": 60000.0,
     "total_unit_price": 150000.0,
-    "primary_grade": "표준",
-    "lookup_key": "lighting_indirect_bath|표준",
-    "secondary_key": "간접|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-LH-003",
@@ -2425,9 +2181,7 @@
     "material_price": 90000.0,
     "labor_price": 60000.0,
     "total_unit_price": 150000.0,
-    "primary_grade": "고급",
-    "lookup_key": "lighting_indirect_bath|고급",
-    "secondary_key": "간접|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-LE-001",
@@ -2445,9 +2199,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비",
-    "lookup_key": "lighting_magnetic_living|가성비",
-    "secondary_key": "마그네틱|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-LE-002",
@@ -2465,9 +2217,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "표준",
-    "lookup_key": "lighting_magnetic_living|표준",
-    "secondary_key": "마그네틱|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-LE-003",
@@ -2485,9 +2235,7 @@
     "material_price": 600000.0,
     "labor_price": 400000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "고급",
-    "lookup_key": "lighting_magnetic_living|고급",
-    "secondary_key": "마그네틱|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-LF-001",
@@ -2505,9 +2253,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "가성비",
-    "lookup_key": "lighting_magnetic_kitchen|가성비",
-    "secondary_key": "마그네틱|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-LF-002",
@@ -2525,9 +2271,7 @@
     "material_price": 0.0,
     "labor_price": 0.0,
     "total_unit_price": 0.0,
-    "primary_grade": "표준",
-    "lookup_key": "lighting_magnetic_kitchen|표준",
-    "secondary_key": "마그네틱|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-LF-003",
@@ -2545,9 +2289,7 @@
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급",
-    "lookup_key": "lighting_magnetic_kitchen|고급",
-    "secondary_key": "마그네틱|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-WD-001",
@@ -2565,9 +2307,7 @@
     "material_price": 145000.0,
     "labor_price": 80000.0,
     "total_unit_price": 225000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "window|가성비",
-    "secondary_key": "PVC|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-WD-002",
@@ -2585,9 +2325,7 @@
     "material_price": 200000.0,
     "labor_price": 90000.0,
     "total_unit_price": 290000.0,
-    "primary_grade": "표준",
-    "lookup_key": "window|표준",
-    "secondary_key": "PVC|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-WD-003",
@@ -2604,9 +2342,7 @@
     "material_price": 245000.0,
     "labor_price": 100000.0,
     "total_unit_price": 345000.0,
-    "primary_grade": "표준",
-    "lookup_key": "window|표준",
-    "secondary_key": "PVC|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-WD-004",
@@ -2624,9 +2360,7 @@
     "material_price": 400000.0,
     "labor_price": 100000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급",
-    "lookup_key": "window|고급",
-    "secondary_key": "알루미늄|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-AC-001",
@@ -2644,9 +2378,7 @@
     "material_price": 850000.0,
     "labor_price": 280000.0,
     "total_unit_price": 1130000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "aircon|가성비",
-    "secondary_key": "벽걸이|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-AC-002",
@@ -2664,9 +2396,7 @@
     "material_price": 1650000.0,
     "labor_price": 550000.0,
     "total_unit_price": 2200000.0,
-    "primary_grade": "표준",
-    "lookup_key": "aircon|표준",
-    "secondary_key": "천장형|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-AC-003",
@@ -2684,9 +2414,7 @@
     "material_price": 2200000.0,
     "labor_price": 700000.0,
     "total_unit_price": 2900000.0,
-    "primary_grade": "고급",
-    "lookup_key": "aircon|고급",
-    "secondary_key": "천장형|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-AO-001",
@@ -2704,9 +2432,7 @@
     "material_price": 1200000.0,
     "labor_price": 250000.0,
     "total_unit_price": 1450000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "aircon_outdoor|가성비",
-    "secondary_key": "보급|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-AO-002",
@@ -2724,9 +2450,7 @@
     "material_price": 1800000.0,
     "labor_price": 320000.0,
     "total_unit_price": 2120000.0,
-    "primary_grade": "표준",
-    "lookup_key": "aircon_outdoor|표준",
-    "secondary_key": "표준|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-AO-003",
@@ -2744,9 +2468,7 @@
     "material_price": 2500000.0,
     "labor_price": 380000.0,
     "total_unit_price": 2880000.0,
-    "primary_grade": "고급",
-    "lookup_key": "aircon_outdoor|고급",
-    "secondary_key": "고급|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-CL-001",
@@ -2764,9 +2486,7 @@
     "material_price": 480000.0,
     "labor_price": 180000.0,
     "total_unit_price": 660000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "closet|가성비",
-    "secondary_key": "사제|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-CL-002",
@@ -2784,9 +2504,7 @@
     "material_price": 720000.0,
     "labor_price": 220000.0,
     "total_unit_price": 940000.0,
-    "primary_grade": "표준",
-    "lookup_key": "closet|표준",
-    "secondary_key": "한샘|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-CL-003",
@@ -2803,9 +2521,7 @@
     "material_price": 950000.0,
     "labor_price": 280000.0,
     "total_unit_price": 1230000.0,
-    "primary_grade": "표준",
-    "lookup_key": "closet|표준",
-    "secondary_key": "리바트|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-CL-004",
@@ -2823,9 +2539,7 @@
     "material_price": 1450000.0,
     "labor_price": 380000.0,
     "total_unit_price": 1830000.0,
-    "primary_grade": "고급",
-    "lookup_key": "closet|고급",
-    "secondary_key": "한샘|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-CF-001",
@@ -2843,9 +2557,7 @@
     "material_price": 150000.0,
     "labor_price": 150000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "ceiling_fan|가성비",
-    "secondary_key": "일반|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-CF-002",
@@ -2863,9 +2575,7 @@
     "material_price": 580000.0,
     "labor_price": 150000.0,
     "total_unit_price": 730000.0,
-    "primary_grade": "표준",
-    "lookup_key": "ceiling_fan|표준",
-    "secondary_key": "브랜드|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-CF-003",
@@ -2883,9 +2593,7 @@
     "material_price": 950000.0,
     "labor_price": 180000.0,
     "total_unit_price": 1130000.0,
-    "primary_grade": "고급",
-    "lookup_key": "ceiling_fan|고급",
-    "secondary_key": "디자인|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-CB-001",
@@ -2903,9 +2611,7 @@
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "carpentry_base|가성비",
-    "secondary_key": "기본|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-CB-002",
@@ -2923,9 +2629,7 @@
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "표준",
-    "lookup_key": "carpentry_base|표준",
-    "secondary_key": "기본|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-CB-003",
@@ -2943,9 +2647,7 @@
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "고급",
-    "lookup_key": "carpentry_base|고급",
-    "secondary_key": "기본|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-CC-001",
@@ -2963,9 +2665,7 @@
     "material_price": 0.0,
     "labor_price": 12085.0,
     "total_unit_price": 12085.0,
-    "primary_grade": "가성비",
-    "lookup_key": "carpentry_ceiling|가성비",
-    "secondary_key": "천정|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-CC-002",
@@ -2983,9 +2683,7 @@
     "material_price": 0.0,
     "labor_price": 12085.0,
     "total_unit_price": 12085.0,
-    "primary_grade": "표준",
-    "lookup_key": "carpentry_ceiling|표준",
-    "secondary_key": "천정|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-CC-003",
@@ -3003,9 +2701,7 @@
     "material_price": 0.0,
     "labor_price": 12085.0,
     "total_unit_price": 12085.0,
-    "primary_grade": "고급",
-    "lookup_key": "carpentry_ceiling|고급",
-    "secondary_key": "천정|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-CN-001",
@@ -3023,9 +2719,7 @@
     "material_price": 0.0,
     "labor_price": 18127.0,
     "total_unit_price": 18127.0,
-    "primary_grade": "가성비",
-    "lookup_key": "carpentry_partition|가성비",
-    "secondary_key": "가벽|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-CN-002",
@@ -3043,9 +2737,7 @@
     "material_price": 0.0,
     "labor_price": 18127.0,
     "total_unit_price": 18127.0,
-    "primary_grade": "표준",
-    "lookup_key": "carpentry_partition|표준",
-    "secondary_key": "가벽|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-CN-003",
@@ -3063,9 +2755,7 @@
     "material_price": 0.0,
     "labor_price": 18127.0,
     "total_unit_price": 18127.0,
-    "primary_grade": "고급",
-    "lookup_key": "carpentry_partition|고급",
-    "secondary_key": "가벽|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-VT-001",
@@ -3083,9 +2773,7 @@
     "material_price": 8000.0,
     "labor_price": 0.0,
     "total_unit_price": 8000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "balcony_floor_tile|가성비",
-    "secondary_key": "300각|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-VT-002",
@@ -3103,9 +2791,7 @@
     "material_price": 15000.0,
     "labor_price": 0.0,
     "total_unit_price": 15000.0,
-    "primary_grade": "표준",
-    "lookup_key": "balcony_floor_tile|표준",
-    "secondary_key": "600각|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-VT-003",
@@ -3123,9 +2809,7 @@
     "material_price": 35000.0,
     "labor_price": 0.0,
     "total_unit_price": 35000.0,
-    "primary_grade": "고급",
-    "lookup_key": "balcony_floor_tile|고급",
-    "secondary_key": "600각|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-VP-001",
@@ -3143,9 +2827,7 @@
     "material_price": 8000.0,
     "labor_price": 9000.0,
     "total_unit_price": 17000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "balcony_paint|가성비",
-    "secondary_key": "수성일반|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-VP-002",
@@ -3163,9 +2845,7 @@
     "material_price": 25000.0,
     "labor_price": 16000.0,
     "total_unit_price": 41000.0,
-    "primary_grade": "표준",
-    "lookup_key": "balcony_paint|표준",
-    "secondary_key": "친환경수성|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-VP-003",
@@ -3183,9 +2863,7 @@
     "material_price": 60000.0,
     "labor_price": 28000.0,
     "total_unit_price": 88000.0,
-    "primary_grade": "고급",
-    "lookup_key": "balcony_paint|고급",
-    "secondary_key": "프리미엄|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-ES-001",
@@ -3203,9 +2881,7 @@
     "material_price": 4500.0,
     "labor_price": 4500.0,
     "total_unit_price": 9000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "electrical_switch|가성비",
-    "secondary_key": "국산|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-ES-002",
@@ -3223,9 +2899,7 @@
     "material_price": 14000.0,
     "labor_price": 9000.0,
     "total_unit_price": 23000.0,
-    "primary_grade": "표준",
-    "lookup_key": "electrical_switch|표준",
-    "secondary_key": "르그랑|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-ES-003",
@@ -3243,9 +2917,7 @@
     "material_price": 32000.0,
     "labor_price": 12000.0,
     "total_unit_price": 44000.0,
-    "primary_grade": "고급",
-    "lookup_key": "electrical_switch|고급",
-    "secondary_key": "JUNG|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-IN-001",
@@ -3263,9 +2935,7 @@
     "material_price": 200000.0,
     "labor_price": 300000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "induction_line|가성비",
-    "secondary_key": "기본|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-IN-002",
@@ -3283,9 +2953,7 @@
     "material_price": 200000.0,
     "labor_price": 300000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "표준",
-    "lookup_key": "induction_line|표준",
-    "secondary_key": "기본|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-IN-003",
@@ -3303,9 +2971,7 @@
     "material_price": 200000.0,
     "labor_price": 300000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급",
-    "lookup_key": "induction_line|고급",
-    "secondary_key": "기본|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-EX-001",
@@ -3323,9 +2989,7 @@
     "material_price": 70000.0,
     "labor_price": 50000.0,
     "total_unit_price": 120000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "expansion|가성비",
-    "secondary_key": "기본|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-EX-002",
@@ -3343,9 +3007,7 @@
     "material_price": 90000.0,
     "labor_price": 70000.0,
     "total_unit_price": 160000.0,
-    "primary_grade": "표준",
-    "lookup_key": "expansion|표준",
-    "secondary_key": "표준|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-EX-003",
@@ -3363,9 +3025,7 @@
     "material_price": 120000.0,
     "labor_price": 100000.0,
     "total_unit_price": 220000.0,
-    "primary_grade": "고급",
-    "lookup_key": "expansion|고급",
-    "secondary_key": "고급|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-DM-001",
@@ -3383,9 +3043,7 @@
     "material_price": 6500.0,
     "labor_price": 0.0,
     "total_unit_price": 6500.0,
-    "primary_grade": "가성비",
-    "lookup_key": "base_work|가성비",
-    "secondary_key": "철거|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-DM-002",
@@ -3403,9 +3061,7 @@
     "material_price": 8000.0,
     "labor_price": 0.0,
     "total_unit_price": 8000.0,
-    "primary_grade": "표준",
-    "lookup_key": "base_work|표준",
-    "secondary_key": "철거|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-DM-003",
@@ -3423,9 +3079,7 @@
     "material_price": 10000.0,
     "labor_price": 0.0,
     "total_unit_price": 10000.0,
-    "primary_grade": "고급",
-    "lookup_key": "base_work|고급",
-    "secondary_key": "철거|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-IS-001",
@@ -3443,9 +3097,7 @@
     "material_price": 9000.0,
     "labor_price": 6000.0,
     "total_unit_price": 15000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "insulation|가성비",
-    "secondary_key": "30T 글라스울|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-IS-002",
@@ -3463,9 +3115,7 @@
     "material_price": 20000.0,
     "labor_price": 10000.0,
     "total_unit_price": 30000.0,
-    "primary_grade": "표준",
-    "lookup_key": "insulation|표준",
-    "secondary_key": "50T 발포단열|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-IS-003",
@@ -3483,9 +3133,7 @@
     "material_price": 22000.0,
     "labor_price": 11000.0,
     "total_unit_price": 33000.0,
-    "primary_grade": "고급",
-    "lookup_key": "insulation|고급",
-    "secondary_key": "70T 경질우레탄|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-EP-001",
@@ -3503,9 +3151,7 @@
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "기타|가성비",
-    "secondary_key": "구청 확장공사 신고|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-EP-002",
@@ -3523,9 +3169,7 @@
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "표준",
-    "lookup_key": "기타|표준",
-    "secondary_key": "구청 확장공사 신고|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-EP-003",
@@ -3543,9 +3187,7 @@
     "material_price": 0.0,
     "labor_price": 1000000.0,
     "total_unit_price": 1000000.0,
-    "primary_grade": "고급",
-    "lookup_key": "기타|고급",
-    "secondary_key": "구청 확장공사 신고|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-EB-001",
@@ -3563,9 +3205,7 @@
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "가성비",
-    "lookup_key": "electrical_base|가성비",
-    "secondary_key": "기본공사|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-EB-002",
@@ -3583,9 +3223,7 @@
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "표준",
-    "lookup_key": "electrical_base|표준",
-    "secondary_key": "기본공사|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-EB-003",
@@ -3603,9 +3241,7 @@
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "고급",
-    "lookup_key": "electrical_base|고급",
-    "secondary_key": "기본공사|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-PB-001",
@@ -3623,9 +3259,7 @@
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "가성비",
-    "lookup_key": "plumbing_base|가성비",
-    "secondary_key": "기본공사|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-PB-002",
@@ -3643,9 +3277,7 @@
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "표준",
-    "lookup_key": "plumbing_base|표준",
-    "secondary_key": "기본공사|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-PB-003",
@@ -3663,9 +3295,7 @@
     "material_price": 3000.0,
     "labor_price": 3042.0,
     "total_unit_price": 6042.0,
-    "primary_grade": "고급",
-    "lookup_key": "plumbing_base|고급",
-    "secondary_key": "기본공사|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-DP-001",
@@ -3683,9 +3313,7 @@
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "distribution_panel|가성비",
-    "secondary_key": "분배기|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-DP-002",
@@ -3703,9 +3331,7 @@
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "표준",
-    "lookup_key": "distribution_panel|표준",
-    "secondary_key": "분배기|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-DP-003",
@@ -3723,9 +3349,7 @@
     "material_price": 300000.0,
     "labor_price": 200000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급",
-    "lookup_key": "distribution_panel|고급",
-    "secondary_key": "분배기|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-PR-001",
@@ -3743,9 +3367,7 @@
     "material_price": 100000.0,
     "labor_price": 400000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "plumbing_relocation|가성비",
-    "secondary_key": "배관변경|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-PR-002",
@@ -3763,9 +3385,7 @@
     "material_price": 100000.0,
     "labor_price": 400000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "표준",
-    "lookup_key": "plumbing_relocation|표준",
-    "secondary_key": "배관변경|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-PR-003",
@@ -3783,9 +3403,7 @@
     "material_price": 100000.0,
     "labor_price": 400000.0,
     "total_unit_price": 500000.0,
-    "primary_grade": "고급",
-    "lookup_key": "plumbing_relocation|고급",
-    "secondary_key": "배관변경|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-TR-001",
@@ -3803,9 +3421,7 @@
     "material_price": 50000.0,
     "labor_price": 30000.0,
     "total_unit_price": 80000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "thermostat|가성비",
-    "secondary_key": "일반 디지털|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-TR-002",
@@ -3823,9 +3439,7 @@
     "material_price": 150000.0,
     "labor_price": 50000.0,
     "total_unit_price": 200000.0,
-    "primary_grade": "표준",
-    "lookup_key": "thermostat|표준",
-    "secondary_key": "스마트 디지털|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-TR-003",
@@ -3843,9 +3457,7 @@
     "material_price": 350000.0,
     "labor_price": 80000.0,
     "total_unit_price": 430000.0,
-    "primary_grade": "고급",
-    "lookup_key": "thermostat|고급",
-    "secondary_key": "IoT 통합|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-SI-LAB-001",
@@ -3863,9 +3475,7 @@
     "material_price": 0.0,
     "labor_price": 250000.0,
     "total_unit_price": 250000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "silicon_labor|가성비",
-    "secondary_key": "저가 인건|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-SI-LAB-002",
@@ -3883,9 +3493,7 @@
     "material_price": 0.0,
     "labor_price": 400000.0,
     "total_unit_price": 400000.0,
-    "primary_grade": "표준",
-    "lookup_key": "silicon_labor|표준",
-    "secondary_key": "표준 인건|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-SI-LAB-003",
@@ -3903,9 +3511,7 @@
     "material_price": 0.0,
     "labor_price": 550000.0,
     "total_unit_price": 550000.0,
-    "primary_grade": "고급",
-    "lookup_key": "silicon_labor|고급",
-    "secondary_key": "고급 인건|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-SI-MAT-001",
@@ -3923,9 +3529,7 @@
     "material_price": 100000.0,
     "labor_price": 0.0,
     "total_unit_price": 100000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "silicon_bio|가성비",
-    "secondary_key": "영진 일반|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-SI-MAT-002",
@@ -3943,9 +3547,7 @@
     "material_price": 135000.0,
     "labor_price": 0.0,
     "total_unit_price": 135000.0,
-    "primary_grade": "표준",
-    "lookup_key": "silicon_bio|표준",
-    "secondary_key": "영진 바이오|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-SI-MAT-003",
@@ -3963,9 +3565,7 @@
     "material_price": 175000.0,
     "labor_price": 0.0,
     "total_unit_price": 175000.0,
-    "primary_grade": "고급",
-    "lookup_key": "silicon_bio|고급",
-    "secondary_key": "모멘티브 토씰 83|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-SI-MOD-001",
@@ -3983,9 +3583,7 @@
     "material_price": 52500.0,
     "labor_price": 0.0,
     "total_unit_price": 52500.0,
-    "primary_grade": "가성비",
-    "lookup_key": "silicon_modified|가성비",
-    "secondary_key": "영진 비초산|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-SI-MOD-002",
@@ -4003,9 +3601,7 @@
     "material_price": 72500.0,
     "labor_price": 0.0,
     "total_unit_price": 72500.0,
-    "primary_grade": "표준",
-    "lookup_key": "silicon_modified|표준",
-    "secondary_key": "영진 변성|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-SI-MOD-003",
@@ -4023,9 +3619,7 @@
     "material_price": 92500.0,
     "labor_price": 0.0,
     "total_unit_price": 92500.0,
-    "primary_grade": "고급",
-    "lookup_key": "silicon_modified|고급",
-    "secondary_key": "Dow 변성|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-ETC-001",
@@ -4043,9 +3637,7 @@
     "material_price": 200000.0,
     "labor_price": 400000.0,
     "total_unit_price": 600000.0,
-    "primary_grade": "단일등급",
-    "lookup_key": "기타|단일등급",
-    "secondary_key": "엘리베이터 보양|단일등급"
+    "primary_grade": "단일등급"
   },
   {
     "material_id": "MAT-ETC-002",
@@ -4063,9 +3655,7 @@
     "material_price": 0.0,
     "labor_price": 600000.0,
     "total_unit_price": 600000.0,
-    "primary_grade": "단일등급",
-    "lookup_key": "기타|단일등급",
-    "secondary_key": "주민동의서 징구|단일등급"
+    "primary_grade": "단일등급"
   },
   {
     "material_id": "MAT-ETC-003",
@@ -4083,9 +3673,7 @@
     "material_price": 5000.0,
     "labor_price": 15000.0,
     "total_unit_price": 20000.0,
-    "primary_grade": "단일등급",
-    "lookup_key": "기타|단일등급",
-    "secondary_key": "준공청소|단일등급"
+    "primary_grade": "단일등급"
   },
   {
     "material_id": "MAT-KT-001",
@@ -4103,9 +3691,7 @@
     "material_price": 850000.0,
     "labor_price": 300000.0,
     "total_unit_price": 1150000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "kitchen_furniture|가성비",
-    "secondary_key": "주방가구 세트|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-KT-002",
@@ -4123,9 +3709,7 @@
     "material_price": 1330000.0,
     "labor_price": 370000.0,
     "total_unit_price": 1700000.0,
-    "primary_grade": "표준",
-    "lookup_key": "kitchen_furniture|표준",
-    "secondary_key": "주방가구 세트|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-KT-003",
@@ -4143,9 +3727,7 @@
     "material_price": 1650000.0,
     "labor_price": 450000.0,
     "total_unit_price": 2100000.0,
-    "primary_grade": "고급",
-    "lookup_key": "kitchen_furniture|고급",
-    "secondary_key": "주방가구 세트|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-TD-001",
@@ -4163,9 +3745,7 @@
     "material_price": 800000.0,
     "labor_price": 400000.0,
     "total_unit_price": 1200000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "turning_door|가성비",
-    "secondary_key": "터닝도어|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-TD-002",
@@ -4183,9 +3763,7 @@
     "material_price": 1300000.0,
     "labor_price": 500000.0,
     "total_unit_price": 1800000.0,
-    "primary_grade": "표준",
-    "lookup_key": "turning_door|표준",
-    "secondary_key": "터닝도어|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-TD-003",
@@ -4203,9 +3781,7 @@
     "material_price": 2200000.0,
     "labor_price": 600000.0,
     "total_unit_price": 2800000.0,
-    "primary_grade": "고급",
-    "lookup_key": "turning_door|고급",
-    "secondary_key": "터닝도어|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-DF-001",
@@ -4223,9 +3799,7 @@
     "material_price": 70000.0,
     "labor_price": 70000.0,
     "total_unit_price": 140000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "door_replacement|가성비",
-    "secondary_key": "인테리어 필름|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-DF-002",
@@ -4243,9 +3817,7 @@
     "material_price": 120000.0,
     "labor_price": 100000.0,
     "total_unit_price": 220000.0,
-    "primary_grade": "표준",
-    "lookup_key": "door_replacement|표준",
-    "secondary_key": "인테리어 필름|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-DF-003",
@@ -4263,9 +3835,7 @@
     "material_price": 180000.0,
     "labor_price": 140000.0,
     "total_unit_price": 320000.0,
-    "primary_grade": "고급",
-    "lookup_key": "door_replacement|고급",
-    "secondary_key": "인테리어 필름|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-DR-001",
@@ -4283,9 +3853,7 @@
     "material_price": 250000.0,
     "labor_price": 200000.0,
     "total_unit_price": 450000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "door_replacement|가성비",
-    "secondary_key": "문틀 교체|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-DR-002",
@@ -4303,9 +3871,7 @@
     "material_price": 320000.0,
     "labor_price": 230000.0,
     "total_unit_price": 550000.0,
-    "primary_grade": "표준",
-    "lookup_key": "door_replacement|표준",
-    "secondary_key": "문틀 교체|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-DR-003",
@@ -4323,9 +3889,7 @@
     "material_price": 400000.0,
     "labor_price": 300000.0,
     "total_unit_price": 700000.0,
-    "primary_grade": "고급",
-    "lookup_key": "door_replacement|고급",
-    "secondary_key": "문틀 교체|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-DO-001",
@@ -4343,9 +3907,7 @@
     "material_price": 120000.0,
     "labor_price": 100000.0,
     "total_unit_price": 220000.0,
-    "primary_grade": "가성비",
-    "lookup_key": "door_replacement|가성비",
-    "secondary_key": "문짝 교체|가성비"
+    "primary_grade": "가성비"
   },
   {
     "material_id": "MAT-DO-002",
@@ -4363,9 +3925,7 @@
     "material_price": 180000.0,
     "labor_price": 120000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "표준",
-    "lookup_key": "door_replacement|표준",
-    "secondary_key": "문짝 교체|표준"
+    "primary_grade": "표준"
   },
   {
     "material_id": "MAT-DO-003",
@@ -4383,9 +3943,7 @@
     "material_price": 270000.0,
     "labor_price": 150000.0,
     "total_unit_price": 420000.0,
-    "primary_grade": "고급",
-    "lookup_key": "door_replacement|고급",
-    "secondary_key": "문짝 교체|고급"
+    "primary_grade": "고급"
   },
   {
     "material_id": "MAT-NL-001",
@@ -4403,9 +3961,7 @@
     "material_price": 20000.0,
     "labor_price": 30000.0,
     "total_unit_price": 50000.0,
-    "primary_grade": "단일등급",
-    "lookup_key": "door_replacement|단일등급",
-    "secondary_key": "무문선 목공 추가비|단일등급"
+    "primary_grade": "단일등급"
   },
   {
     "material_id": "MAT-NL-002",
@@ -4423,9 +3979,7 @@
     "material_price": 15000.0,
     "labor_price": 35000.0,
     "total_unit_price": 50000.0,
-    "primary_grade": "단일등급",
-    "lookup_key": "door_replacement|단일등급",
-    "secondary_key": "무문선 도배 추가비|단일등급"
+    "primary_grade": "단일등급"
   },
   {
     "material_id": "MAT-PH-001",
@@ -4443,8 +3997,6 @@
     "material_price": 200000.0,
     "labor_price": 100000.0,
     "total_unit_price": 300000.0,
-    "primary_grade": "단일등급",
-    "lookup_key": "plumbing_heating|단일등급",
-    "secondary_key": "난방배관 교체|단일등급"
+    "primary_grade": "단일등급"
   }
 ]

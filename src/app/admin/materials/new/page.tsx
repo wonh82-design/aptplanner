@@ -72,8 +72,6 @@ function NewMaterialForm() {
     labor_price: 0,
     total_unit_price: 0,
     primary_grade: '표준',
-    lookup_key: null,
-    secondary_key: null,
   });
 
   // 기존 자재 로드 → material_id 자동 생성 + 카테고리 옵션
@@ -310,15 +308,6 @@ function NewMaterialForm() {
           </Field>
           <Field label="합계 (자동 계산)" full>
             <input value={draft.total_unit_price.toLocaleString('ko-KR') + ' 원'} readOnly className="input bg-zinc-50 text-right tabular-nums font-bold" />
-          </Field>
-        </FieldGroup>
-
-        <FieldGroup title="lookup (비워두면 자동 생성)">
-          <Field label="lookup_key">
-            <input value={draft.lookup_key ?? ''} onChange={(e) => updateField('lookup_key', e.target.value || null)} className="input font-mono text-xs" placeholder="자동: {work_type}|{grade}" />
-          </Field>
-          <Field label="secondary_key">
-            <input value={draft.secondary_key ?? ''} onChange={(e) => updateField('secondary_key', e.target.value || null)} className="input font-mono text-xs" placeholder="예: 강마루|표준" />
           </Field>
         </FieldGroup>
 

@@ -322,16 +322,6 @@ function MaterialEditor({ materialId }: { materialId: string }) {
           </Field>
         </FieldGroup>
 
-        {/* 키 */}
-        <FieldGroup title="lookup (자동 생성 가능)">
-          <Field label="lookup_key">
-            <input value={draft.lookup_key ?? ''} onChange={(e) => updateField('lookup_key', e.target.value || null)} className="input font-mono text-xs" placeholder="예: flooring|표준" />
-          </Field>
-          <Field label="secondary_key">
-            <input value={draft.secondary_key ?? ''} onChange={(e) => updateField('secondary_key', e.target.value || null)} className="input font-mono text-xs" placeholder="예: 강마루|표준" />
-          </Field>
-        </FieldGroup>
-
         {/* 외부 링크 */}
         <FieldGroup title="외부 링크">
           <Field label="제조사 페이지 URL (자재 카드의 ↗ 버튼이 새 창으로 엶)" full>

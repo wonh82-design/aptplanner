@@ -76,12 +76,6 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       return s === '' ? null : s;
     };
 
-    // lookup_key 빈 칸 자동 생성
-    let lookupKey = String(m.lookup_key ?? '').trim();
-    if (!lookupKey && m.work_type && grade) {
-      lookupKey = `${String(m.work_type)}|${grade}`;
-    }
-
     // image_url 정규화
     let imageUrl: string | undefined;
     if (typeof m.image_url === 'string' && m.image_url.trim()) {
@@ -108,8 +102,6 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       labor_price: Number.isFinite(labPrice) ? labPrice : 0,
       total_unit_price: Number.isFinite(total) ? total : 0,
       primary_grade: VALID_GRADES.has(grade) ? grade as Material['primary_grade'] : '표준',
-      lookup_key: lookupKey || null,
-      secondary_key: nullable(m.secondary_key),
       ...(imageUrl ? { image_url: imageUrl } : {}),
       ...(vendorUrl ? { vendor_url: vendorUrl } : {}),
     };

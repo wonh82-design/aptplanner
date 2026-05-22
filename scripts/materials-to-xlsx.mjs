@@ -56,8 +56,6 @@ const COLUMNS = [
   'labor_price',
   'total_unit_price',
   'primary_grade',
-  'lookup_key',
-  'secondary_key',
   'image_url',      // Phase 1에서 추가된 필드
   'vendor_url',     // 제조사 페이지 URL (자재 카드의 ↗ 버튼)
 ];
@@ -97,8 +95,6 @@ const widths = [
   { wch: 12 },  // labor_price
   { wch: 14 },  // total_unit_price
   { wch: 10 },  // primary_grade
-  { wch: 22 },  // lookup_key
-  { wch: 22 },  // secondary_key
   { wch: 48 },  // image_url
   { wch: 48 },  // vendor_url
 ];
@@ -121,7 +117,6 @@ const readmeRows = [
   ['- tags 는 콤마 구분 (예: "표준,주력")'],
   ['- total_unit_price 는 material_price + labor_price 와 일치해야 함 (sync 시 검증)'],
   ['- primary_grade 는 가성비 / 표준 / 고급 / 단일등급 4가지 중 하나'],
-  ['- lookup_key 형식: "{work_type}|{primary_grade}" (예: "flooring|표준")'],
   ['- image_url 은 구글 드라이브 공유 링크 또는 일반 https URL (자동 변환 처리)'],
   ['- vendor_url 은 제조사 제품 페이지 URL — 자재 카드의 ↗ 버튼이 새 창으로 엶'],
   [''],

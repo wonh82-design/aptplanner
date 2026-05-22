@@ -15,8 +15,10 @@
  *   - material_id 중복 → 에러
  *   - primary_grade 유효 값(가성비/표준/고급/단일등급) → 에러
  *   - total_unit_price = material_price + labor_price → 에러 (±1원 허용)
- *   - lookup_key 형식 "{work_type}|{grade}" 자동 생성 (빈 칸이면 채워넣기)
  *   - tags 문자열 콤마 분리 → 배열
+ *
+ * 참고: 엑셀에 lookup_key / secondary_key 컬럼이 있어도 무시됨 (deprecated).
+ *       work_type + primary_grade + sub_category 에서 동적으로 계산 가능한 중복 필드라 제거됨.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -155,12 +157,6 @@ rows.forEach((r, idx) => {
     tags = String(r.tags).split(',').map((t) => t.trim()).filter(Boolean);
   }
 
-  // lookup_key 자동 생성 (빈 칸이면)
-  let lookupKey = String(r.lookup_key ?? '').trim();
-  if (!lookupKey && wt && grade) {
-    lookupKey = `${wt}|${grade}`;
-  }
-
   // image_url 정규화 (양끝 공백 제거)
   let imageUrl = r.image_url;
   if (typeof imageUrl === 'string') {
@@ -200,8 +196,6 @@ rows.forEach((r, idx) => {
     labor_price: labPrice,
     total_unit_price: total,
     primary_grade: grade,
-    lookup_key: lookupKey || null,
-    secondary_key: nullable(r.secondary_key),
     ...(imageUrl ? { image_url: imageUrl } : {}),
     ...(vendorUrl ? { vendor_url: vendorUrl } : {}),
   });
