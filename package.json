@@ -11,7 +11,8 @@
     "image-checklist": "node scripts/phase1-build-checklist.mjs",
     "materials:sync": "node scripts/materials-from-xlsx.mjs",
     "materials:export": "node scripts/materials-to-xlsx.mjs",
-    "materials:db:migrate": "node scripts/materials-to-db.mjs"
+    "materials:db:migrate": "node scripts/materials-to-db.mjs",
+    "images:migrate-to-blob": "node scripts/migrate-images-to-blob.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

@@ -14,6 +14,7 @@
  */
 
 import { useState } from 'react';
+import Image from 'next/image';
 import type { Grade, GradeGroup, Material } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
@@ -247,14 +248,15 @@ function MaterialImage({ url, alt, isDummy = false }: { url: string | null; alt:
 
   return (
     <div className="relative aspect-[4/3] bg-zinc-50 border-b border-zinc-200 overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={url}
         alt={alt}
-        loading="lazy"
+        fill
+        sizes="(max-width: 768px) 100vw, 33vw"
         onError={() => setErrored(true)}
-        className="w-full h-full object-cover"
+        className="object-cover"
         referrerPolicy="no-referrer"
+        unoptimized={url.includes('drive.google.com')}
       />
       {isDummy && (
         <span className="absolute top-1.5 left-1.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/90 text-white shadow-sm">

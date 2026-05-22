@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useMemo, useState } from 'react';
+import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
@@ -826,17 +827,20 @@ function MaterialCardImage({ url, alt, isDummy = false }: { url: string | null; 
 
   return (
     <div className="relative aspect-[4/3] bg-zinc-50 border-b border-zinc-200 overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={url}
         alt={alt}
-        loading="lazy"
+        fill
+        sizes="(max-width: 640px) 50vw, 240px"
         onError={() => setErrored(true)}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        className="object-cover group-hover:scale-105 transition-transform duration-300"
+        // Drive 등 외부 origin: referrer 차단으로 hotlink 회피
         referrerPolicy="no-referrer"
+        // 카드는 페이지에 동시에 여러 개 — 기본 lazy 그대로
+        unoptimized={url.includes('drive.google.com')}
       />
       {isDummy && (
-        <span className="absolute top-1 left-1 text-[7px] font-bold uppercase tracking-wider px-1 py-0 rounded bg-amber-500/90 text-white shadow-sm">
+        <span className="absolute top-1 left-1 text-[7px] font-bold uppercase tracking-wider px-1 py-0 rounded bg-amber-500/90 text-white shadow-sm z-10">
           샘플
         </span>
       )}

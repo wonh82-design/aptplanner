@@ -19,6 +19,7 @@ import type { Grade, Material } from '@/lib/types';
 import { normalizeImageUrl } from '@/lib/image-utils';
 import { AdminGate } from '../../AdminGate';
 import { useAdminToken } from '../../useAdminToken';
+import { ImageUploadField } from '../../ImageUploadField';
 
 const GRADES: Grade[] = [
   '가성비 추천', '가성비',
@@ -320,28 +321,18 @@ function NewMaterialForm() {
         </FieldGroup>
 
         <FieldGroup title="이미지">
-          <Field label="image_url (구글 드라이브 공유 링크 또는 일반 URL)" full>
-            <input
-              value={draft.image_url ?? ''}
-              onChange={(e) => updateField('image_url', e.target.value || undefined)}
-              className="input"
-              placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
+          <div className="sm:col-span-2">
+            <ImageUploadField
+              value={draft.image_url ?? null}
+              onChange={(next) => updateField('image_url', next ?? undefined)}
+              materialId={draft.material_id}
+              token={token}
+              onUnauthorized={() => setToken(null)}
             />
-          </Field>
-          {previewImageUrl && (
-            <div className="sm:col-span-2 rounded-lg border border-zinc-200 overflow-hidden bg-zinc-50">
-              <div className="aspect-[4/3] max-w-md mx-auto">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={previewImageUrl}
-                  alt={(draft.brand ?? '') + ' ' + (draft.product_line ?? '')}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-                />
-              </div>
-            </div>
-          )}
+            <p className="mt-2 text-[10px] text-zinc-500 leading-relaxed">
+              📤 파일 업로드 (권장) 또는 외부 URL 직접 입력. 업로드한 파일은 Vercel Blob 에 저장됩니다.
+            </p>
+          </div>
         </FieldGroup>
       </div>
     </div>

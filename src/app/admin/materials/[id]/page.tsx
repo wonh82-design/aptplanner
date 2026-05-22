@@ -22,6 +22,7 @@ import type { Grade, Material } from '@/lib/types';
 import { normalizeImageUrl } from '@/lib/image-utils';
 import { AdminGate } from '../../AdminGate';
 import { useAdminToken } from '../../useAdminToken';
+import { ImageUploadField } from '../../ImageUploadField';
 
 const GRADES: Grade[] = [
   '가성비 추천', '가성비',
@@ -334,44 +335,25 @@ function MaterialEditor({ materialId }: { materialId: string }) {
 
         {/* 이미지 */}
         <FieldGroup title="이미지">
-          <Field label="image_url (구글 드라이브 공유 링크 또는 일반 URL)" full>
-            <input
-              value={draft.image_url ?? ''}
-              onChange={(e) => updateField('image_url', e.target.value || undefined)}
-              className="input"
-              placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
+          <div className="sm:col-span-2">
+            <ImageUploadField
+              value={draft.image_url ?? null}
+              onChange={(next) => updateField('image_url', next ?? undefined)}
+              materialId={draft.material_id}
+              token={token}
+              onUnauthorized={() => setToken(null)}
             />
-            <p className="mt-1 text-[10px] text-zinc-500 leading-relaxed">
-              구글 드라이브 공유 링크 그대로 붙여넣어도 자동 변환됩니다.
-              {previewImageUrl && (
+            <p className="mt-2 text-[10px] text-zinc-500 leading-relaxed">
+              📤 <strong>파일 업로드</strong>: 권장. Vercel Blob 에 저장되어 즉시 운영 반영.<br />
+              🔗 <strong>URL 직접 입력</strong>: 구글 드라이브 공유 링크도 자동 변환되어 표시됨.
+              {previewImageUrl && draft.image_url && draft.image_url.includes('drive.google.com') && (
                 <>
                   <br />
-                  정규화 URL: <span className="font-mono text-[10px] break-all">{previewImageUrl}</span>
+                  <span className="text-amber-700">⚠️ Drive URL 은 호스팅 안정성이 낮아요. 파일 업로드로 교체 권장.</span>
                 </>
               )}
             </p>
-          </Field>
-          {/* 이미지 미리보기 */}
-          {previewImageUrl ? (
-            <div className="sm:col-span-2 rounded-lg border border-zinc-200 overflow-hidden bg-zinc-50">
-              <div className="aspect-[4/3] max-w-md mx-auto">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={previewImageUrl}
-                  alt={draft.brand + ' ' + draft.product_line}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="sm:col-span-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 p-6 text-center text-xs text-zinc-400">
-              이미지 URL을 입력하면 여기에 미리보기가 표시됩니다.
-            </div>
-          )}
+          </div>
         </FieldGroup>
       </div>
     </div>
