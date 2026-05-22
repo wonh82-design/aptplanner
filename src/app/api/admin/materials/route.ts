@@ -90,9 +90,9 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
 
     const cleaned_row: Material = {
       material_id: id,
-      work_type: String(m.work_type ?? '').trim(),
+      // sub_category 는 세부공종 (시스템 내부 ID, 구 work_type)
+      sub_category: String(m.sub_category ?? m.work_type ?? '').trim(),
       category: nullable(m.category),
-      sub_category: nullable(m.sub_category),
       brand: nullable(m.brand),
       product_line: nullable(m.product_line),
       installer_spec: nullable(m.installer_spec),

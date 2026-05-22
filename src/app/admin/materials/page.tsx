@@ -122,7 +122,7 @@ function MaterialsList() {
       if (onlyMissingImage && m.image_url) return false;
       if (q) {
         const hay = [
-          m.material_id, m.work_type, m.brand, m.product_line, m.installer_spec, m.sub_category,
+          m.material_id, m.sub_category, m.brand, m.product_line, m.installer_spec,
         ].filter(Boolean).join(' ').toLowerCase();
         if (!hay.includes(q)) return false;
       }
@@ -152,7 +152,7 @@ function MaterialsList() {
           cmp = (GRADE_ORDER[a.primary_grade] ?? 99) - (GRADE_ORDER[b.primary_grade] ?? 99);
           break;
         case 'work_type':
-          cmp = a.work_type.localeCompare(b.work_type);
+          cmp = a.sub_category.localeCompare(b.sub_category);
           break;
         case 'brand':
           cmp = (a.brand ?? '').localeCompare(b.brand ?? '')
@@ -323,7 +323,7 @@ function MaterialsList() {
                 <tr key={m.material_id} className="hover:bg-blue-50/30">
                   <td className="px-3 py-2 font-mono text-[10px] text-zinc-500">{m.material_id}</td>
                   <td className="px-3 py-2 text-zinc-700">{m.category ?? '—'}</td>
-                  <td className="px-3 py-2 text-zinc-700">{m.work_type}</td>
+                  <td className="px-3 py-2 text-zinc-700">{m.sub_category}</td>
                   <td className="px-3 py-2">
                     <GradeBadge grade={m.primary_grade} />
                   </td>

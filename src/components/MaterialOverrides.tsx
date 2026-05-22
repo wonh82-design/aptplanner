@@ -152,7 +152,7 @@ export function MaterialOverrides({
    * overrides[wt]도 그 자재의 등급 그룹으로 설정해서 UI 등급 표시 일관성 유지.
    */
   function setMaterial(material: Material) {
-    const wt = material.work_type;
+    const wt = material.sub_category;
     const group = gradeGroupOf(material.primary_grade as Grade);
     const overrides = { ...value.overrides, [wt]: group };
     const matOv = { ...value.material_overrides, [wt]: material.material_id };

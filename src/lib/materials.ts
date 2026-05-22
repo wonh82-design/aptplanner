@@ -32,7 +32,7 @@ function rebuildIndexes() {
     // 그룹 단위로 인덱싱 — 사용자는 GradeGroup(4가지) 단위로 선택하기 때문.
     // "가성비 추천" + "가성비" 둘 다 key="flooring|가성비" 로 들어감.
     const group = gradeGroupOf(m.primary_grade as Grade);
-    const k = `${m.work_type}|${group}`;
+    const k = `${m.sub_category}|${group}`;
     const arr = byKey.get(k) || [];
     arr.push(m);
     byKey.set(k, arr);
@@ -80,7 +80,7 @@ export function getPrimaryMaterial(workType: string, group: GradeGroup): Materia
   const single = byKey.get(`${workType}|단일등급`) ?? [];
   if (single.length > 0) return single[0];
   // 4. 등급 무관 폴백
-  for (const m of ALL_MATERIALS) if (m.work_type === workType) return m;
+  for (const m of ALL_MATERIALS) if (m.sub_category === workType) return m;
   return null;
 }
 
@@ -88,14 +88,14 @@ export function getPrimaryMaterial(workType: string, group: GradeGroup): Materia
 export function gradeOptionsFor(workType: string): GradeGroup[] {
   const set = new Set<GradeGroup>();
   for (const m of ALL_MATERIALS) {
-    if (m.work_type === workType) set.add(gradeGroupOf(m.primary_grade as Grade));
+    if (m.sub_category === workType) set.add(gradeGroupOf(m.primary_grade as Grade));
   }
   return Array.from(set);
 }
 
-/** 해당 공종의 모든 자재 (등급그룹순 → 추천우선 → sub_category순 정렬) */
+/** 해당 세부공종의 모든 자재 (등급그룹순 → 추천우선 → brand 순 정렬) */
 export function materialsFor(workType: string): Material[] {
-  const list = ALL_MATERIALS.filter((m) => m.work_type === workType);
+  const list = ALL_MATERIALS.filter((m) => m.sub_category === workType);
   const groupOrder: Record<string, number> = { '가성비': 0, '표준': 1, '고급': 2, '단일등급': 3 };
   return list.slice().sort((a, b) => {
     const ga = groupOrder[gradeGroupOf(a.primary_grade as Grade)] ?? 99;
@@ -105,7 +105,7 @@ export function materialsFor(workType: string): Material[] {
     const ra = isRecommendedGrade(a.primary_grade as Grade) ? 0 : 1;
     const rb = isRecommendedGrade(b.primary_grade as Grade) ? 0 : 1;
     if (ra !== rb) return ra - rb;
-    return (a.sub_category ?? '').localeCompare(b.sub_category ?? '');
+    return (a.brand ?? '').localeCompare(b.brand ?? '');
   });
 }
 

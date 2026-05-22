@@ -46,9 +46,18 @@ export type BathId = '공용욕실' | '부부욕실';
 /** 자재마스터 1행 */
 export type Material = {
   material_id: string;
-  work_type: string;
+  /**
+   * 세부공종 (sub_category) — 시스템 내부 ID.
+   * 예: 'flooring', 'wallpaper', 'bath_tile', 'window' 등.
+   * 계산기·UI 라우팅·번들 매핑의 키. UI 에는 "세부공종" 으로 표시.
+   * (구 work_type 의 새 이름)
+   */
+  sub_category: string;
+  /**
+   * 대공종 (category) — 사람이 읽는 한글 분류.
+   * 예: '마루', '도배', '타일', '샷시'. nullable.
+   */
   category: string | null;
-  sub_category: string | null;
   brand: string | null;
   product_line: string | null;
   installer_spec: string | null;     // 시공자용 풀스펙

@@ -257,7 +257,7 @@ function MaterialEditor({ materialId }: { materialId: string }) {
             <input value={draft.material_id} readOnly className="input bg-zinc-50 font-mono text-xs" />
           </Field>
           <Field label="세부공종">
-            <input value={draft.work_type} onChange={(e) => updateField('work_type', e.target.value)} className="input font-mono" />
+            <input value={draft.sub_category} onChange={(e) => updateField('sub_category', e.target.value)} className="input font-mono" />
           </Field>
           <Field label="대공종">
             <input
@@ -270,9 +270,6 @@ function MaterialEditor({ materialId }: { materialId: string }) {
             <datalist id="category-options">
               {categoryOptions.map((c) => <option key={c} value={c} />)}
             </datalist>
-          </Field>
-          <Field label="서브 카테고리">
-            <input value={draft.sub_category ?? ''} onChange={(e) => updateField('sub_category', e.target.value || null)} className="input" />
           </Field>
         </FieldGroup>
 

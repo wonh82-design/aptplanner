@@ -44,9 +44,8 @@ const outDir = path.dirname(outXlsx);
 // 컬럼 순서 — 엑셀에서 보기 좋은 순서로
 const COLUMNS = [
   'material_id',
-  'work_type',
-  'category',
-  'sub_category',
+  'sub_category',   // 세부공종 (구 work_type — 시스템 내부 ID)
+  'category',       // 대공종 (한글 분류)
   'brand',
   'product_line',
   'installer_spec',
@@ -78,9 +77,8 @@ const ws = XLSX.utils.aoa_to_sheet(rows);
 // 컬럼 폭 설정 — 가독성 개선
 const widths = [
   { wch: 14 },  // material_id
-  { wch: 22 },  // work_type
+  { wch: 22 },  // sub_category
   { wch: 10 },  // category
-  { wch: 14 },  // sub_category
   { wch: 14 },  // brand
   { wch: 22 },  // product_line
   { wch: 50 },  // installer_spec

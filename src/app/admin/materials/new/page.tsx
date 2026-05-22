@@ -66,9 +66,8 @@ function NewMaterialForm() {
 
   const [draft, setDraft] = useState<Material>({
     material_id: 'MAT-NEW-001',
-    work_type: '',
+    sub_category: '',
     category: null,
-    sub_category: null,
     brand: null,
     product_line: null,
     installer_spec: null,
@@ -127,7 +126,7 @@ function NewMaterialForm() {
   const workTypeOptions = useMemo(() => {
     if (!allMaterials) return [];
     const set = new Set<string>();
-    for (const m of allMaterials) if (m.work_type) set.add(m.work_type);
+    for (const m of allMaterials) if (m.sub_category) set.add(m.sub_category);
     return Array.from(set).sort();
   }, [allMaterials]);
 
@@ -139,7 +138,7 @@ function NewMaterialForm() {
       alert(`material_id "${draft.material_id}" 중복. 다른 ID로 변경하세요.`);
       return;
     }
-    if (!draft.work_type.trim()) { alert('work_type 입력 필요'); return; }
+    if (!draft.sub_category.trim()) { alert('세부공종 입력 필요'); return; }
 
     setSaving(true);
     setSaveResult(null);
@@ -239,8 +238,8 @@ function NewMaterialForm() {
           </Field>
           <Field label="세부공종">
             <input
-              value={draft.work_type}
-              onChange={(e) => updateField('work_type', e.target.value)}
+              value={draft.sub_category}
+              onChange={(e) => updateField('sub_category', e.target.value)}
               className="input font-mono"
               list="work-type-options"
               placeholder="예: flooring, wallpaper, kitchen_top"
@@ -260,9 +259,6 @@ function NewMaterialForm() {
             <datalist id="category-options">
               {categoryOptions.map((c) => <option key={c} value={c} />)}
             </datalist>
-          </Field>
-          <Field label="서브 카테고리">
-            <input value={draft.sub_category ?? ''} onChange={(e) => updateField('sub_category', e.target.value || null)} className="input" placeholder="예: 강마루, 합지" />
           </Field>
         </FieldGroup>
 

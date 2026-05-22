@@ -63,7 +63,7 @@ const VALID_GRADES = new Set([
   '단일등급',
 ]);
 const REQUIRED_COLUMNS = [
-  'material_id', 'work_type', 'unit_type', 'primary_grade',
+  'material_id', 'sub_category', 'unit_type', 'primary_grade',
   'material_price', 'labor_price', 'total_unit_price',
 ];
 
@@ -129,8 +129,9 @@ rows.forEach((r, idx) => {
   }
   seenIds.add(id);
 
-  const wt = String(r.work_type ?? '').trim();
-  if (!wt) errors.push(`행 ${rowNum} (${id}): work_type 누락`);
+  // sub_category 가 신 이름. 옛 엑셀 파일이 work_type 컬럼이면 폴백.
+  const wt = String(r.sub_category ?? r.work_type ?? '').trim();
+  if (!wt) errors.push(`행 ${rowNum} (${id}): sub_category(세부공종) 누락`);
 
   const grade = String(r.primary_grade ?? '').trim();
   if (!VALID_GRADES.has(grade)) {
@@ -179,9 +180,8 @@ rows.forEach((r, idx) => {
 
   materials.push({
     material_id: id,
-    work_type: wt,
+    sub_category: wt,
     category: nullable(r.category),
-    sub_category: nullable(r.sub_category),
     brand: nullable(r.brand),
     product_line: nullable(r.product_line),
     installer_spec: nullable(r.installer_spec),

@@ -94,7 +94,7 @@ function lineItem(
   const overrideId = grade.material_overrides?.[workType];
   const overrideMat = overrideId ? getMaterialById(overrideId) : null;
   // override가 해당 work_type이 아니면 무시 (안전망)
-  const mat = overrideMat && overrideMat.work_type === workType
+  const mat = overrideMat && overrideMat.sub_category === workType
     ? overrideMat
     : getPrimaryMaterial(workType, effectiveGrade(workType, grade));
   if (!mat) return null;
