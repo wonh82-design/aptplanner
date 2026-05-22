@@ -109,9 +109,9 @@ export function materialsFor(workType: string): Material[] {
   });
 }
 
-/** 공종(work_type) → 한글 라벨 매핑 (UI용) */
+/** 세부공종(sub_category) → 한글 라벨 매핑 (UI용).
+ *  sub_category 값이 이미 한글인 경우(예: '마루') 이 매핑이 없어도 labelOf 가 그대로 반환. */
 export const WORK_TYPE_LABEL: Record<string, string> = {
-  flooring: '바닥재',
   wallpaper: '도배',
   molding: '몰딩',
   baseboard: '걸레받이',

@@ -253,9 +253,10 @@ export function MaterialOverrides({
     const nextRooms = { ...scope.rooms };
     const nextGlobal = { ...scope.global };
 
-    // 룸 단위 work_type (모든 활성 룸의 키 OFF)
+    // 자재 sub_category → RoomScope 필드명 매핑 (룸 단위 일괄 OFF 용)
+    // 키 = 자재의 sub_category 값 (데이터에 적힌 그대로), 값 = RoomScope 의 boolean 필드명
     const ROOM_KEY_MAP: Record<string, 'flooring' | 'wallpaper' | 'molding' | 'sash' | 'aircon' | 'closet' | 'ceiling_fan'> = {
-      flooring: 'flooring',
+      '마루': 'flooring',
       wallpaper: 'wallpaper',
       molding: 'molding',
       window: 'sash',

@@ -175,7 +175,7 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     const area = roomAreaForId(roomId, p.pyeong, p.bay);
     const perim = roomPerimeterForId(roomId, p.pyeong);
 
-    if (rs.flooring) push(lineItem('', roomId, 'flooring', area, grade, 'per_m2'));
+    if (rs.flooring) push(lineItem('', roomId, '마루', area, grade, 'per_m2'));
     if (rs.wallpaper) push(lineItem('', roomId, 'wallpaper', area * WALL_RATIO, grade, 'per_m2'));
     if (rs.molding) {
       if (scope.global.no_molding) {
