@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ServicesPricing } from '@/components/ServicesPricing';
 import { SiteHeader } from '@/components/SiteHeader';
 
 export const metadata = {
@@ -196,50 +195,6 @@ export default function Landing() {
             <StepCard n="1" title="우리집 정보 입력" desc="평형·베이·욕실·발코니 등 기본 정보. 1분이면 충분합니다." />
             <StepCard n="2" title="공사 범위·자재 등급" desc="공간별로 무엇을 시공할지, 자재는 어떤 등급으로 할지 직관적으로 선택." />
             <StepCard n="3" title="실시간 공사비 산출" desc="공종별·공간별 상세 견적. PDF로 다운받아 업체에 그대로 전달 가능." />
-          </div>
-        </div>
-      </section>
-
-      {/* ===== Pricing — 3종 서비스 ===== */}
-      <section id="pricing" className="border-t border-zinc-200 bg-gradient-to-br from-blue-50/40 via-white to-emerald-50/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-xs font-medium mb-4">
-              출시 기념 컨설팅 50% 할인 (5월 한정)
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-4">
-              3가지 방식으로 <span className="text-blue-700">정확한 견적</span>을 만드세요
-            </h2>
-            <p className="text-zinc-600 max-w-2xl mx-auto leading-relaxed text-sm">
-              무료로 예상 공사비부터 확인하고,
-              비교 견적이 필요하면 한 끼 식사값으로 스펙북을,
-              우리집에 딱 맞는 최적안이 필요하면 전문가 컨설팅을 받으세요.
-            </p>
-          </div>
-
-          <ServicesPricing pyeong={30} recommended="spec" />
-
-          <div className="text-center mt-10 flex flex-col items-center gap-3">
-            <Link
-              href="/calc"
-              className="group relative inline-flex items-center justify-center gap-3
-                         rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-rose-500
-                         hover:from-orange-600 hover:via-orange-700 hover:to-rose-600
-                         px-8 py-4 text-white font-bold text-base
-                         shadow-[0_10px_30px_-8px_rgba(234,88,12,0.55)]
-                         hover:shadow-[0_14px_38px_-6px_rgba(234,88,12,0.65)]
-                         ring-4 ring-orange-500/10 hover:ring-orange-500/20
-                         transition-all duration-200 active:scale-[0.98]"
-            >
-              먼저 무료 예상 공사비부터 알아보기
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-1" aria-hidden>
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </Link>
-            <p className="text-xs text-zinc-500">
-              <strong className="text-zinc-700">가입·결제 없음</strong> · 1분이면 결과 · 30평 기준 절감액 예시
-            </p>
           </div>
         </div>
       </section>
