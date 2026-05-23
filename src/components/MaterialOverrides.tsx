@@ -693,8 +693,8 @@ function SingleCard({
    */
   onGradeRadio?: (choice: GradeGroup | 'excluded') => void;
 }) {
-  // 그 work_type의 모든 자재 (현장시공 제외)
-  const allMaterials = materialsFor(work.wt).filter((m) => m.brand !== '현장시공');
+  // 그 work_type의 모든 자재 (현장시공도 포함 — 카드 자체와 공사비 정보 노출 위해)
+  const allMaterials = materialsFor(work.wt);
 
   // 등급 그룹별 그룹핑 → 각 그룹 안에서 추천(primary) 먼저 정렬
   const sortedMaterials = (() => {
