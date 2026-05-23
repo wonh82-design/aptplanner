@@ -316,9 +316,9 @@ export function MaterialOverrides({
   }
 
   /**
-   * 등급 라디오 클릭 핸들러.
-   *  - 'excluded' 선택 시: scope OFF + excludedKeys 에 추가
-   *  - 가성비/표준/고급 선택 시: excludedKeys 에서 제거 + scope ON 복원 + grade override
+   * 제외/복원 토글 핸들러.
+   *  - 'excluded' → scope OFF + excludedKeys 에 추가 (카드 영역 사라짐, 헤더 유지)
+   *  - 'restore'  → scope ON 복원 + excludedKeys 에서 제거 (등급은 기존 값 유지)
    */
   function handleGradeRadio(wt: string, choice: GradeGroup | 'excluded') {
     if (choice === 'excluded') {
@@ -330,7 +330,7 @@ export function MaterialOverrides({
       excludeWorkType(wt);
       return;
     }
-    // 가성비/표준/고급 — 복원 + 등급 설정
+    // 복원 — 등급 변경은 동반하지 않음 (override 보존)
     if (excludedKeys.has(wt)) {
       setExcludedKeys((prev) => {
         const next = new Set(prev);
@@ -339,7 +339,6 @@ export function MaterialOverrides({
       });
       includeWorkType(wt);
     }
-    setGrade(wt, choice);
   }
 
   /**
@@ -719,30 +718,36 @@ function SingleCard({
     return out;
   })();
 
+  // 제외 토글 — 평소: "이 공종 제외", 제외 상태: "다시 추가"
+  const toggleExclude = () => {
+    if (!onGradeRadio) return;
+    onGradeRadio(isExcluded ? curGrade : 'excluded');
+  };
+
   return (
     <div className={`rounded-lg border ${isExcluded ? 'border-zinc-200 bg-zinc-50/30' : hasOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
-      {/* 헤더 — 공종명 + 자세히 + 라디오 그룹 + 현재금액 */}
-      <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70 gap-2 flex-wrap">
+      {/* 헤더 — 공종명 [자세히] [제외/다시 추가]      현재 공사비 (강조) */}
+      <div className="flex items-center justify-between px-3 py-2.5 bg-zinc-50/50 border-b border-zinc-200/70 gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className={`text-sm font-semibold ${isExcluded ? 'text-zinc-400 line-through' : 'text-zinc-900'} truncate`}>{label}</span>
           <DetailButton onClick={onShowDetail} label={`${label} 자세히 보기`} />
+          {onGradeRadio && (
+            <ExcludeToggleButton isExcluded={isExcluded} onClick={toggleExclude} />
+          )}
           {hasOverride && !isExcluded && (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium whitespace-nowrap">개별 설정</span>
           )}
-          {isExcluded && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-600 font-medium whitespace-nowrap">제외됨</span>
-          )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          {onGradeRadio && (
-            <GradeRadioGroup
-              current={isExcluded ? 'excluded' : curGrade}
-              onSelect={onGradeRadio}
-            />
-          )}
-          <span className={`text-[11px] tabular-nums whitespace-nowrap ${isExcluded ? 'text-zinc-300 line-through' : 'text-zinc-500'}`}>
-            현재 {fmtKRWShort(work.sub)}
-          </span>
+          {/* 현재 공사비 — 강조 */}
+          <div className="flex flex-col items-end leading-tight">
+            <span className="text-[10px] text-zinc-500 font-medium">현재 공사비</span>
+            <span className={`text-base font-bold tabular-nums ${
+              isExcluded ? 'text-zinc-300 line-through' : 'text-blue-700'
+            }`}>
+              {isExcluded ? '제외됨' : fmtKRWShort(work.sub)}
+            </span>
+          </div>
           {hasOverride && !isExcluded && (
             <button onClick={onClear} className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 whitespace-nowrap">
               초기화
@@ -751,81 +756,76 @@ function SingleCard({
         </div>
       </div>
 
-      {/* 자재 카드 — 한 행 가로 스크롤. 제외 상태면 흐릿하게 + 클릭 비활성화 */}
-      <div className={isExcluded ? 'opacity-40 pointer-events-none' : ''}>
-      {sortedMaterials.length === 0 ? (
-        <div className="px-3 py-6 text-center text-xs text-zinc-400 italic">
-          등록된 자재가 없습니다
-        </div>
-      ) : (
-        <div className="relative">
-          <div
-            className="flex gap-2 overflow-x-auto p-2.5 snap-x snap-mandatory scrollbar-thin"
-            style={{ scrollbarWidth: 'thin' }}
-          >
-            {sortedMaterials.map(({ material, isPrimary }) => (
-              <div
-                key={material.material_id}
-                className="flex-shrink-0 w-40 sm:w-44 snap-start"
-              >
-                <MaterialCard
-                  material={material}
-                  isPrimary={isPrimary}
-                  isSelected={effectiveMaterialId === material.material_id}
-                  totalQty={work.totalQty}
-                  onSelect={() => onSelectMaterial(material)}
-                />
-              </div>
-            ))}
+      {/* 자재 카드 — 제외 상태면 영역 자체를 숨김 */}
+      {!isExcluded && (
+        sortedMaterials.length === 0 ? (
+          <div className="px-3 py-6 text-center text-xs text-zinc-400 italic">
+            등록된 자재가 없습니다
           </div>
-          {/* 우측 페이드 — 더 있음을 시각적으로 암시 (스크롤 가능 시) */}
-          {sortedMaterials.length > 4 && (
-            <div className="pointer-events-none absolute top-2.5 bottom-2.5 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
-          )}
-        </div>
+        ) : (
+          <div className="relative">
+            <div
+              className="flex gap-2 overflow-x-auto p-2.5 snap-x snap-mandatory scrollbar-thin"
+              style={{ scrollbarWidth: 'thin' }}
+            >
+              {sortedMaterials.map(({ material, isPrimary }) => (
+                <div
+                  key={material.material_id}
+                  className="flex-shrink-0 w-40 sm:w-44 snap-start"
+                >
+                  <MaterialCard
+                    material={material}
+                    isPrimary={isPrimary}
+                    isSelected={effectiveMaterialId === material.material_id}
+                    totalQty={work.totalQty}
+                    onSelect={() => onSelectMaterial(material)}
+                  />
+                </div>
+              ))}
+            </div>
+            {/* 우측 페이드 — 더 있음을 시각적으로 암시 (스크롤 가능 시) */}
+            {sortedMaterials.length > 4 && (
+              <div className="pointer-events-none absolute top-2.5 bottom-2.5 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
+            )}
+          </div>
+        )
       )}
-      </div>
     </div>
   );
 }
 
 // =====================================================
-// GradeRadioGroup — [제외][가성비][표준][고급] 라디오 4개
+// ExcludeToggleButton — 헤더의 '제외/다시 추가' 토글
 // =====================================================
-function GradeRadioGroup({
-  current,
-  onSelect,
-}: {
-  current: GradeGroup | 'excluded';
-  onSelect: (choice: GradeGroup | 'excluded') => void;
-}) {
-  type Opt = { value: GradeGroup | 'excluded'; label: string; activeClass: string };
-  const OPTS: Opt[] = [
-    { value: 'excluded', label: '제외', activeClass: 'bg-zinc-200 text-zinc-700 ring-zinc-400' },
-    { value: '가성비',    label: '가성비', activeClass: 'bg-emerald-100 text-emerald-800 ring-emerald-400' },
-    { value: '표준',      label: '표준',  activeClass: 'bg-blue-100 text-blue-800 ring-blue-400' },
-    { value: '고급',      label: '고급',  activeClass: 'bg-amber-100 text-amber-800 ring-amber-400' },
-  ];
+function ExcludeToggleButton({ isExcluded, onClick }: { isExcluded: boolean; onClick: () => void }) {
+  if (isExcluded) {
+    return (
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        title="이 공종을 다시 견적에 포함"
+        className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-semibold transition whitespace-nowrap"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        다시 추가
+      </button>
+    );
+  }
   return (
-    <div className="inline-flex rounded-md overflow-hidden border border-zinc-300 text-[10px]" role="radiogroup" aria-label="등급 선택 또는 제외">
-      {OPTS.map((o) => {
-        const selected = current === o.value;
-        return (
-          <button
-            key={o.value}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            onClick={(e) => { e.stopPropagation(); onSelect(o.value); }}
-            className={`px-2 py-1 border-r last:border-r-0 border-zinc-200 transition font-semibold whitespace-nowrap ${
-              selected ? `${o.activeClass} ring-1 ring-inset` : 'bg-white text-zinc-500 hover:bg-zinc-50'
-            }`}
-          >
-            {o.label}
-          </button>
-        );
-      })}
-    </div>
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      title="이 공종을 견적에서 제외 (다시 클릭하면 복원)"
+      className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-zinc-300 bg-white text-zinc-500 hover:border-red-400 hover:bg-red-50 hover:text-red-700 text-[10px] font-semibold transition whitespace-nowrap"
+    >
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="8" y1="12" x2="16" y2="12" />
+      </svg>
+      제외
+    </button>
   );
 }
 
