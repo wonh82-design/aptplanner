@@ -83,10 +83,17 @@ export function MaterialOverrides({
   const [detailWorkType, setDetailWorkType] = useState<string | null>(null);
   // 일괄 등급 선택 popover
   const [bulkOpen, setBulkOpen] = useState(false);
+  /**
+   * '제외' 라디오로 빠진 work_type 추적.
+   * scope OFF 가 되어 line_items 에서 사라져도 이 set 에 있으면 카드가 계속 표시됨 (회색 상태).
+   * 사용자가 다시 가성비/표준/고급 라디오를 누르면 set 에서 제거되고 scope 가 다시 ON.
+   */
+  const [excludedKeys, setExcludedKeys] = useState<Set<string>>(new Set());
   // 공사범위 프리셋 — 마지막 적용된 ID (시각적 강조용)
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
 
   // 1) 견적에 등장하는 work_type 집계 (등장 순서·총 qty 보존)
+  //    + 제외된 work_type 도 placeholder 로 추가해 카드 유지
   const workInfoList = useMemo(() => {
     const map = new Map<string, WorkInfo>();
     quote.line_items.forEach((it, idx) => {
@@ -99,8 +106,15 @@ export function MaterialOverrides({
         map.set(it.work_type, { wt: it.work_type, sub: it.subtotal, totalQty: it.qty, firstIdx: idx });
       }
     });
+    // 제외된 work_type 도 카드 보존을 위해 추가 (sub=0, qty=0)
+    let placeholderIdx = quote.line_items.length;
+    for (const wt of excludedKeys) {
+      if (!map.has(wt)) {
+        map.set(wt, { wt, sub: 0, totalQty: 0, firstIdx: placeholderIdx++ });
+      }
+    }
     return Array.from(map.values());
-  }, [quote.line_items]);
+  }, [quote.line_items, excludedKeys]);
 
   // 2) bundle 단위로 그룹핑 → DisplayItem 리스트
   const displayItems = useMemo<DisplayItem[]>(() => {
@@ -243,6 +257,91 @@ export function MaterialOverrides({
     onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
   }
 
+  /** 자재 sub_category → RoomScope 필드명 매핑 (위/아래에서 모두 사용). */
+  const ROOM_KEY_MAP: Record<string, 'flooring' | 'wallpaper' | 'molding' | 'sash' | 'aircon' | 'closet' | 'ceiling_fan'> = {
+    '마루': 'flooring',
+    '도배': 'wallpaper',
+    molding: 'molding',
+    window: 'sash',
+    aircon: 'aircon',
+    aircon_outdoor: 'aircon',
+    closet: 'closet',
+    ceiling_fan: 'ceiling_fan',
+  };
+
+  const GLOBAL_KEY_MAP: Record<string, keyof Scope['global']> = {
+    base_work: 'demolition',
+    insulation: 'insulation',
+    electrical_base: 'electrical_base',
+    electrical_switch: 'switch_outlet',
+    induction_line: 'induction_line',
+    plumbing_base: 'plumbing_base',
+    thermostat: 'thermostat',
+    plumbing_heating: 'heating_pipe',
+    silicon_labor: 'silicon',
+    balcony_floor_tile: 'balcony_floor_tile',
+    balcony_paint: 'balcony_paint',
+    sliding_door: 'middoor',
+    general_furniture: 'entry_furniture',
+    carpentry_base: 'carpentry_base',
+    carpentry_ceiling: 'carpentry_ceiling',
+  };
+
+  /**
+   * scope OFF 된 work_type 을 다시 ON 으로 (해당 scope 키 true).
+   * "제외" 라디오에서 가성비/표준/고급 라디오로 전환할 때 사용.
+   */
+  function includeWorkType(wt: string) {
+    if (!scope || !onScopeChange || !property) return;
+    const visibleRooms = activeRooms(property) as RoomId[];
+    const nextRooms = { ...scope.rooms };
+    const nextGlobal = { ...scope.global };
+
+    if (wt in ROOM_KEY_MAP) {
+      const k = ROOM_KEY_MAP[wt];
+      for (const r of visibleRooms) {
+        nextRooms[r] = { ...nextRooms[r], [k]: true };
+      }
+      onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+      return;
+    }
+    if (wt in GLOBAL_KEY_MAP) {
+      const k = GLOBAL_KEY_MAP[wt];
+      if (typeof nextGlobal[k] === 'boolean') {
+        (nextGlobal as Record<string, unknown>)[k] = true;
+      }
+      onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+      return;
+    }
+  }
+
+  /**
+   * 등급 라디오 클릭 핸들러.
+   *  - 'excluded' 선택 시: scope OFF + excludedKeys 에 추가
+   *  - 가성비/표준/고급 선택 시: excludedKeys 에서 제거 + scope ON 복원 + grade override
+   */
+  function handleGradeRadio(wt: string, choice: GradeGroup | 'excluded') {
+    if (choice === 'excluded') {
+      setExcludedKeys((prev) => {
+        const next = new Set(prev);
+        next.add(wt);
+        return next;
+      });
+      excludeWorkType(wt);
+      return;
+    }
+    // 가성비/표준/고급 — 복원 + 등급 설정
+    if (excludedKeys.has(wt)) {
+      setExcludedKeys((prev) => {
+        const next = new Set(prev);
+        next.delete(wt);
+        return next;
+      });
+      includeWorkType(wt);
+    }
+    setGrade(wt, choice);
+  }
+
   /**
    * 특정 work_type을 scope에서 제외 (해당 scope 키 OFF).
    * line_items가 자동으로 빠져서 자재 카드도 사라짐.
@@ -253,18 +352,6 @@ export function MaterialOverrides({
     const nextRooms = { ...scope.rooms };
     const nextGlobal = { ...scope.global };
 
-    // 자재 sub_category → RoomScope 필드명 매핑 (룸 단위 일괄 OFF 용)
-    // 키 = 자재의 sub_category 값 (데이터에 적힌 그대로), 값 = RoomScope 의 boolean 필드명
-    const ROOM_KEY_MAP: Record<string, 'flooring' | 'wallpaper' | 'molding' | 'sash' | 'aircon' | 'closet' | 'ceiling_fan'> = {
-      '마루': 'flooring',
-      '도배': 'wallpaper',
-      molding: 'molding',
-      window: 'sash',
-      aircon: 'aircon',
-      aircon_outdoor: 'aircon',
-      closet: 'closet',
-      ceiling_fan: 'ceiling_fan',
-    };
     if (wt in ROOM_KEY_MAP) {
       const k = ROOM_KEY_MAP[wt];
       for (const r of visibleRooms) {
@@ -274,24 +361,6 @@ export function MaterialOverrides({
       return;
     }
 
-    // 글로벌 단위 work_type
-    const GLOBAL_KEY_MAP: Record<string, keyof typeof nextGlobal> = {
-      base_work: 'demolition',
-      insulation: 'insulation',
-      electrical_base: 'electrical_base',
-      electrical_switch: 'switch_outlet',
-      induction_line: 'induction_line',
-      plumbing_base: 'plumbing_base',
-      thermostat: 'thermostat',
-      plumbing_heating: 'heating_pipe',
-      silicon_labor: 'silicon',
-      balcony_floor_tile: 'balcony_floor_tile',
-      balcony_paint: 'balcony_paint',
-      sliding_door: 'middoor',
-      general_furniture: 'entry_furniture',
-      carpentry_base: 'carpentry_base',
-      carpentry_ceiling: 'carpentry_ceiling',
-    };
     if (wt in GLOBAL_KEY_MAP) {
       const k = GLOBAL_KEY_MAP[wt];
       if (typeof nextGlobal[k] === 'boolean') {
@@ -537,10 +606,11 @@ export function MaterialOverrides({
                 value.overrides[item.work.wt] !== undefined ||
                 value.material_overrides[item.work.wt] !== undefined
               }
+              isExcluded={excludedKeys.has(item.work.wt)}
               onSelectMaterial={setMaterial}
               onClear={() => clearOverride(item.work.wt)}
               onShowDetail={() => setDetailWorkType(item.work.wt)}
-              onExclude={canEditScope ? () => excludeWorkType(item.work.wt) : undefined}
+              onGradeRadio={canEditScope ? (c) => handleGradeRadio(item.work.wt, c) : undefined}
             />
           ) : (
             <BundleCard
@@ -603,19 +673,25 @@ function isPrimaryMaterial(m: Material, allInGrade: Material[]): boolean {
  * 카드 클릭 시 material_override 설정 — 그 자재로 즉시 변경.
  */
 function SingleCard({
-  work, label, effectiveGrade: curGrade, effectiveMaterialId, hasOverride,
-  onSelectMaterial, onClear, onShowDetail, onExclude,
+  work, label, effectiveGrade: curGrade, effectiveMaterialId, hasOverride, isExcluded,
+  onSelectMaterial, onClear, onShowDetail, onGradeRadio,
 }: {
   work: WorkInfo;
   label: string;
   effectiveGrade: GradeGroup;
   effectiveMaterialId: string | null;
   hasOverride: boolean;
+  /** '제외' 라디오로 빠진 상태 — 카드 회색 처리 + radio "제외" 선택 표시 */
+  isExcluded: boolean;
   onSelectMaterial: (m: Material) => void;
   onClear: () => void;
   onShowDetail: () => void;
-  /** "이 공종 제외" 클릭 — 미전달 시 버튼 숨김 */
-  onExclude?: () => void;
+  /**
+   * 등급 라디오 클릭 (4가지: '제외'|'가성비'|'표준'|'고급').
+   * '제외' → scope OFF + 카드 회색
+   * 가성비/표준/고급 → scope ON 복원 + grade override
+   */
+  onGradeRadio?: (choice: GradeGroup | 'excluded') => void;
 }) {
   // 그 work_type의 모든 자재 (현장시공 제외)
   const allMaterials = materialsFor(work.wt).filter((m) => m.brand !== '현장시공');
@@ -644,20 +720,30 @@ function SingleCard({
   })();
 
   return (
-    <div className={`rounded-lg border ${hasOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
-      {/* 헤더 — 공종명 옆에 [제외] [자세히] 버튼 */}
-      <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70 gap-2">
+    <div className={`rounded-lg border ${isExcluded ? 'border-zinc-200 bg-zinc-50/30' : hasOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
+      {/* 헤더 — 공종명 + 자세히 + 라디오 그룹 + 현재금액 */}
+      <div className="flex items-center justify-between px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70 gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-sm font-semibold text-zinc-900 truncate">{label}</span>
-          {onExclude && <ExcludeButton onExclude={onExclude} />}
+          <span className={`text-sm font-semibold ${isExcluded ? 'text-zinc-400 line-through' : 'text-zinc-900'} truncate`}>{label}</span>
           <DetailButton onClick={onShowDetail} label={`${label} 자세히 보기`} />
-          {hasOverride && (
+          {hasOverride && !isExcluded && (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium whitespace-nowrap">개별 설정</span>
           )}
+          {isExcluded && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-600 font-medium whitespace-nowrap">제외됨</span>
+          )}
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <span className="text-[11px] text-zinc-500 tabular-nums whitespace-nowrap">현재 {fmtKRWShort(work.sub)}</span>
-          {hasOverride && (
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {onGradeRadio && (
+            <GradeRadioGroup
+              current={isExcluded ? 'excluded' : curGrade}
+              onSelect={onGradeRadio}
+            />
+          )}
+          <span className={`text-[11px] tabular-nums whitespace-nowrap ${isExcluded ? 'text-zinc-300 line-through' : 'text-zinc-500'}`}>
+            현재 {fmtKRWShort(work.sub)}
+          </span>
+          {hasOverride && !isExcluded && (
             <button onClick={onClear} className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 whitespace-nowrap">
               초기화
             </button>
@@ -665,7 +751,8 @@ function SingleCard({
         </div>
       </div>
 
-      {/* 자재 카드 — 한 행 가로 스크롤 (등급 순서 보존, 우측으로 스크롤하여 나머지 확인) */}
+      {/* 자재 카드 — 한 행 가로 스크롤. 제외 상태면 흐릿하게 + 클릭 비활성화 */}
+      <div className={isExcluded ? 'opacity-40 pointer-events-none' : ''}>
       {sortedMaterials.length === 0 ? (
         <div className="px-3 py-6 text-center text-xs text-zinc-400 italic">
           등록된 자재가 없습니다
@@ -697,6 +784,47 @@ function SingleCard({
           )}
         </div>
       )}
+      </div>
+    </div>
+  );
+}
+
+// =====================================================
+// GradeRadioGroup — [제외][가성비][표준][고급] 라디오 4개
+// =====================================================
+function GradeRadioGroup({
+  current,
+  onSelect,
+}: {
+  current: GradeGroup | 'excluded';
+  onSelect: (choice: GradeGroup | 'excluded') => void;
+}) {
+  type Opt = { value: GradeGroup | 'excluded'; label: string; activeClass: string };
+  const OPTS: Opt[] = [
+    { value: 'excluded', label: '제외', activeClass: 'bg-zinc-200 text-zinc-700 ring-zinc-400' },
+    { value: '가성비',    label: '가성비', activeClass: 'bg-emerald-100 text-emerald-800 ring-emerald-400' },
+    { value: '표준',      label: '표준',  activeClass: 'bg-blue-100 text-blue-800 ring-blue-400' },
+    { value: '고급',      label: '고급',  activeClass: 'bg-amber-100 text-amber-800 ring-amber-400' },
+  ];
+  return (
+    <div className="inline-flex rounded-md overflow-hidden border border-zinc-300 text-[10px]" role="radiogroup" aria-label="등급 선택 또는 제외">
+      {OPTS.map((o) => {
+        const selected = current === o.value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={(e) => { e.stopPropagation(); onSelect(o.value); }}
+            className={`px-2 py-1 border-r last:border-r-0 border-zinc-200 transition font-semibold whitespace-nowrap ${
+              selected ? `${o.activeClass} ring-1 ring-inset` : 'bg-white text-zinc-500 hover:bg-zinc-50'
+            }`}
+          >
+            {o.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
