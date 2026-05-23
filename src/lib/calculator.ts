@@ -176,7 +176,7 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     const perim = roomPerimeterForId(roomId, p.pyeong);
 
     if (rs.flooring) push(lineItem('', roomId, '마루', area, grade, 'per_m2'));
-    if (rs.wallpaper) push(lineItem('', roomId, 'wallpaper', area * WALL_RATIO, grade, 'per_m2'));
+    if (rs.wallpaper) push(lineItem('', roomId, '도배', area * WALL_RATIO, grade, 'per_m2'));
     if (rs.molding) {
       if (scope.global.no_molding) {
         // 무몰딩 — molding 자재 대신 천장-벽 접점 목공+도배 마감

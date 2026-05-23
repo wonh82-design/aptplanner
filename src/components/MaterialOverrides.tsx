@@ -257,7 +257,7 @@ export function MaterialOverrides({
     // 키 = 자재의 sub_category 값 (데이터에 적힌 그대로), 값 = RoomScope 의 boolean 필드명
     const ROOM_KEY_MAP: Record<string, 'flooring' | 'wallpaper' | 'molding' | 'sash' | 'aircon' | 'closet' | 'ceiling_fan'> = {
       '마루': 'flooring',
-      wallpaper: 'wallpaper',
+      '도배': 'wallpaper',
       molding: 'molding',
       window: 'sash',
       aircon: 'aircon',
