@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'drive.google.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
     // 캐시 TTL — 동일 URL 의 변환 결과 재사용 (Vercel Image Optimization 한도 절약)
     minimumCacheTTL: 60 * 60 * 24 * 7, // 7일
