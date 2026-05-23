@@ -59,6 +59,8 @@ export default function CalcPage() {
   const [quoteId, setQuoteId] = useState<string>(() => generateQuoteId());
   // localStorage 복원 알림 배너
   const [restored, setRestored] = useState(false);
+  // Step 1 → Step 2 진행 시 확인 모달 노출
+  const [confirmStep2Open, setConfirmStep2Open] = useState(false);
   // hydration 완료 플래그 — 완료 전엔 저장 useEffect를 무시 (default 덮어쓰기 방지)
   const hydratedRef = useRef(false);
 
@@ -220,7 +222,7 @@ export default function CalcPage() {
               quote={quote}
               gradeLabel={grade.default}
               onJumpToStep={goTo}
-              onNext={pyeongValid ? () => goTo(2) : undefined}
+              onNext={pyeongValid ? () => setConfirmStep2Open(true) : undefined}
               nextLabel="공종 및 자재"
             />
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
@@ -267,7 +269,7 @@ export default function CalcPage() {
                 <StepNav
                   right={
                     <button
-                      onClick={() => goTo(2)}
+                      onClick={() => setConfirmStep2Open(true)}
                       disabled={!pyeongValid}
                       className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -404,6 +406,19 @@ export default function CalcPage() {
             grand_total: quote.totals.grand_total,
             quote_id: quote.quote_id,
           }}
+        />
+      )}
+
+      {/* Step 1 → Step 2 진행 전 확인 모달 */}
+      {confirmStep2Open && (
+        <PropertyConfirmModal
+          property={property}
+          scope={scope}
+          onConfirm={() => {
+            setConfirmStep2Open(false);
+            goTo(2);
+          }}
+          onCancel={() => setConfirmStep2Open(false)}
         />
       )}
 
@@ -555,4 +570,92 @@ function FinalNudge() {
   );
 }
 
+// ===== Step 1 → 2 진행 전 우리집 현황 확인 모달 =====
+
+function PropertyConfirmModal({
+  property,
+  scope,
+  onConfirm,
+  onCancel,
+}: {
+  property: Property;
+  scope: Scope;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  // 확장공사 계산: expansion_current=false && expansion_after=true 인 룸들
+  const expansionRooms = (Object.entries(scope.rooms) as [string, typeof scope.rooms[keyof typeof scope.rooms]][])
+    .filter(([, rs]) => rs && !rs.expansion_current && rs.expansion_after)
+    .map(([id]) => id);
+  const expansionText =
+    expansionRooms.length === 0
+      ? '확장공사 없음'
+      : `${expansionRooms.join(', ')} 확장공사`;
+
+  const bathCount = property.common_bath + property.master_bath;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onCancel}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="property-confirm-title"
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* 헤더 */}
+        <div className="px-5 sm:px-6 py-4 border-b border-zinc-200 bg-blue-50/50">
+          <h2 id="property-confirm-title" className="text-lg font-bold text-zinc-900">
+            우리집 현황 확인
+          </h2>
+          <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+            입력하신 내용을 확인해주세요.
+          </p>
+        </div>
+
+        {/* 본문 — 정보 행 */}
+        <dl className="px-5 sm:px-6 py-4 space-y-2.5 text-sm">
+          <Row k="평형" v={`${property.pyeong}평`} />
+          <Row k="베이" v={`${property.bay}베이`} />
+          <Row k="지역" v={REGION_LABEL[property.region]} />
+          <Row k="욕실수" v={`${bathCount}개 (공용 ${property.common_bath}, 부부 ${property.master_bath})`} />
+          <Row k="아파트 연식" v={AGE_LABEL[property.age]} />
+          <Row k="확장공사" v={expansionText} highlight={expansionRooms.length > 0} />
+        </dl>
+
+        {/* 버튼 */}
+        <div className="px-5 sm:px-6 py-4 border-t border-zinc-200 bg-zinc-50/50 flex gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 px-4 py-2.5 rounded-lg border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-800 font-semibold text-sm transition"
+          >
+            다시 입력
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition shadow-sm"
+          >
+            입력한 내용이 맞아요
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Row({ k, v, highlight = false }: { k: string; v: string; highlight?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <dt className="text-xs text-zinc-500 font-medium whitespace-nowrap">{k}</dt>
+      <dd className={`text-sm font-semibold text-right ${highlight ? 'text-blue-700' : 'text-zinc-900'}`}>
+        {v}
+      </dd>
+    </div>
+  );
+}
 
