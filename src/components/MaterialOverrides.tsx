@@ -512,14 +512,14 @@ export function MaterialOverrides({
         <span className="text-[11px] text-zinc-500">{displayItems.length}개 항목</span>
       </div>
 
-      {/* ===== 프리셋 행: 공사범위 + 일괄 등급 ===== */}
+      {/* ===== 프리셋 행: 공사범위 간단 지정 + 자재등급 한번에 정하기 ===== */}
       {canEditScope && (
-        <div className="mb-4 space-y-2.5">
-          {/* 공사범위 프리셋 */}
-          <div>
-            <div className="flex items-baseline gap-2 mb-1.5">
-              <span className="text-[11px] font-bold text-zinc-700">⚡ 공사범위 프리셋</span>
-              <span className="text-[10px] text-zinc-400">대표 시나리오 한 번에 적용</span>
+        <div className="mb-4 space-y-3">
+          {/* 공사범위 간단 지정 */}
+          <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-[15px] sm:text-base font-bold text-zinc-900">⚡ 공사범위 간단 지정</span>
+              <span className="text-[11px] text-zinc-600">대표 시나리오 중에서 골라 한 번에 적용해요</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
               {PRESETS.map((preset, idx) => {
@@ -553,11 +553,11 @@ export function MaterialOverrides({
             </div>
           </div>
 
-          {/* 자재등급 프리셋 + 일괄 토글 */}
-          <div>
-            <div className="flex items-baseline gap-2 mb-1.5">
-              <span className="text-[11px] font-bold text-zinc-700">🎨 자재 등급 프리셋</span>
-              <span className="text-[10px] text-zinc-400">모든 공종에 일괄 적용</span>
+          {/* 자재등급 한번에 정하기 */}
+          <div className="rounded-lg border border-amber-200 bg-amber-50/40 p-3">
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-[15px] sm:text-base font-bold text-zinc-900">🎨 자재등급 한번에 정하기</span>
+              <span className="text-[11px] text-zinc-600">모든 공종에 같은 등급을 일괄 적용해요</span>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
               {(['가성비', '표준', '고급'] as GradeGroup[]).map((g) => {
