@@ -1061,12 +1061,6 @@ function BundleCard({
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold text-zinc-900">{bundle.label}</span>
             {onExclude && <ExcludeButton onExclude={onExclude} />}
-            {works.length > 0 && (
-              <DetailButton
-                onClick={() => onShowDetail(works[0].wt)}
-                label={`${bundle.label} 자세히 보기`}
-              />
-            )}
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">
               세트 · {works.length}개 자재
             </span>
