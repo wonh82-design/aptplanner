@@ -93,19 +93,21 @@ export function MaterialOverrides({
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
 
   /**
-   * firstIdx 영구 캐시 — 한 번 등장한 work_type 의 표시 순서를 기억.
-   * 제외(scope OFF) 후에도 카드 자리가 바뀌지 않도록 안정 키 보장.
+   * 한 번이라도 line_items 에 등장한 모든 work_type 의 첫 등장 idx 영구 캐시.
+   * 의도:
+   *  - 프리셋·scope 변경으로 line_items 에서 wt 가 빠져도 카드 자리 유지
+   *  - 제외(excludedKeys) 후에도 카드 자리 그대로
+   *  - "본 적 있으면 사라지지 않는다" 정책
    */
   const firstIdxCacheRef = useRef<Map<string, number>>(new Map());
 
-  // 1) 견적에 등장하는 work_type 집계 (등장 순서·총 qty 보존)
-  //    + 제외된 work_type 도 placeholder 로 추가해 카드 유지 (캐시된 firstIdx 사용)
+  // 1) 견적에 등장하는 work_type 집계 + 캐시에 있는 모든 wt 도 placeholder 로 보존
   const workInfoList = useMemo(() => {
     const cache = firstIdxCacheRef.current;
     const map = new Map<string, WorkInfo>();
     quote.line_items.forEach((it, idx) => {
       if (!it.material_id) return;
-      // 처음 등장 시 캐시에 기록 — 이후엔 캐시 우선 사용
+      // 처음 등장 시 캐시에 기록
       if (!cache.has(it.work_type)) cache.set(it.work_type, idx);
       const firstIdx = cache.get(it.work_type)!;
       const prev = map.get(it.work_type);
@@ -116,7 +118,14 @@ export function MaterialOverrides({
         map.set(it.work_type, { wt: it.work_type, sub: it.subtotal, totalQty: it.qty, firstIdx });
       }
     });
-    // 제외된 work_type — 캐시에 있던 자리 그대로 (없으면 끝으로)
+    // 캐시에 있지만 line_items 에 없는 wt — placeholder 로 자리 유지
+    // (프리셋으로 빠진 케이스 / 사용자가 제외한 케이스 모두 포함)
+    for (const [wt, firstIdx] of cache.entries()) {
+      if (!map.has(wt)) {
+        map.set(wt, { wt, sub: 0, totalQty: 0, firstIdx });
+      }
+    }
+    // excludedKeys 의 wt 도 (혹시 캐시에도 없는 새 경우) 안전망
     let fallbackIdx = quote.line_items.length + 1000;
     for (const wt of excludedKeys) {
       if (!map.has(wt)) {
@@ -616,7 +625,11 @@ export function MaterialOverrides({
                 value.overrides[item.work.wt] !== undefined ||
                 value.material_overrides[item.work.wt] !== undefined
               }
-              isExcluded={excludedKeys.has(item.work.wt)}
+              isExcluded={
+                excludedKeys.has(item.work.wt) ||
+                // 캐시에 있지만 line_items 에서 빠진 경우 (프리셋 등으로 scope OFF) — 자동 제외 상태로
+                (item.work.sub === 0 && item.work.totalQty === 0)
+              }
               onSelectMaterial={setMaterial}
               onClear={() => clearOverride(item.work.wt)}
               onShowDetail={() => setDetailWorkType(item.work.wt)}
