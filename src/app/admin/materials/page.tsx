@@ -49,6 +49,91 @@ function MaterialsList() {
   const [sortKey, setSortKey] = useState<SortKey>('default');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
+  // 인라인 편집 state
+  const [editMode, setEditMode] = useState(false);
+  // material_id → 변경된 필드들 (등급/브랜드/제품명/자재비/인건비)
+  const [drafts, setDrafts] = useState<Record<string, Partial<Material>>>({});
+  const [bulkSaving, setBulkSaving] = useState(false);
+
+  /** 셀의 표시값 — drafts 우선, 없으면 원본 */
+  const getDraftValue = <K extends keyof Material>(m: Material, key: K): Material[K] => {
+    const d = drafts[m.material_id];
+    if (d && key in d) return d[key] as Material[K];
+    return m[key];
+  };
+
+  /** 단일 셀 변경 */
+  const updateDraft = <K extends keyof Material>(id: string, key: K, value: Material[K]) => {
+    setDrafts((prev) => {
+      const next = { ...prev };
+      const cur = { ...(next[id] ?? {}) };
+      // 원본과 같으면 dirty 에서 제거 (정확히 같은 값으로 되돌렸을 때)
+      const original = materials?.find((m) => m.material_id === id);
+      if (original && original[key] === value) {
+        delete cur[key];
+      } else {
+        cur[key] = value;
+      }
+      if (Object.keys(cur).length === 0) {
+        delete next[id];
+      } else {
+        next[id] = cur;
+      }
+      return next;
+    });
+  };
+
+  const dirtyCount = Object.keys(drafts).length;
+
+  /** drafts 적용 — total_unit_price 자동 재계산 */
+  const applyDraftsToMaterials = (src: Material[]): Material[] => {
+    return src.map((m) => {
+      const d = drafts[m.material_id];
+      if (!d) return m;
+      const next = { ...m, ...d };
+      const matP = next.material_price;
+      const labP = next.labor_price;
+      next.total_unit_price = matP + labP;
+      return next;
+    });
+  };
+
+  /** 일괄 저장 — 전체 materials 배열 PUT */
+  const handleBulkSave = async () => {
+    if (!materials || dirtyCount === 0) return;
+    if (!confirm(`${dirtyCount}개 자재의 변경 사항을 저장하시겠어요?`)) return;
+    setBulkSaving(true);
+    try {
+      const next = applyDraftsToMaterials(materials);
+      const res = await fetchWithAuth('/api/admin/materials', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ materials: next }),
+      });
+      if (res.status === 401) { setToken(null); return; }
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        alert('저장 실패: ' + (data.errors?.join('\n') || data.message || res.status));
+        return;
+      }
+      setMaterials(next);
+      setDrafts({});
+      setEditMode(false);
+      alert(`${dirtyCount}개 자재 저장 완료`);
+    } catch (e) {
+      alert('네트워크 오류: ' + String(e));
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
+  /** 편집 취소 — 변경 모두 폐기 */
+  const handleCancelEdit = () => {
+    if (dirtyCount > 0 && !confirm(`${dirtyCount}개 자재의 변경을 모두 폐기하시겠어요?`)) return;
+    setDrafts({});
+    setEditMode(false);
+  };
+
   // hydrate 완료 + 토큰 있을 때만 fetch (AdminGate 통과한 후)
   useEffect(() => {
     if (!hydrated || !token) return;
@@ -203,7 +288,36 @@ function MaterialsList() {
             이미지 등록 {materials.filter((m) => m.image_url).length}개
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {!editMode ? (
+            <button
+              onClick={() => setEditMode(true)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-bold transition"
+              title="등급·브랜드·제품명·자재비·인건비를 행에서 직접 편집"
+            >
+              <span>✏ 일괄 편집 모드</span>
+            </button>
+          ) : (
+            <>
+              <span className="text-[11px] text-zinc-600 font-semibold">
+                변경 {dirtyCount}건
+              </span>
+              <button
+                onClick={handleBulkSave}
+                disabled={bulkSaving || dirtyCount === 0}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-xs font-bold transition"
+              >
+                {bulkSaving ? '⏳ 저장 중...' : '💾 저장'}
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                disabled={bulkSaving}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition"
+              >
+                취소
+              </button>
+            </>
+          )}
           <Link
             href="/admin/materials/new"
             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition"
@@ -321,26 +435,86 @@ function MaterialsList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
-              {sorted.map((m) => (
-                <tr key={m.material_id} className="hover:bg-blue-50/30">
-                  <td className="px-3 py-2 font-mono text-[10px] text-zinc-500">{m.material_id}</td>
+              {sorted.map((m) => {
+                const isDirty = !!drafts[m.material_id];
+                const vGrade = getDraftValue(m, 'primary_grade');
+                const vBrand = getDraftValue(m, 'brand') ?? '';
+                const vProd = getDraftValue(m, 'product_line') ?? '';
+                const vMat = getDraftValue(m, 'material_price');
+                const vLab = getDraftValue(m, 'labor_price');
+                const vTotal = (typeof vMat === 'number' && typeof vLab === 'number') ? vMat + vLab : m.total_unit_price;
+                return (
+                <tr key={m.material_id} className={isDirty ? 'bg-amber-50/60' : 'hover:bg-blue-50/30'}>
+                  <td className="px-3 py-2 font-mono text-[10px] text-zinc-500">
+                    {isDirty && <span className="text-amber-700 mr-1" title="저장 안 된 변경">●</span>}
+                    {m.material_id}
+                  </td>
                   <td className="px-3 py-2 text-zinc-700">{m.category ?? '—'}</td>
                   <td className="px-3 py-2 text-zinc-700">{m.sub_category}</td>
                   <td className="px-3 py-2">
-                    <GradeBadge grade={m.primary_grade} />
+                    {editMode ? (
+                      <select
+                        value={vGrade}
+                        onChange={(e) => updateDraft(m.material_id, 'primary_grade', e.target.value as Grade)}
+                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white"
+                      >
+                        {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
+                      </select>
+                    ) : (
+                      <GradeBadge grade={m.primary_grade} />
+                    )}
                   </td>
                   <td className="px-3 py-2">
-                    <div className="font-semibold text-zinc-900">{m.brand} {m.product_line}</div>
-                    <div className="text-[10px] text-zinc-500 truncate max-w-md">{m.installer_spec}</div>
+                    {editMode ? (
+                      <div className="flex flex-col gap-1">
+                        <input
+                          type="text"
+                          value={vBrand}
+                          onChange={(e) => updateDraft(m.material_id, 'brand', e.target.value || null)}
+                          placeholder="브랜드"
+                          className="text-[11px] border border-zinc-300 rounded px-1.5 py-0.5 bg-white w-32"
+                        />
+                        <input
+                          type="text"
+                          value={vProd}
+                          onChange={(e) => updateDraft(m.material_id, 'product_line', e.target.value || null)}
+                          placeholder="제품명"
+                          className="text-[11px] border border-zinc-300 rounded px-1.5 py-0.5 bg-white w-32"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-semibold text-zinc-900">{m.brand} {m.product_line}</div>
+                        <div className="text-[10px] text-zinc-500 truncate max-w-md">{m.installer_spec}</div>
+                      </>
+                    )}
                   </td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600">
-                    {m.material_price.toLocaleString('ko-KR')}
+                    {editMode ? (
+                      <input
+                        type="number"
+                        value={vMat}
+                        onChange={(e) => updateDraft(m.material_id, 'material_price', Number(e.target.value))}
+                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-24 text-right tabular-nums"
+                      />
+                    ) : (
+                      m.material_price.toLocaleString('ko-KR')
+                    )}
                   </td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600">
-                    {m.labor_price.toLocaleString('ko-KR')}
+                    {editMode ? (
+                      <input
+                        type="number"
+                        value={vLab}
+                        onChange={(e) => updateDraft(m.material_id, 'labor_price', Number(e.target.value))}
+                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-24 text-right tabular-nums"
+                      />
+                    ) : (
+                      m.labor_price.toLocaleString('ko-KR')
+                    )}
                   </td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900 font-bold border-l border-zinc-100">
-                    {m.total_unit_price.toLocaleString('ko-KR')}
+                    {vTotal.toLocaleString('ko-KR')}
                   </td>
                   <td className="px-3 py-2 text-center">
                     {m.image_url
@@ -358,12 +532,14 @@ function MaterialsList() {
                       onClick={() => handleDelete(m.material_id, `${m.brand ?? ''} ${m.product_line ?? ''}`.trim())}
                       className="ml-1 inline-block px-2 py-1 rounded border border-red-200 bg-white hover:bg-red-50 text-red-600 font-semibold text-[10px]"
                       title="이 자재 삭제"
+                      disabled={editMode}
                     >
                       🗑
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={10} className="px-3 py-8 text-center text-zinc-400 italic">
