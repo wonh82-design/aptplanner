@@ -313,7 +313,9 @@ function MaterialsList() {
                 <SortableTh label="세부공종" sortKey="work_type" current={sortKey} dir={sortDir} onClick={toggleSort} />
                 <SortableTh label="등급" sortKey="grade" current={sortKey} dir={sortDir} onClick={toggleSort} />
                 <SortableTh label="브랜드 / 제품" sortKey="brand" current={sortKey} dir={sortDir} onClick={toggleSort} />
-                <SortableTh label="합계 단가" sortKey="price" current={sortKey} dir={sortDir} onClick={toggleSort} align="right" />
+                <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">자재비</th>
+                <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">인건비</th>
+                <SortableTh label="합계단가" sortKey="price" current={sortKey} dir={sortDir} onClick={toggleSort} align="right" />
                 <SortableTh label="이미지" sortKey="image" current={sortKey} dir={sortDir} onClick={toggleSort} align="center" />
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600"></th>
               </tr>
@@ -331,7 +333,13 @@ function MaterialsList() {
                     <div className="font-semibold text-zinc-900">{m.brand} {m.product_line}</div>
                     <div className="text-[10px] text-zinc-500 truncate max-w-md">{m.installer_spec}</div>
                   </td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900">
+                  <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600">
+                    {m.material_price.toLocaleString('ko-KR')}
+                  </td>
+                  <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600">
+                    {m.labor_price.toLocaleString('ko-KR')}
+                  </td>
+                  <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900 font-bold border-l border-zinc-100">
                     {m.total_unit_price.toLocaleString('ko-KR')}
                   </td>
                   <td className="px-3 py-2 text-center">
@@ -358,7 +366,7 @@ function MaterialsList() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-3 py-8 text-center text-zinc-400 italic">
+                  <td colSpan={10} className="px-3 py-8 text-center text-zinc-400 italic">
                     필터에 매치되는 자재가 없습니다
                   </td>
                 </tr>
