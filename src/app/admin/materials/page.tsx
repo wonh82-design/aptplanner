@@ -444,7 +444,22 @@ function MaterialsList() {
       {/* 테이블 */}
       <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+          <table className="w-full text-xs table-fixed min-w-[1200px]">
+            {/* 명시적 컬럼 폭 — 1200px 기준으로 PC 한 화면에 모두 노출 */}
+            <colgroup>
+              <col className="w-[92px]" />   {/* ID */}
+              <col className="w-[68px]" />   {/* 대공종 */}
+              <col className="w-[90px]" />   {/* 세부공종 */}
+              <col className="w-[96px]" />   {/* 등급 */}
+              <col className="w-auto" />     {/* 브랜드/제품 — 남는 공간 흡수 */}
+              <col className="w-[84px]" />   {/* 자재비 */}
+              <col className="w-[84px]" />   {/* 인건비 */}
+              <col className="w-[96px]" />   {/* 합계단가 */}
+              <col className="w-[90px]" />   {/* 평당 환산 */}
+              <col className="w-[110px]" />  {/* 24평 공사비 */}
+              <col className="w-[56px]" />   {/* 이미지 */}
+              <col className="w-[96px]" />   {/* 액션 */}
+            </colgroup>
             <thead className="bg-zinc-50 border-b border-zinc-200">
               <tr>
                 <th className="px-3 py-2 text-left font-semibold text-zinc-600">ID</th>
@@ -483,7 +498,7 @@ function MaterialsList() {
                       <select
                         value={vGrade}
                         onChange={(e) => updateDraft(m.material_id, 'primary_grade', e.target.value as Grade)}
-                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white"
+                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0"
                       >
                         {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
                       </select>
@@ -491,7 +506,7 @@ function MaterialsList() {
                       <GradeBadge grade={m.primary_grade} />
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 min-w-0">
                     {editMode ? (
                       <div className="flex flex-col gap-1">
                         <input
@@ -499,20 +514,20 @@ function MaterialsList() {
                           value={vBrand}
                           onChange={(e) => updateDraft(m.material_id, 'brand', e.target.value || null)}
                           placeholder="브랜드"
-                          className="text-[11px] border border-zinc-300 rounded px-1.5 py-0.5 bg-white w-32"
+                          className="text-[11px] border border-zinc-300 rounded px-1.5 py-0.5 bg-white w-full min-w-0"
                         />
                         <input
                           type="text"
                           value={vProd}
                           onChange={(e) => updateDraft(m.material_id, 'product_line', e.target.value || null)}
                           placeholder="제품명"
-                          className="text-[11px] border border-zinc-300 rounded px-1.5 py-0.5 bg-white w-32"
+                          className="text-[11px] border border-zinc-300 rounded px-1.5 py-0.5 bg-white w-full min-w-0"
                         />
                       </div>
                     ) : (
                       <>
-                        <div className="font-semibold text-zinc-900">{m.brand} {m.product_line}</div>
-                        <div className="text-[10px] text-zinc-500 truncate max-w-md">{m.installer_spec}</div>
+                        <div className="font-semibold text-zinc-900 truncate">{m.brand} {m.product_line}</div>
+                        <div className="text-[10px] text-zinc-500 truncate">{m.installer_spec}</div>
                       </>
                     )}
                   </td>
@@ -522,7 +537,7 @@ function MaterialsList() {
                         type="number"
                         value={vMat}
                         onChange={(e) => updateDraft(m.material_id, 'material_price', Number(e.target.value))}
-                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-24 text-right tabular-nums"
+                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0 text-right tabular-nums"
                       />
                     ) : (
                       m.material_price.toLocaleString('ko-KR')
@@ -534,7 +549,7 @@ function MaterialsList() {
                         type="number"
                         value={vLab}
                         onChange={(e) => updateDraft(m.material_id, 'labor_price', Number(e.target.value))}
-                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-24 text-right tabular-nums"
+                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0 text-right tabular-nums"
                       />
                     ) : (
                       m.labor_price.toLocaleString('ko-KR')
