@@ -56,6 +56,7 @@ const HIDE_COMPONENTS_BUNDLES = new Set<string>([
   'balcony',      // 발코니 마감
   'closet',       // 붙박이장
   'ceiling_fan',  // 실링팬
+  'lighting',     // 조명 풀세트 — 등급별 카드로만 선택
 ]);
 const CUSTOM_META = {
   color: 'text-purple-700',
