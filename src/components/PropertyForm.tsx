@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import type { Property, RoomScope, Scope, RoomId, RegionId, AgeId } from '@/lib/types';
 import {
   recommendedRoomCount, exclusiveAreaM2, supplyAreaM2, outsideWindowArea, activeRooms,
@@ -31,6 +32,7 @@ type Props = {
 
 export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
   const [inputMode, setInputMode] = useState<InputMode>('pyeong');
+  const [bayHelpOpen, setBayHelpOpen] = useState(false);
 
   const setField = <K extends keyof Property>(k: K, v: Property[K]) =>
     onChange({ ...value, [k]: v });
@@ -196,8 +198,26 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
 
       {/* ===== 기본 정보 — 데스크톱 3열 / 모바일 2열 ===== */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-        <Field label="베이 수">
+        {/* 베이 수 — Field 안 쓰고 인라인 (라벨 옆 '베이란?' 버튼 위해) */}
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-1.5">
+            <label htmlFor="bay-select" className="text-xs font-medium text-zinc-600">베이 수</label>
+            <button
+              type="button"
+              onClick={() => setBayHelpOpen(true)}
+              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-[10px] transition"
+              title="베이가 무엇인지 알아보기"
+            >
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              베이란?
+            </button>
+          </div>
           <select
+            id="bay-select"
             value={value.bay}
             onChange={(e) => setField('bay', Number(e.target.value) as 2 | 3 | 4 | 5)}
             className="input"
@@ -207,7 +227,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             <option value={4}>4베이</option>
             <option value={5}>5베이</option>
           </select>
-        </Field>
+        </div>
 
         <Field label="방 (거실 제외)">
           <select
@@ -417,7 +437,113 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           <span>‘확장 시공’ 공간이 있으면 확장공사·새 외창·구청 신고·터닝도어 비용이 자동으로 추가됩니다.</span>
         </p>
       </div>
+
+      {/* 베이란? 도움말 모달 */}
+      {bayHelpOpen && <BayHelpModal onClose={() => setBayHelpOpen(false)} />}
     </section>
+  );
+}
+
+// ===== 베이란? 도움말 모달 =====
+function BayHelpModal({ onClose }: { onClose: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="bay-help-title"
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* 헤더 */}
+        <div className="sticky top-0 z-10 bg-white border-b border-zinc-200 px-5 sm:px-6 py-4 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-0.5">
+              도움말
+            </div>
+            <h2 id="bay-help-title" className="text-lg sm:text-xl font-bold text-zinc-900">
+              베이(Bay)란?
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex-shrink-0 text-zinc-400 hover:text-zinc-900 text-2xl leading-none -mt-1"
+            aria-label="닫기"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* 본문 */}
+        <div className="px-5 sm:px-6 py-5 space-y-5">
+          {/* 이미지 — public/images/bay-comparison.png 에 파일이 있으면 표시, 없으면 안내 */}
+          <div className="rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
+            {!imgFailed ? (
+              <div className="relative w-full aspect-[2/1]">
+                <Image
+                  src="/images/bay-comparison.png"
+                  alt="3 BAY vs 2 BAY 평면도 비교"
+                  fill
+                  className="object-contain"
+                  onError={() => setImgFailed(true)}
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="aspect-[2/1] flex items-center justify-center text-xs text-zinc-400 italic px-4 text-center">
+                평면도 이미지 (public/images/bay-comparison.png) 미등록
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3 text-sm leading-relaxed text-zinc-700">
+            <p>
+              <strong className="text-zinc-900">베이(Bay)</strong> 는 아파트 평면에서{' '}
+              <strong className="text-zinc-900">전면(보통 남향)에 배치된 방의 개수</strong>{' '}
+              를 의미합니다. 거실과 침실이 전면을 향해 일렬로 배치된 개수예요.
+            </p>
+            <ul className="space-y-1.5 pl-2">
+              <li className="flex gap-2">
+                <span className="text-blue-600 mt-0.5">·</span>
+                <span><strong className="text-zinc-900">2베이</strong> — 거실 + 침실 1개가 전면. 작은방들은 후면에 배치.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-blue-600 mt-0.5">·</span>
+                <span><strong className="text-zinc-900">3베이</strong> — 거실 + 침실 2개가 전면. 30평대 아파트의 표준.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-blue-600 mt-0.5">·</span>
+                <span><strong className="text-zinc-900">4베이 이상</strong> — 거실 + 침실 3개 이상이 전면. 40평대 이상 큰 평형에서 흔함.</span>
+              </li>
+            </ul>
+
+            <div className="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-3 text-[13px] leading-relaxed">
+              <div className="font-bold text-amber-900 mb-1">베이가 공사비에 미치는 영향</div>
+              <p className="text-amber-900">
+                베이 수가 많을수록 일조량·채광이 좋아지지만,{' '}
+                <strong>외창(샷시) 면적과 외벽 면적이 늘어나</strong>{' '}
+                샷시 공사비·단열·도배 비용이 함께 증가합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 닫기 버튼 */}
+        <div className="px-5 sm:px-6 py-4 border-t border-zinc-200 bg-zinc-50/50">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-sm transition"
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
