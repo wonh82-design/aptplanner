@@ -450,6 +450,48 @@ function ResultBanner({
   gradeLabel: string;
 }) {
   const { totals, property } = quote;
+  const base = totals.grand_total;
+
+  // 10만원 단위 반올림
+  const r100k = (n: number) => Math.round(n / 100_000) * 100_000;
+
+  // 3가지 시공 방식별 공사비 범위
+  const scenarios = [
+    {
+      key: 'self',
+      label: '반셀프 인테리어',
+      desc: '직영·내가 직접 챙김',
+      range: '±5%',
+      low: r100k(base * 0.95),
+      high: r100k(base * 1.05),
+      tone: 'emerald',
+    },
+    {
+      key: 'local',
+      label: '동네 인테리어업체 턴키',
+      desc: '지역 종합 업체에 일임',
+      range: '+5~15%',
+      low: r100k(base * 1.05),
+      high: r100k(base * 1.15),
+      tone: 'blue',
+    },
+    {
+      key: 'design',
+      label: '디자인 턴키업체',
+      desc: '디자이너 포함 프리미엄',
+      range: '+10~20%',
+      low: r100k(base * 1.10),
+      high: r100k(base * 1.20),
+      tone: 'amber',
+    },
+  ] as const;
+
+  const toneClass = (tone: 'emerald' | 'blue' | 'amber') => {
+    if (tone === 'emerald') return { border: 'border-emerald-300', bg: 'bg-emerald-50/70', label: 'text-emerald-700', value: 'text-emerald-900', chip: 'bg-emerald-100 text-emerald-700' };
+    if (tone === 'blue') return { border: 'border-blue-300', bg: 'bg-blue-50/70', label: 'text-blue-700', value: 'text-blue-900', chip: 'bg-blue-100 text-blue-700' };
+    return { border: 'border-amber-300', bg: 'bg-amber-50/70', label: 'text-amber-700', value: 'text-amber-900', chip: 'bg-amber-100 text-amber-800' };
+  };
+
   return (
     <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-blue-50 border border-emerald-200 p-5">
       <div className="text-xs text-emerald-700 font-semibold uppercase tracking-wider">산출 완료</div>
@@ -457,24 +499,44 @@ function ResultBanner({
         {property.pyeong}평 · {REGION_LABEL[property.region]} · {AGE_LABEL[property.age]} · {gradeLabel}
       </div>
 
-      {/* 범위 표시 */}
+      {/* 3가지 시공 방식별 공사비 — 부가세 별도 */}
       <div className="mt-4 rounded-lg bg-white/70 p-4">
-        <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-1">예상 공사비 (부가세 별도)</div>
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-2xl sm:text-3xl font-extrabold text-blue-900 tabular-nums">
-            {fmtKRWShort(totals.grand_total_low)} ~ {fmtKRWShort(totals.grand_total_high)}
-          </span>
-          <span className="text-xs text-zinc-500">
-            (중앙값 {fmtKRWShort(totals.grand_total)})
-          </span>
+        <div className="flex items-baseline justify-between gap-2 mb-3">
+          <div className="text-[11px] uppercase tracking-wide text-zinc-500 font-semibold">
+            시공 방식별 예상 공사비 <span className="text-zinc-400 normal-case">(부가세 별도)</span>
+          </div>
+          <div className="text-[10px] text-zinc-400 tabular-nums">
+            기준 {fmtKRWShort(base)}
+          </div>
         </div>
-        <div className="text-[11px] text-zinc-600 mt-2">
-          지역·연식 반영 · 10만원 단위 반올림 · ±5% 범위
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          {scenarios.map((s) => {
+            const c = toneClass(s.tone);
+            return (
+              <div key={s.key} className={`rounded-lg border ${c.border} ${c.bg} p-3 flex flex-col`}>
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <div className="min-w-0">
+                    <div className={`text-[12px] font-bold ${c.label} leading-tight`}>{s.label}</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5 leading-tight">{s.desc}</div>
+                  </div>
+                  <span className={`flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded ${c.chip} whitespace-nowrap`}>
+                    {s.range}
+                  </span>
+                </div>
+                <div className={`text-base sm:text-lg font-extrabold tabular-nums ${c.value} mt-auto leading-tight`}>
+                  {fmtKRWShort(s.low)} ~ {fmtKRWShort(s.high)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="text-[11px] text-zinc-600 mt-3 leading-relaxed">
+          ※ 기준 공사비는 지역·연식 보정 및 10만원 단위 반올림 적용. 시공 방식별 비율은 시장 평균 추정치이며, 업체·디자인 난이도에 따라 다를 수 있습니다.
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <Stat label="부가세 포함" value={fmtKRWShort(totals.grand_total_with_vat)} />
+        <Stat label="부가세 포함 (기준)" value={fmtKRWShort(totals.grand_total_with_vat)} />
         <Stat label="평당" value={`${fmtKRWShort(totals.per_pyeong)}/평`} />
         <Stat label="세부 공종 및 자재 항목 수" value={`${quote.line_items.length}건`} />
       </div>
