@@ -216,6 +216,17 @@ export function MaterialOverrides({
       pyeong: property.pyeong,
     });
     onScopeChange(preset.apply(property, scope));
+    // 프리셋에 grade override 지정 시 함께 적용
+    // 예: 'finish-only' → base_work 가성비 (= 철거 최소화)
+    if (preset.gradeOverrides) {
+      const nextOverrides = { ...value.overrides, ...preset.gradeOverrides };
+      // material_overrides 도 해당 wt 는 초기화 (등급 기본 자재로 돌아가도록)
+      const nextMatOv = { ...value.material_overrides };
+      for (const wt of Object.keys(preset.gradeOverrides)) {
+        delete nextMatOv[wt];
+      }
+      onChange({ ...value, overrides: nextOverrides, material_overrides: nextMatOv });
+    }
     setAppliedPresetId(preset.id);
   }
 
@@ -967,12 +978,15 @@ const MaterialCard = memo(function MaterialCard({
             </a>
           )}
         </div>
-        {material.installer_spec && (
-          <div className="text-[9.5px] text-zinc-500 leading-snug line-clamp-2" title={material.installer_spec}>
-            {material.installer_spec}
-          </div>
-        )}
-        <div className="mt-1 pt-1 border-t border-zinc-100 flex items-baseline justify-between gap-1">
+        {/* installer_spec — 항상 2줄 분량 공간 차지 (콘텐츠 없어도 균등 높이 유지) */}
+        <div
+          className="text-[9.5px] text-zinc-500 leading-snug line-clamp-2 min-h-[2.4em]"
+          title={material.installer_spec ?? ''}
+        >
+          {material.installer_spec ?? ''}
+        </div>
+        {/* 가격 — mt-auto 로 카드 하단 고정 (콘텐츠 분량 차이에도 위치 일관) */}
+        <div className="mt-auto pt-1 border-t border-zinc-100 flex items-baseline justify-between gap-1">
           <span className="text-[9px] text-zinc-500">우리집</span>
           <span className={`text-xs font-bold tabular-nums ${isSelected ? meta.color : 'text-zinc-900'}`}>
             {fmtKRWShort(homeTotal)}

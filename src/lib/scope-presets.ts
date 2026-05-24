@@ -8,7 +8,7 @@
  * ⚠️ 발코니 확장 관련 필드(expansion_current, expansion_after, expansion_report)는
  *    프리셋에서 절대 건드리지 않는다. 우리집 현황의 '발코니 확장 현황'에서만 변경 가능.
  */
-import type { Property, RoomScope, Scope, RoomId } from './types';
+import type { Property, RoomScope, Scope, RoomId, GradeGroup } from './types';
 import { activeRooms } from './areas';
 
 type Preset = {
@@ -18,6 +18,12 @@ type Preset = {
   desc: string;
   /** 현재 scope를 받아 확장 관련 필드는 보존, 나머지만 교체 */
   apply(p: Property, current: Scope): Scope;
+  /**
+   * 프리셋 적용 시 함께 설정할 work_type → 등급 그룹 매핑.
+   * MaterialOverrides.applyScopePreset 에서 value.overrides 에 머지.
+   * 예: 'finish-only' 는 base_work(철거)에 '가성비' = "철거 최소화" 자재 선택.
+   */
+  gradeOverrides?: Record<string, GradeGroup>;
 };
 
 function makeRoomScope(opts: Partial<RoomScope> = {}): RoomScope {
@@ -147,6 +153,8 @@ export const PRESETS: Preset[] = [
     icon: '🎨',
     label: '철거 최소화 + 마감재만 교체',
     desc: '철거·전기·설비·조명·목공 기본 포함, 도배·마루·주방·욕실 새로',
+    // 철거 최소화 — base_work 가성비 등급 자동 선택
+    gradeOverrides: { base_work: '가성비' },
     apply(p, current) {
       return {
         rooms: makeRoomMap(p, current, () => makeRoomScope({
