@@ -13,7 +13,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import type { Grade, Material } from '@/lib/types';
+import type { Grade, Material, Property } from '@/lib/types';
+import { buildQuote } from '@/lib/calculator';
+import { defaultScope, defaultGrade } from '@/lib/defaults';
 import { AdminGate } from '../AdminGate';
 import { useAdminToken } from '../useAdminToken';
 
@@ -158,6 +160,29 @@ function MaterialsList() {
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, token]);
+
+  /**
+   * 24평 표준 견적의 sub_category → qty 매핑.
+   * 각 자재의 24평 기준 예상 공사비 = qty × total_unit_price.
+   * default scope 에서 해당 sub_category 가 OFF 면 qty=0.
+   * materials 가 변경되면 자동 재계산 (자재 단가·등급 영향).
+   */
+  const qtyByWorkType = useMemo(() => {
+    const STD_PROPERTY: Property = {
+      pyeong: 24, bay: 3, rooms: 3, common_bath: 1, master_bath: 1,
+      balcony_depth_m: 1.5, region: 'gyeonggi', age: '15-30',
+    };
+    try {
+      const q = buildQuote(STD_PROPERTY, defaultScope(), defaultGrade());
+      const map = new Map<string, number>();
+      for (const it of q.line_items) {
+        map.set(it.work_type, (map.get(it.work_type) ?? 0) + it.qty);
+      }
+      return map;
+    } catch {
+      return new Map<string, number>();
+    }
+  }, [materials]);
 
   const categories = useMemo(() => {
     if (!materials) return [];
@@ -430,6 +455,8 @@ function MaterialsList() {
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">자재비</th>
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">인건비</th>
                 <SortableTh label="합계단가" sortKey="price" current={sortKey} dir={sortDir} onClick={toggleSort} align="right" />
+                <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">평당 환산</th>
+                <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">24평 공사비</th>
                 <SortableTh label="이미지" sortKey="image" current={sortKey} dir={sortDir} onClick={toggleSort} align="center" />
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600"></th>
               </tr>
@@ -516,6 +543,23 @@ function MaterialsList() {
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900 font-bold border-l border-zinc-100">
                     {vTotal.toLocaleString('ko-KR')}
                   </td>
+                  {/* 평당 환산 = (24평 공사비) / 24 */}
+                  {/* 24평 공사비 = sub_category 의 24평 표준 qty × 합계단가 */}
+                  {(() => {
+                    const qty = qtyByWorkType.get(m.sub_category) ?? 0;
+                    const total24 = Math.round(qty * vTotal);
+                    const perPyeong = qty > 0 ? Math.round(total24 / 24) : 0;
+                    return (
+                      <>
+                        <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600 whitespace-nowrap">
+                          {qty > 0 ? perPyeong.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
+                        </td>
+                        <td className="px-3 py-2 text-right font-mono tabular-nums text-blue-700 font-semibold whitespace-nowrap">
+                          {qty > 0 ? total24.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
+                        </td>
+                      </>
+                    );
+                  })()}
                   <td className="px-3 py-2 text-center">
                     {m.image_url
                       ? <span className="text-emerald-600 font-bold">✓</span>
@@ -542,7 +586,7 @@ function MaterialsList() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-3 py-8 text-center text-zinc-400 italic">
+                  <td colSpan={12} className="px-3 py-8 text-center text-zinc-400 italic">
                     필터에 매치되는 자재가 없습니다
                   </td>
                 </tr>
