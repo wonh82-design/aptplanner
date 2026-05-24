@@ -22,7 +22,11 @@ export function LivePricePreview({ quote, step }: Props) {
     <aside
       role="status"
       aria-live="polite"
-      className="sticky top-28 sm:top-[132px] z-10 -mx-4 sm:mx-0 mb-3 sm:mb-4"
+      // lg:hidden — 데스크탑은 WizardSidebar 가 대체. 모바일만 sticky 배너로 동작.
+      // sticky 가 부모 flex 안의 형제들과 함께 있어야 효과 — wrapper 없이 직접 자식.
+      // top: SiteHeader(56/64) + StepIndicator(~48~56) 만큼 내려서 겹침 방지.
+      // z-30: StepIndicator(z-20) 보다 위. SiteHeader(z-40) 보다 아래.
+      className="lg:hidden sticky top-[104px] sm:top-[120px] z-30 -mx-4 sm:mx-0 mb-3 sm:mb-4"
     >
       <div className="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 text-white rounded-none sm:rounded-xl shadow-sm border-y sm:border border-zinc-700/40 px-4 sm:px-5 py-3 sm:py-3.5">
         <div className="flex items-center justify-between gap-3 flex-wrap">

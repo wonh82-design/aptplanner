@@ -298,9 +298,9 @@ export default function CalcPage() {
               nextLabel="최종 결과"
             />
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
-              <div className="lg:hidden">
-                <LivePricePreview quote={quote} step={2} />
-              </div>
+              {/* 모바일 sticky 배너 — LivePricePreview 가 자체적으로 lg:hidden 처리.
+                  부모 flex 의 직접 자식이어야 sticky 가 동작 (wrapper 안에 단독으로 두면 무효). */}
+              <LivePricePreview quote={quote} step={2} />
               <MaterialOverrides
                 quote={quote}
                 value={grade}
