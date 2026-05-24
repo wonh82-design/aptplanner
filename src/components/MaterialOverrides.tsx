@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
@@ -92,25 +92,36 @@ export function MaterialOverrides({
   // 공사범위 프리셋 — 마지막 적용된 ID (시각적 강조용)
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
 
+  /**
+   * firstIdx 영구 캐시 — 한 번 등장한 work_type 의 표시 순서를 기억.
+   * 제외(scope OFF) 후에도 카드 자리가 바뀌지 않도록 안정 키 보장.
+   */
+  const firstIdxCacheRef = useRef<Map<string, number>>(new Map());
+
   // 1) 견적에 등장하는 work_type 집계 (등장 순서·총 qty 보존)
-  //    + 제외된 work_type 도 placeholder 로 추가해 카드 유지
+  //    + 제외된 work_type 도 placeholder 로 추가해 카드 유지 (캐시된 firstIdx 사용)
   const workInfoList = useMemo(() => {
+    const cache = firstIdxCacheRef.current;
     const map = new Map<string, WorkInfo>();
     quote.line_items.forEach((it, idx) => {
       if (!it.material_id) return;
+      // 처음 등장 시 캐시에 기록 — 이후엔 캐시 우선 사용
+      if (!cache.has(it.work_type)) cache.set(it.work_type, idx);
+      const firstIdx = cache.get(it.work_type)!;
       const prev = map.get(it.work_type);
       if (prev) {
         prev.sub += it.subtotal;
         prev.totalQty += it.qty;
       } else {
-        map.set(it.work_type, { wt: it.work_type, sub: it.subtotal, totalQty: it.qty, firstIdx: idx });
+        map.set(it.work_type, { wt: it.work_type, sub: it.subtotal, totalQty: it.qty, firstIdx });
       }
     });
-    // 제외된 work_type 도 카드 보존을 위해 추가 (sub=0, qty=0)
-    let placeholderIdx = quote.line_items.length;
+    // 제외된 work_type — 캐시에 있던 자리 그대로 (없으면 끝으로)
+    let fallbackIdx = quote.line_items.length + 1000;
     for (const wt of excludedKeys) {
       if (!map.has(wt)) {
-        map.set(wt, { wt, sub: 0, totalQty: 0, firstIdx: placeholderIdx++ });
+        const firstIdx = cache.get(wt) ?? fallbackIdx++;
+        map.set(wt, { wt, sub: 0, totalQty: 0, firstIdx });
       }
     }
     return Array.from(map.values());
@@ -623,7 +634,15 @@ export function MaterialOverrides({
               onSelectComponentGrade={(wt, g) => setGrade(wt, g)}
               onClearBundle={() => clearBundleOverride(item.bundle)}
               onShowDetail={(wt) => setDetailWorkType(wt)}
-              onExclude={canEditScope ? () => excludeBundle(item.bundle) : undefined}
+              onExclude={canEditScope ? () => {
+                // bundle 안의 모든 work_type 을 excludedKeys 에 추가 → 카드 보존
+                setExcludedKeys((prev) => {
+                  const next = new Set(prev);
+                  for (const w of item.works) next.add(w.wt);
+                  return next;
+                });
+                excludeBundle(item.bundle);
+              } : undefined}
               scope={scope}
               onScopeChange={onScopeChange}
             />
