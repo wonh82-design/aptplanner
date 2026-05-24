@@ -535,8 +535,13 @@ function MaterialsList() {
                     {editMode ? (
                       <input
                         type="number"
-                        value={vMat}
-                        onChange={(e) => updateDraft(m.material_id, 'material_price', Number(e.target.value))}
+                        inputMode="numeric"
+                        value={vMat === 0 ? '' : vMat}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          updateDraft(m.material_id, 'material_price', v === '' ? 0 : Number(v));
+                        }}
+                        placeholder="0"
                         className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0 text-right tabular-nums"
                       />
                     ) : (
@@ -547,8 +552,13 @@ function MaterialsList() {
                     {editMode ? (
                       <input
                         type="number"
-                        value={vLab}
-                        onChange={(e) => updateDraft(m.material_id, 'labor_price', Number(e.target.value))}
+                        inputMode="numeric"
+                        value={vLab === 0 ? '' : vLab}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          updateDraft(m.material_id, 'labor_price', v === '' ? 0 : Number(v));
+                        }}
+                        placeholder="0"
                         className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0 text-right tabular-nums"
                       />
                     ) : (

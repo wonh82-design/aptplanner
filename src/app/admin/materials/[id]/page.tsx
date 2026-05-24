@@ -307,10 +307,24 @@ function MaterialEditor({ materialId }: { materialId: string }) {
             </select>
           </Field>
           <Field label="자재가 (₩)">
-            <input type="number" value={draft.material_price} onChange={(e) => updateField('material_price', Number(e.target.value))} className="input text-right tabular-nums" />
+            <input
+              type="number"
+              inputMode="numeric"
+              value={draft.material_price === 0 ? '' : draft.material_price}
+              onChange={(e) => updateField('material_price', e.target.value === '' ? 0 : Number(e.target.value))}
+              placeholder="0"
+              className="input text-right tabular-nums"
+            />
           </Field>
           <Field label="시공비 (₩)">
-            <input type="number" value={draft.labor_price} onChange={(e) => updateField('labor_price', Number(e.target.value))} className="input text-right tabular-nums" />
+            <input
+              type="number"
+              inputMode="numeric"
+              value={draft.labor_price === 0 ? '' : draft.labor_price}
+              onChange={(e) => updateField('labor_price', e.target.value === '' ? 0 : Number(e.target.value))}
+              placeholder="0"
+              className="input text-right tabular-nums"
+            />
           </Field>
           <Field label="합계 (자동 계산)" full>
             <input value={draft.total_unit_price.toLocaleString('ko-KR') + ' 원'} readOnly className="input bg-zinc-50 text-right tabular-nums font-bold" />
