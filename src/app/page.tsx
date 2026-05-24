@@ -228,8 +228,8 @@ export default function Landing() {
 
         <div className="max-w-4xl mx-auto px-5 sm:px-8 py-24 sm:py-32 text-center">
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.15] mb-6">
-            1분 투자로<br />
-            견적 사기를 예방하세요.
+            1분 투자로 예산에 맞는<br />
+            우리집 공사계획을 완성해보세요
           </h2>
           <p className="text-zinc-200 text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
             가입도, 결제도, 전화번호도 필요 없습니다.
