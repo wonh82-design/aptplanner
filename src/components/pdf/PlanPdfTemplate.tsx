@@ -11,7 +11,7 @@ import {
   BodyPage, Section, KeyValGrid, Footer, tdL, tdR, unitShort, Table,
 } from './QuotePdfTemplate';
 import { PdfShareQr } from './PdfShareQr';
-import { REGION_LABEL, AGE_LABEL, fmtKRW } from '@/lib/calculator';
+import { REGION_LABEL, AGE_LABEL, fmtKRWVat } from '@/lib/calculator';
 
 const SHARE_URL = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SITE_URL) || 'https://apt-planner.kr';
 
@@ -76,7 +76,7 @@ export function PlanPdfTemplate({ quote, gradeLabel, rootRef }: Props) {
             { k: '방 개수', v: `${quote.property.rooms}개` },
             { k: '욕실', v: `공용 ${quote.property.common_bath} / 부부 ${quote.property.master_bath ? '있음' : '없음'}` },
             { k: '자재 등급', v: gradeLabel },
-            { k: '예상 공사비 범위', v: `${fmtKRW(quote.totals.grand_total_low)} ~ ${fmtKRW(quote.totals.grand_total_high)}` },
+            { k: '예상 공사비 범위 (부가세 포함)', v: `${fmtKRWVat(quote.totals.grand_total_low)} ~ ${fmtKRWVat(quote.totals.grand_total_high)}` },
           ]} />
         </Section>
       </BodyPage>

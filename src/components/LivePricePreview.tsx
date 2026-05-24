@@ -7,7 +7,7 @@
  * 끝까지 진행할 동기를 강화한다.
  */
 
-import { fmtKRWShort } from '@/lib/calculator';
+import { fmtKRWShort, fmtKRWShortVat } from '@/lib/calculator';
 import type { Quote } from '@/lib/types';
 
 type Props = {
@@ -28,14 +28,14 @@ export function LivePricePreview({ quote, step }: Props) {
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="min-w-0 flex-1">
             <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-0.5">
-              실시간 예상 공사비 · 부가세 별도
+              실시간 예상 공사비 · 부가세 포함
             </div>
             <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-lg sm:text-xl font-extrabold tabular-nums tracking-tight">
-                {fmtKRWShort(totals.grand_total_low)} ~ {fmtKRWShort(totals.grand_total_high)}
+                {fmtKRWShortVat(totals.grand_total_low)} ~ {fmtKRWShortVat(totals.grand_total_high)}
               </span>
               <span className="text-[11px] text-zinc-300">
-                중앙값 {fmtKRWShort(totals.grand_total)}
+                중앙값 {fmtKRWShortVat(totals.grand_total)}
               </span>
             </div>
           </div>

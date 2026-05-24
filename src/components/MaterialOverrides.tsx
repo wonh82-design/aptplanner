@@ -5,7 +5,7 @@ import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
-import { fmtKRWShort } from '@/lib/calculator';
+import { fmtKRWShort, fmtKRWShortVat } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength } from '@/lib/areas';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
 import { WORK_BUNDLES, bundleForWorkType, type WorkBundle } from '@/lib/material-bundles';
@@ -800,7 +800,7 @@ function SingleCard({
             <span className={`text-base font-bold tabular-nums ${
               isExcluded ? 'text-zinc-300 line-through' : 'text-blue-700'
             }`}>
-              {isExcluded ? '제외됨' : fmtKRWShort(work.sub)}
+              {isExcluded ? '제외됨' : fmtKRWShortVat(work.sub)}
             </span>
           </div>
           {hasOverride && !isExcluded && (
@@ -989,7 +989,7 @@ const MaterialCard = memo(function MaterialCard({
         <div className="mt-auto pt-1 border-t border-zinc-100 flex items-baseline justify-between gap-1">
           <span className="text-[9px] text-zinc-500">우리집</span>
           <span className={`text-xs font-bold tabular-nums ${isSelected ? meta.color : 'text-zinc-900'}`}>
-            {fmtKRWShort(homeTotal)}
+            {fmtKRWShortVat(homeTotal)}
           </span>
         </div>
       </div>
@@ -1153,7 +1153,7 @@ function BundleCard({
         </div>
         <div className="flex-shrink-0 flex items-center justify-between sm:justify-end gap-2 flex-wrap">
           <span className="text-[11px] text-zinc-500 tabular-nums whitespace-nowrap">
-            현재 {fmtKRWShort(totalSub)}
+            현재 {fmtKRWShortVat(totalSub)}
           </span>
           <div className="flex items-center gap-2 flex-wrap">
             {!HIDE_COMPONENTS_BUNDLES.has(bundle.id) && (
@@ -1211,7 +1211,7 @@ function BundleCard({
             </div>
             <div className="flex-shrink-0 text-right ml-auto">
               <div className={`text-sm font-bold tabular-nums ${CUSTOM_META.color}`}>
-                {fmtKRWShort(totalSub)}
+                {fmtKRWShortVat(totalSub)}
               </div>
               <div className="text-[10px] text-zinc-500">우리집 총공사비</div>
             </div>
@@ -1286,7 +1286,7 @@ function BundleCard({
               </div>
               <div className="flex-shrink-0 text-right ml-auto">
                 <div className={`text-sm font-bold tabular-nums ${selected ? meta.color : 'text-zinc-900'}`}>
-                  {fmtKRWShort(total)}
+                  {fmtKRWShortVat(total)}
                 </div>
                 <div className="text-[10px] text-zinc-500">우리집 총공사비</div>
               </div>

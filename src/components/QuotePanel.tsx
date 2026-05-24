@@ -11,7 +11,7 @@
  */
 
 import type { Quote } from '@/lib/types';
-import { fmtKRW, fmtKRWShort } from '@/lib/calculator';
+import { fmtKRWVat, fmtKRWShortVat } from '@/lib/calculator';
 
 type Props = { quote: Quote };
 
@@ -28,7 +28,7 @@ export function QuotePanel({ quote }: Props) {
       <header className="mb-4">
         <h3 className="text-base font-semibold text-zinc-900">견적 상세 내역</h3>
         <p className="text-xs text-zinc-500 mt-0.5">
-          공종별·공간별 두 가지 형태로 우리집 공사비를 확인하세요. (부가세 별도)
+          공종별·공간별 두 가지 형태로 우리집 공사비를 확인하세요. (부가세 포함)
         </p>
       </header>
 
@@ -53,7 +53,7 @@ export function QuotePanel({ quote }: Props) {
       </div>
 
       <p className="mt-4 text-[11px] text-zinc-500 leading-relaxed">
-        ※ 위 합계는 자재가 + 시공·인건비 기준이며, 지역·연식 보정 후 10만원 단위로 반올림된 총공사비와 약간의 차이가 있을 수 있습니다.
+        ※ 위 합계는 자재가 + 시공·인건비 + 부가세(10%) 포함 기준이며, 지역·연식 보정 후 10만원 단위로 반올림된 총공사비와 약간의 차이가 있을 수 있습니다.
         라인별 상세 사양·자재는 유료 인테리어 계획서 PDF에서 확인할 수 있습니다.
       </p>
     </section>
@@ -91,7 +91,7 @@ function BreakdownTable({
                 <span className="text-xs text-zinc-800 truncate flex-1 min-w-0">{name}</span>
                 <span className="text-[11px] text-zinc-500 tabular-nums flex-shrink-0">{pct.toFixed(1)}%</span>
                 <span className="text-xs font-mono font-semibold text-zinc-900 tabular-nums flex-shrink-0 min-w-[68px] text-right">
-                  {fmtKRWShort(amt)}
+                  {fmtKRWShortVat(amt)}
                 </span>
               </div>
               <div className="h-1 w-full bg-zinc-100 rounded-full overflow-hidden">
@@ -105,8 +105,8 @@ function BreakdownTable({
         })}
       </ul>
       <div className="px-3 py-2 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between">
-        <span className="text-xs font-semibold text-zinc-700">합계 (보정 전)</span>
-        <span className="text-sm font-mono font-bold text-zinc-900 tabular-nums">{fmtKRW(sum)}</span>
+        <span className="text-xs font-semibold text-zinc-700">합계 (부가세 포함, 보정 전)</span>
+        <span className="text-sm font-mono font-bold text-zinc-900 tabular-nums">{fmtKRWVat(sum)}</span>
       </div>
     </div>
   );

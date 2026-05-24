@@ -450,7 +450,8 @@ function ResultBanner({
   gradeLabel: string;
 }) {
   const { totals, property } = quote;
-  const base = totals.grand_total;
+  // 시공 방식별 base = 부가세 포함 기준
+  const base = totals.grand_total_with_vat;
 
   // 10만원 단위 반올림
   const r100k = (n: number) => Math.round(n / 100_000) * 100_000;
@@ -499,11 +500,11 @@ function ResultBanner({
         {property.pyeong}평 · {REGION_LABEL[property.region]} · {AGE_LABEL[property.age]} · {gradeLabel}
       </div>
 
-      {/* 3가지 시공 방식별 공사비 — 부가세 별도 */}
+      {/* 3가지 시공 방식별 공사비 — 부가세 포함 */}
       <div className="mt-4 rounded-lg bg-white/70 p-4">
         <div className="flex items-baseline justify-between gap-2 mb-3">
           <div className="text-[11px] uppercase tracking-wide text-zinc-500 font-semibold">
-            시공 방식별 예상 공사비 <span className="text-zinc-400 normal-case">(부가세 별도)</span>
+            시공 방식별 예상 공사비 <span className="text-zinc-400 normal-case">(부가세 포함)</span>
           </div>
           <div className="text-[10px] text-zinc-400 tabular-nums">
             기준 {fmtKRWShort(base)}
@@ -531,13 +532,13 @@ function ResultBanner({
           })}
         </div>
         <div className="text-[11px] text-zinc-600 mt-3 leading-relaxed">
-          ※ 기준 공사비는 지역·연식 보정 및 10만원 단위 반올림 적용. 시공 방식별 비율은 시장 평균 추정치이며, 업체·디자인 난이도에 따라 다를 수 있습니다.
+          ※ 모든 금액은 부가세(10%) 포함, 지역·연식 보정 및 10만원 단위 반올림. 시공 방식별 비율은 시장 평균 추정치이며, 업체·디자인 난이도에 따라 다를 수 있습니다.
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <Stat label="부가세 포함 (기준)" value={fmtKRWShort(totals.grand_total_with_vat)} />
-        <Stat label="평당" value={`${fmtKRWShort(totals.per_pyeong)}/평`} />
+        <Stat label="부가세 별도" value={fmtKRWShort(totals.grand_total)} />
+        <Stat label="평당 (부가세 포함)" value={`${fmtKRWShort(Math.round(totals.per_pyeong * 1.1))}/평`} />
         <Stat label="세부 공종 및 자재 항목 수" value={`${quote.line_items.length}건`} />
       </div>
     </div>

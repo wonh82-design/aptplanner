@@ -501,3 +501,20 @@ export function fmtKRWShort(n: number): string {
   if (n >= 10_000) return Math.round(n / 10_000).toLocaleString('ko-KR') + '만원';
   return n.toLocaleString('ko-KR') + '원';
 }
+
+/**
+ * 부가세 포함 환산 — 사용자에게 보이는 모든 가격은 이 함수로 변환.
+ * 내부 계산(line_items.subtotal, totals.grand_total 등)은 부가세 별도로 유지.
+ */
+export function withVat(n: number): number {
+  return Math.round(n * (1 + VAT_RATE));
+}
+
+/** 부가세 포함 통화 포맷팅 (사용자 표시용) */
+export function fmtKRWVat(n: number): string {
+  return fmtKRW(withVat(n));
+}
+
+export function fmtKRWShortVat(n: number): string {
+  return fmtKRWShort(withVat(n));
+}

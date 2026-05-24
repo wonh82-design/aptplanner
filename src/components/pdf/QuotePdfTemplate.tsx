@@ -15,7 +15,7 @@
  */
 
 import type { Quote, RoomId, RoomScope, GradeGroup } from '@/lib/types';
-import { fmtKRW, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
+import { fmtKRWVat, fmtKRWShortVat, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { PdfCover } from './PdfCover';
 import { PdfShareQr } from './PdfShareQr';
@@ -372,13 +372,13 @@ export function HeroBox({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '24px' }}>
         <div>
           <div style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-            {fmtKRW(low)} ~ {fmtKRW(high)}
+            {fmtKRWVat(low)} ~ {fmtKRWVat(high)}
           </div>
           <div style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '6px' }}>
-            중앙값 {fmtKRW(mid)} · ±5% 범위 · 부가세 별도 · 10만원 단위 반올림
+            중앙값 {fmtKRWVat(mid)} · ±5% 범위 · 부가세 포함 · 10만원 단위 반올림
           </div>
         </div>
-        <HeroStat label="평당 단가" value={`${fmtKRWShort(perPyeong)}/평`} />
+        <HeroStat label="평당 단가" value={`${fmtKRWShortVat(perPyeong)}/평`} />
       </div>
     </div>
   );
