@@ -647,6 +647,9 @@ export function MaterialOverrides({
               onSelectComponentGrade={(wt, g) => setGrade(wt, g)}
               onClearBundle={() => clearBundleOverride(item.bundle)}
               onShowDetail={(wt) => setDetailWorkType(wt)}
+              isExcluded={item.works.every(
+                (w) => excludedKeys.has(w.wt) || (w.sub === 0 && w.totalQty === 0)
+              )}
               onExclude={canEditScope ? () => {
                 // bundle 안의 모든 work_type 을 excludedKeys 에 추가 → 카드 보존
                 setExcludedKeys((prev) => {
@@ -655,6 +658,15 @@ export function MaterialOverrides({
                   return next;
                 });
                 excludeBundle(item.bundle);
+              } : undefined}
+              onRestoreBundle={canEditScope ? () => {
+                // bundle 의 모든 work_type 을 excludedKeys 에서 제거 + scope ON 복원
+                setExcludedKeys((prev) => {
+                  const next = new Set(prev);
+                  for (const w of item.works) next.delete(w.wt);
+                  return next;
+                });
+                for (const w of item.works) includeWorkType(w.wt);
               } : undefined}
               scope={scope}
               onScopeChange={onScopeChange}
@@ -1035,9 +1047,9 @@ function bundleMaterialSummary(works: WorkInfo[], grade: GradeGroup): string {
 // =====================================================
 
 function BundleCard({
-  bundle, works, totalSub, gradeSelection, effectiveGrade,
+  bundle, works, totalSub, gradeSelection, effectiveGrade, isExcluded = false,
   onSelectBundleGrade, onSelectComponentGrade, onClearBundle,
-  onShowDetail, onExclude,
+  onShowDetail, onExclude, onRestoreBundle,
   scope, onScopeChange,
 }: {
   bundle: WorkBundle;
@@ -1045,6 +1057,8 @@ function BundleCard({
   totalSub: number;
   gradeSelection: GradeSelection;
   effectiveGrade: (wt: string) => GradeGroup;
+  /** bundle 전체가 제외 상태 — '제외' 행 active 표시 */
+  isExcluded?: boolean;
   onSelectBundleGrade: (g: GradeGroup) => void;
   onSelectComponentGrade: (wt: string, g: GradeGroup) => void;
   onClearBundle: () => void;
@@ -1052,6 +1066,8 @@ function BundleCard({
   onShowDetail: (workType: string) => void;
   /** "이 공종 제외" — 미전달 시 버튼 숨김 */
   onExclude?: () => void;
+  /** 제외된 bundle 복원 — '가성비/표준/고급' 행 클릭 시 부모에서 호출 */
+  onRestoreBundle?: () => void;
   scope?: Scope;
   onScopeChange?: (s: Scope) => void;
 }) {
@@ -1092,10 +1108,14 @@ function BundleCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold text-zinc-900">{bundle.label}</span>
-            {onExclude && <ExcludeButton onExclude={onExclude} />}
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">
               세트 · {works.length}개 자재
             </span>
+            {isExcluded && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">
+                제외됨
+              </span>
+            )}
             {hasAnyOverride && (
               <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium whitespace-nowrap">
                 개별 설정
@@ -1183,15 +1203,56 @@ function BundleCard({
             </div>
           </div>
         )}
+        {/*
+         * '제외' 행 — 가성비 위에 같은 row 형태로 배치
+         * 클릭 시: bundle 전체 제외 (scope OFF + excludedKeys 추가)
+         * 다른 등급 행 클릭 시 자동 복원
+         */}
+        {onExclude && (
+          <button
+            type="button"
+            onClick={() => { if (!isExcluded) onExclude(); }}
+            disabled={isExcluded}
+            className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 text-left transition
+              ${isExcluded
+                ? 'bg-zinc-100 ring-2 ring-inset ring-zinc-400 cursor-default'
+                : 'bg-white hover:bg-zinc-50'}`}
+          >
+            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 transition flex-shrink-0
+              ${isExcluded ? 'border-current text-zinc-700' : 'border-zinc-300 text-zinc-300'}`}>
+              {isExcluded && <span className="w-2 h-2 rounded-full bg-current" />}
+            </span>
+            <div className="flex-shrink-0 sm:min-w-[80px]">
+              <div className={`text-xs font-bold ${isExcluded ? 'text-zinc-700' : 'text-zinc-500'}`}>제외</div>
+              <div className="text-[10px] text-zinc-500 leading-tight hidden sm:block">견적·공사범위에서 제외</div>
+            </div>
+            <div className="flex-1 min-w-0 hidden sm:block">
+              <div className="text-[11px] text-zinc-500 truncate">
+                이 세트 전체를 견적에서 빼고 공사비를 0원 처리
+              </div>
+            </div>
+            <div className="flex-shrink-0 text-right ml-auto">
+              <div className={`text-sm font-bold tabular-nums ${isExcluded ? 'text-zinc-700' : 'text-zinc-400'}`}>
+                ₩0
+              </div>
+              <div className="text-[10px] text-zinc-500">우리집 총공사비</div>
+            </div>
+          </button>
+        )}
+
         {GRADES.map(g => {
           const total = bundleTotalAtGrade(g);
-          const selected = bundleGrade === g;
+          const selected = !isExcluded && bundleGrade === g;
           const meta = GRADE_META[g];
           return (
             <button
               key={g}
               type="button"
-              onClick={() => onSelectBundleGrade(g)}
+              onClick={() => {
+                // 제외 상태에서 등급 행을 누르면 → 복원 후 등급 적용
+                if (isExcluded && onRestoreBundle) onRestoreBundle();
+                onSelectBundleGrade(g);
+              }}
               className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 text-left transition
                 ${selected ? `${meta.bg} ring-2 ring-inset ${meta.ring}` : 'bg-white hover:bg-zinc-50'}`}
             >
