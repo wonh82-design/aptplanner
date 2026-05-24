@@ -419,6 +419,60 @@ export function MaterialOverrides({
   /**
    * 번들 단위 제외 — 번들의 모든 work_type을 OFF.
    */
+  /** bundle 단위 scope ON 복원 — excludeBundle 의 정확한 반대. */
+  function includeBundle(bundle: WorkBundle) {
+    if (!scope || !onScopeChange || !property) return;
+    const visibleRooms = activeRooms(property) as RoomId[];
+    const nextRooms = { ...scope.rooms };
+    const nextGlobal = { ...scope.global };
+
+    switch (bundle.id) {
+      case 'bath':
+        nextGlobal.common_bath_set = true;
+        nextGlobal.master_bath_set = true;
+        break;
+      case 'kitchen':
+        nextGlobal.kitchen_set = true;
+        break;
+      case 'lighting':
+        nextGlobal.lighting = true;
+        break;
+      case 'aircon':
+        for (const r of visibleRooms) nextRooms[r] = { ...nextRooms[r], aircon: true };
+        break;
+      case 'ceiling_fan':
+        for (const r of visibleRooms) nextRooms[r] = { ...nextRooms[r], ceiling_fan: true };
+        break;
+      case 'closet':
+        for (const r of visibleRooms) nextRooms[r] = { ...nextRooms[r], closet: true };
+        break;
+      case 'balcony':
+        nextGlobal.balcony_floor_tile = true;
+        nextGlobal.balcony_paint = true;
+        break;
+      case 'electrical':
+        nextGlobal.electrical_base = true;
+        nextGlobal.switch_outlet = true;
+        nextGlobal.induction_line = true;
+        break;
+      case 'plumbing':
+        nextGlobal.plumbing_base = true;
+        nextGlobal.thermostat = true;
+        // heating_pipe 는 노후 의심 시만 — 기본 OFF 유지
+        break;
+      case 'middoor':
+        nextGlobal.middoor = true;
+        nextGlobal.entry_furniture = true;
+        break;
+      case 'carpentry':
+        nextGlobal.carpentry_base = true;
+        nextGlobal.carpentry_ceiling = true;
+        // no_molding/no_door_frame/no_baseboard/partition_length 는 opt-in 유지 (OFF)
+        break;
+    }
+    onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
+  }
+
   function excludeBundle(bundle: WorkBundle) {
     if (!scope || !onScopeChange || !property) return;
     const visibleRooms = activeRooms(property) as RoomId[];
@@ -677,7 +731,9 @@ export function MaterialOverrides({
                   for (const w of item.works) next.delete(w.wt);
                   return next;
                 });
-                for (const w of item.works) includeWorkType(w.wt);
+                // includeWorkType(w.wt) 루프는 욕실/주방 풀세트의 GlobalScope 키와 매핑이
+                // 안 맞아 무효 — bundle 단위 복원 includeBundle 호출이 정확.
+                includeBundle(item.bundle);
               } : undefined}
               scope={scope}
               onScopeChange={onScopeChange}
