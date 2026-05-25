@@ -620,7 +620,7 @@ export function MaterialOverrides({
           {/* 공사범위 간단 지정 */}
           <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
             <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-[15px] sm:text-base font-bold text-zinc-900">⚡ 공사범위 간단 지정</span>
+              <span className="text-[15px] sm:text-base font-bold text-zinc-900">공사범위 간단 지정</span>
               <span className="text-[11px] text-zinc-600">대표 시나리오 중에서 골라 한 번에 적용해요</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
@@ -641,11 +641,6 @@ export function MaterialOverrides({
                       <span className={`text-[9px] font-mono font-bold ${isApplied ? 'text-emerald-700' : 'text-blue-600'}`}>
                         PRESET {idx + 1}
                       </span>
-                      {isApplied && (
-                        <span className="ml-auto text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded">
-                          ✓ 적용됨
-                        </span>
-                      )}
                     </div>
                     <span className="text-xs font-semibold text-zinc-900">{preset.label}</span>
                     <span className="text-[10px] text-zinc-500 leading-tight">{preset.desc}</span>
@@ -658,7 +653,7 @@ export function MaterialOverrides({
           {/* 자재등급 한번에 정하기 */}
           <div className="rounded-lg border border-amber-200 bg-amber-50/40 p-3">
             <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-[15px] sm:text-base font-bold text-zinc-900">🎨 자재등급 한번에 정하기</span>
+              <span className="text-[15px] sm:text-base font-bold text-zinc-900">자재등급 한번에 정하기</span>
               <span className="text-[11px] text-zinc-600">모든 공종에 같은 등급을 일괄 적용해요</span>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
@@ -674,12 +669,7 @@ export function MaterialOverrides({
                       selected ? `${meta.ring.replace('ring-', 'border-')} ${meta.bg} ring-1 ${meta.ring}` : 'border-zinc-200 bg-white hover:border-zinc-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-1">
-                      <span className={`text-sm font-bold ${selected ? meta.color : 'text-zinc-700'}`}>{g}</span>
-                      {selected && (
-                        <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1 py-0.5 rounded whitespace-nowrap">현재</span>
-                      )}
-                    </div>
+                    <div className={`text-sm font-bold ${selected ? meta.color : 'text-zinc-700'}`}>{g}</div>
                     <div className={`text-[10px] mt-0.5 ${selected ? meta.color : 'text-zinc-500'}`}>{meta.label}</div>
                   </button>
                 );
@@ -860,7 +850,6 @@ function SingleCard({
       <div className="flex items-center justify-between px-3 py-2.5 bg-zinc-50/50 border-b border-zinc-200/70 gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className={`text-sm font-semibold ${isExcluded ? 'text-zinc-400 line-through' : 'text-zinc-900'} truncate`}>{label}</span>
-          <DetailButton onClick={onShowDetail} label={`${label} 자세히 보기`} />
           {onGradeRadio && (
             <ExcludeToggleButton isExcluded={isExcluded} onClick={toggleExclude} />
           )}
