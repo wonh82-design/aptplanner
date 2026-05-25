@@ -342,20 +342,8 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   if (totalExpansion > 0) {
     push(lineItem('', '전체', 'expansion', totalExpansion, grade, 'per_m2'));
     if (scope.global.expansion_report) {
-      // 구청 신고 — v4 시트 R111: 1,000,000원 (per_set). 자재마스터에 별도 SKU 없어 고정 라인.
-      push({
-        id: '',
-        room: '전체',
-        work_type: 'expansion_report',
-        category: '구청 신고',
-        unit_type: 'per_set',
-        qty: 1,
-        grade: grade.default,
-        material_id: null,
-        material_label: '현장시공 신고대행',
-        unit_price: 1_000_000,
-        subtotal: 1_000_000,
-      });
+      // 구청 신고 — 자재마스터 work_type='expansion_report' 자재가 등급별 단가 적용
+      push(lineItem('', '전체', 'expansion_report', 1, grade, 'per_set'));
     }
   }
   // 터닝도어: 거실을 신규로 확장 시공 AND 안방은 미확장 상태일 때만 emit.
@@ -399,6 +387,18 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   // 배관 변경 — 옵션 (기본 OFF)
   if (scope.global.plumbing_relocation) {
     push(lineItem('', '전체', 'plumbing_relocation', 1, grade, 'per_set'));
+  }
+
+  // ===== 기타 묶음 (실리콘은 위에서 처리됨) =====
+  if (scope.global.protection) {
+    push(lineItem('', '전체', 'protection', 1, grade, 'per_set'));
+  }
+  if (scope.global.consent) {
+    push(lineItem('', '전체', 'consent', 1, grade, 'per_set'));
+  }
+  if (scope.global.cleanup) {
+    // 준공청소 — 평당 단위 (per_pyeong)
+    push(lineItem('', '전체', 'cleanup', p.pyeong, grade, 'per_ea'));
   }
 
   // re-sequence ids

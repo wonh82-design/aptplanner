@@ -85,6 +85,9 @@ export function defaultScope(): Scope {
       distribution_panel: true,    // 설비 기본 포함 (등급 자동 적용)
       plumbing_relocation: false,  // 옵션 (사용자 별도 선택)
       silicon: true,
+      protection: true,            // 기타 — 보양 (기본 포함)
+      consent: true,               // 기타 — 동의서 (기본 포함)
+      cleanup: true,               // 기타 — 준공청소 (기본 포함)
       // 기본 default = '이미 확장된 상태'이므로 신규 확장 시공 0건 → 신고 불필요
       expansion_report: false,
       // ── 목공사 6 sub-work ──

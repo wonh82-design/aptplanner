@@ -165,6 +165,10 @@ export const WORK_TYPE_LABEL: Record<string, string> = {
   silicon_labor: '실리콘',
   silicon_bio: '실리콘 바이오',
   silicon_modified: '실리콘 변성',
+  protection: '보양',
+  consent: '동의서 징구',
+  cleanup: '준공 청소',
+  expansion_report: '확장공사 신고',
   기타: '기타',
 };
 

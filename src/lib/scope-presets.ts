@@ -114,6 +114,9 @@ function fullRenovateGlobal(current: Scope): Scope['global'] {
     distribution_panel: true,    // 기본 포함
     plumbing_relocation: false,  // 옵션 (사용자 선택)
     silicon: true,
+    protection: true,
+    consent: true,
+    cleanup: true,
     expansion_report: needsExpansionReport(current),
     // 목공사 — 올리모델링이므로 기본·천정 ON
     carpentry_base: true,
@@ -183,6 +186,9 @@ export const PRESETS: Preset[] = [
           thermostat: false,
           distribution_panel: true, // 분배기 기본 포함
           plumbing_relocation: false, // 옵션
+          protection: true,
+          consent: true,
+          cleanup: true,
           silicon: true,            // 마감 디테일은 일반적으로 포함
           expansion_report: needsExpansionReport(current),
           // 목공사 — 기본 목공 포함 (문틀·문선·기본 보강). 천정 목공은 옵션

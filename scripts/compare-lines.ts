@@ -35,7 +35,7 @@ function v5Scope(): Scope {
       middoor: true, entry_furniture: true, lighting: true,
       balcony_floor_tile: true, balcony_paint: true,
       electrical_base: true, switch_outlet: true, induction_line: true,
-      plumbing_base: true, thermostat: true, distribution_panel: true, plumbing_relocation: false, silicon: true,
+      plumbing_base: true, thermostat: true, distribution_panel: true, plumbing_relocation: false, silicon: true, protection: true, consent: true, cleanup: true,
       expansion_report: true,
       carpentry_base: true, carpentry_ceiling: true, partition_length: 0,
       no_molding: false, no_door_frame: false, no_baseboard: false,

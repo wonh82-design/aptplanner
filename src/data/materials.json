@@ -2289,7 +2289,7 @@
   },
   {
     "material_id": "MAT-EP-001",
-    "sub_category": "기타",
+    "sub_category": "expansion_report",
     "category": "확장",
     "brand": "현장시공",
     "product_line": "신고대행",
@@ -2302,7 +2302,7 @@
   },
   {
     "material_id": "MAT-EP-002",
-    "sub_category": "기타",
+    "sub_category": "expansion_report",
     "category": "확장",
     "brand": "현장시공",
     "product_line": "신고대행",
@@ -2315,7 +2315,7 @@
   },
   {
     "material_id": "MAT-EP-003",
-    "sub_category": "기타",
+    "sub_category": "expansion_report",
     "category": "확장",
     "brand": "현장시공",
     "product_line": "신고대행",
@@ -2640,7 +2640,7 @@
   },
   {
     "material_id": "MAT-ETC-001",
-    "sub_category": "기타",
+    "sub_category": "protection",
     "category": "기타",
     "brand": "현장시공",
     "product_line": "표준 보양",
@@ -2653,7 +2653,7 @@
   },
   {
     "material_id": "MAT-ETC-002",
-    "sub_category": "기타",
+    "sub_category": "consent",
     "category": "기타",
     "brand": "현장시공",
     "product_line": "표준 행정대행",
@@ -2666,7 +2666,7 @@
   },
   {
     "material_id": "MAT-ETC-003",
-    "sub_category": "기타",
+    "sub_category": "cleanup",
     "category": "기타",
     "brand": "현장시공",
     "product_line": "표준 청소",

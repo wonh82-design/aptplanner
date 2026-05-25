@@ -322,8 +322,16 @@ export function MaterialOverrides({
     induction_line: 'induction_line',
     plumbing_base: 'plumbing_base',
     thermostat: 'thermostat',
+    distribution_panel: 'distribution_panel',
+    plumbing_relocation: 'plumbing_relocation',
     plumbing_heating: 'heating_pipe',
     silicon_labor: 'silicon',
+    silicon_bio: 'silicon',
+    silicon_modified: 'silicon',
+    protection: 'protection',
+    consent: 'consent',
+    cleanup: 'cleanup',
+    expansion_report: 'expansion_report',
     balcony_floor_tile: 'balcony_floor_tile',
     balcony_paint: 'balcony_paint',
     sliding_door: 'middoor',
@@ -485,6 +493,14 @@ export function MaterialOverrides({
         nextGlobal.carpentry_ceiling = true;
         // no_molding/no_door_frame/no_baseboard/partition_length 는 opt-in 유지 (OFF)
         break;
+      case 'etc':
+        // 기타 — 실리콘·보양·동의서·준공청소·확장공사 신고 일괄 ON
+        nextGlobal.silicon = true;
+        nextGlobal.protection = true;
+        nextGlobal.consent = true;
+        nextGlobal.cleanup = true;
+        nextGlobal.expansion_report = true;
+        break;
     }
     onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
   }
@@ -542,6 +558,14 @@ export function MaterialOverrides({
         nextGlobal.no_door_frame = false;
         nextGlobal.no_baseboard = false;
         nextGlobal.partition_length = 0;
+        break;
+      case 'etc':
+        // 기타 — 실리콘·보양·동의서·준공청소·확장공사 신고 일괄 OFF
+        nextGlobal.silicon = false;
+        nextGlobal.protection = false;
+        nextGlobal.consent = false;
+        nextGlobal.cleanup = false;
+        nextGlobal.expansion_report = false;
         break;
     }
     onScopeChange({ ...scope, rooms: nextRooms, global: nextGlobal });
@@ -746,6 +770,41 @@ export function MaterialOverrides({
               } : undefined}
               scope={scope}
               onScopeChange={onScopeChange}
+              // '기타' 번들 — 각 항목별 ON/OFF 토글 활성
+              perItemExcluded={
+                item.bundle.id === 'etc' && canEditScope
+                  ? (wt) => excludedKeys.has(wt) || (
+                      // 해당 work_type 의 scope 키가 OFF 면 자동으로 제외 상태
+                      // (예: scope.global.silicon=false → silicon_labor 자동 제외)
+                      item.works.find((w) => w.wt === wt)?.sub === 0
+                    )
+                  : undefined
+              }
+              onToggleItemExclude={
+                item.bundle.id === 'etc' && canEditScope
+                  ? (wt) => {
+                      const w = item.works.find((x) => x.wt === wt);
+                      const isExcl = excludedKeys.has(wt) || (w?.sub === 0);
+                      if (isExcl) {
+                        // 복원: excludedKeys 에서 제거 + scope ON
+                        setExcludedKeys((prev) => {
+                          const next = new Set(prev);
+                          next.delete(wt);
+                          return next;
+                        });
+                        includeWorkType(wt);
+                      } else {
+                        // 제외: excludedKeys 추가 + scope OFF
+                        setExcludedKeys((prev) => {
+                          const next = new Set(prev);
+                          next.add(wt);
+                          return next;
+                        });
+                        excludeWorkType(wt);
+                      }
+                    }
+                  : undefined
+              }
             />
           )
         )}
@@ -1129,6 +1188,7 @@ function BundleCard({
   onSelectBundleGrade, onSelectComponentGrade, onClearBundle,
   onShowDetail, onExclude, onRestoreBundle,
   scope, onScopeChange,
+  perItemExcluded, onToggleItemExclude,
 }: {
   bundle: WorkBundle;
   works: WorkInfo[];
@@ -1150,8 +1210,16 @@ function BundleCard({
   onRestoreBundle?: () => void;
   scope?: Scope;
   onScopeChange?: (s: Scope) => void;
+  /**
+   * 항목별 제외 여부 lookup — 전달 시 ComponentRow 가 ON/OFF 토글을 렌더링한다.
+   * (현재 '기타' 번들 전용 패턴)
+   */
+  perItemExcluded?: (wt: string) => boolean;
+  /** 항목별 제외 토글 핸들러 — perItemExcluded 와 짝으로 사용 */
+  onToggleItemExclude?: (wt: string) => void;
 }) {
-  const [showComponents, setShowComponents] = useState(false);
+  // 기타 번들은 기본 펼침 — 각 항목별 ON/OFF 가 핵심 UX
+  const [showComponents, setShowComponents] = useState(bundle.id === 'etc');
 
   // 세트 effective grade: 모든 work_type이 같은 등급이면 그 등급, 아니면 'mixed'
   const grades = works.map(w => effectiveGrade(w.wt));
@@ -1386,6 +1454,8 @@ function BundleCard({
                   effectiveGrade={effectiveGrade(w.wt)}
                   onSelectGrade={(g) => onSelectComponentGrade(w.wt, g)}
                   onShowDetail={() => onShowDetail(w.wt)}
+                  isExcluded={perItemExcluded ? perItemExcluded(w.wt) : undefined}
+                  onToggleExclude={onToggleItemExclude ? () => onToggleItemExclude(w.wt) : undefined}
                 />
               ))}
             </div>
@@ -1524,30 +1594,73 @@ function CarpentryToggle({
 
 function ComponentRow({
   work, effectiveGrade, onSelectGrade, onShowDetail,
+  isExcluded, onToggleExclude,
 }: {
   work: WorkInfo;
   effectiveGrade: GradeGroup;
   onSelectGrade: (g: GradeGroup) => void;
   onShowDetail: () => void;
+  /**
+   * 항목별 ON/OFF — '기타' 번들처럼 각 자재가 독립적인 묶음에서 사용.
+   * 미지정 시 토글 표시 안 함 (기존 동작 유지).
+   */
+  isExcluded?: boolean;
+  onToggleExclude?: () => void;
 }) {
   const label = labelOf(work.wt);
   const currentMat = getPrimaryMaterial(work.wt, effectiveGrade);
+  const hasToggle = onToggleExclude !== undefined;
 
   return (
-    <div className="flex items-center gap-2 rounded-md bg-white border border-zinc-200 px-2.5 py-1.5">
+    <div className={`flex items-center gap-2 rounded-md border px-2.5 py-1.5 transition ${
+      isExcluded ? 'border-zinc-200 bg-zinc-50' : 'border-zinc-200 bg-white'
+    }`}>
+      {/* 왼쪽 ON/OFF 체크박스 — onToggleExclude 전달 시에만 표시 */}
+      {hasToggle && (
+        <button
+          type="button"
+          onClick={onToggleExclude}
+          aria-pressed={!isExcluded}
+          title={isExcluded ? '이 항목을 견적에 포함' : '이 항목을 견적에서 제외'}
+          className={`flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded border-2 transition ${
+            isExcluded
+              ? 'border-zinc-300 bg-white text-transparent hover:border-emerald-400'
+              : 'border-blue-600 bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden>
+            <path d="M2 6.5L4.5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      )}
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-semibold text-zinc-900 truncate flex items-center gap-1.5">
+        <div className={`text-xs font-semibold truncate flex items-center gap-1.5 ${
+          isExcluded ? 'text-zinc-400 line-through' : 'text-zinc-900'
+        }`}>
           <span className="truncate">{label}</span>
-          <DetailButton onClick={onShowDetail} label={`${label} 자세히 보기`} />
+          {!hasToggle && (
+            <DetailButton onClick={onShowDetail} label={`${label} 자세히 보기`} />
+          )}
         </div>
-        {currentMat && (
+        {currentMat && !isExcluded && (
           <div className="text-[10px] text-zinc-500 truncate">
             {currentMat.brand} {currentMat.product_line}
           </div>
         )}
+        {isExcluded && (
+          <div className="text-[10px] text-zinc-400 italic">제외됨 — 견적에서 빠짐</div>
+        )}
       </div>
-      {/* 등급 토글 3버튼 */}
-      <div className="inline-flex rounded-md border border-zinc-200 overflow-hidden text-[10px] flex-shrink-0">
+      {/* 현재 공사비 — 제외 토글이 있는 묶음(기타)에서만 표시 */}
+      {hasToggle && !isExcluded && (
+        <div className="flex-shrink-0 text-[10px] text-zinc-500 tabular-nums whitespace-nowrap">
+          {fmtKRWShortVat(work.sub)}
+        </div>
+      )}
+      {/* 등급 토글 3버튼 — 제외 상태면 흐리게 (선택 가능하지만 시각적으로 약하게) */}
+      <div className={`inline-flex rounded-md border border-zinc-200 overflow-hidden text-[10px] flex-shrink-0 ${
+        isExcluded ? 'opacity-50' : ''
+      }`}>
         {GRADES.map(g => {
           const selected = effectiveGrade === g;
           const meta = GRADE_META[g];

@@ -141,6 +141,9 @@ export type GlobalScope = {
   distribution_panel: boolean; // 분배기 교체 — 설비 기본 포함 (등급에 자동 적용)
   plumbing_relocation: boolean;// 배관 변경 — 옵션 (사용자 선택)
   silicon: boolean;
+  protection: boolean;        // 기타 — 보양
+  consent: boolean;           // 기타 — 동의서 징구
+  cleanup: boolean;           // 기타 — 준공 청소
   expansion_report: boolean;   // 구청 확장공사 신고
   // ── 목공사 (carpentry) — 6가지 sub-work ──
   carpentry_base: boolean;     // 기본 목공사 (문틀·문선·기본 보강)

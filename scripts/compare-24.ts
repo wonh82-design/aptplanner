@@ -15,7 +15,7 @@ function v5Scope(): Scope {
       '작은방2': makeRoom({ expansion_after: true, flooring: true, wallpaper: true, molding: true, sash: true, closet: true }),
       '작은방3': makeRoom(),
     },
-    global: { demolition: true, insulation: true, heating_pipe: false, common_bath_set: true, master_bath_set: true, kitchen_set: true, middoor: true, entry_furniture: true, lighting: true, balcony_floor_tile: true, balcony_paint: true, electrical_base: true, switch_outlet: true, induction_line: true, plumbing_base: true, thermostat: true, distribution_panel: true, plumbing_relocation: false, silicon: true, expansion_report: true, carpentry_base: true, carpentry_ceiling: true, partition_length: 0, no_molding: false, no_door_frame: false, no_baseboard: false },
+    global: { demolition: true, insulation: true, heating_pipe: false, common_bath_set: true, master_bath_set: true, kitchen_set: true, middoor: true, entry_furniture: true, lighting: true, balcony_floor_tile: true, balcony_paint: true, electrical_base: true, switch_outlet: true, induction_line: true, plumbing_base: true, thermostat: true, distribution_panel: true, plumbing_relocation: false, silicon: true, protection: true, consent: true, cleanup: true, expansion_report: true, carpentry_base: true, carpentry_ceiling: true, partition_length: 0, no_molding: false, no_door_frame: false, no_baseboard: false },
   };
 }
 

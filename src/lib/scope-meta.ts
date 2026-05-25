@@ -276,9 +276,12 @@ export const GLOBAL_GROUPS: GlobalGroup[] = [
     ],
   },
   {
-    icon: '🧴', title: '마감 디테일', desc: '실리콘 등 잔공사',
+    icon: '🧴', title: '기타', desc: '실리콘·보양·동의서·준공청소',
     items: [
       { key: 'silicon', label: '실리콘 마감', desc: '욕실·주방·창틀 마감' },
+      { key: 'protection', label: '보양', desc: '바닥·창호·문짝 보호' },
+      { key: 'consent', label: '동의서 징구', desc: '관리실·이웃 동의' },
+      { key: 'cleanup', label: '준공 청소', desc: '평수 비례 — 입주 전 마무리' },
     ],
   },
 ];
