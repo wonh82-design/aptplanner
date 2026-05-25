@@ -719,6 +719,7 @@ export function MaterialOverrides({
               key={`b-${item.bundle.id}-${i}`}
               bundle={item.bundle}
               works={item.works}
+              bathCount={property ? (property.common_bath + property.master_bath) : undefined}
               totalSub={item.sub}
               gradeSelection={value}
               effectiveGrade={effectiveGrade}
@@ -1131,7 +1132,7 @@ function bundleMaterialSummary(works: WorkInfo[], grade: GradeGroup): string {
 // =====================================================
 
 function BundleCard({
-  bundle, works, totalSub, gradeSelection, effectiveGrade, isExcluded = false,
+  bundle, works, totalSub, gradeSelection, effectiveGrade, isExcluded = false, bathCount,
   onSelectBundleGrade, onSelectComponentGrade, onClearBundle,
   onShowDetail, onExclude, onRestoreBundle,
   scope, onScopeChange,
@@ -1143,6 +1144,8 @@ function BundleCard({
   effectiveGrade: (wt: string) => GradeGroup;
   /** bundle 전체가 제외 상태 — '제외' 행 active 표시 */
   isExcluded?: boolean;
+  /** 욕실 풀세트(bundle.id='bath') 의 욕실 총 개수 (공용 + 부부) 표시용 */
+  bathCount?: number;
   onSelectBundleGrade: (g: GradeGroup) => void;
   onSelectComponentGrade: (wt: string, g: GradeGroup) => void;
   onClearBundle: () => void;
@@ -1195,6 +1198,13 @@ function BundleCard({
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">
               세트 · {works.length}개 자재
             </span>
+            {/* 욕실 풀세트는 욕실 개수 칩 표시 */}
+            {bundle.id === 'bath' && bathCount !== undefined && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold whitespace-nowrap">
+                욕실 {bathCount}개
+                {bathCount === 2 && ' (공용 + 부부)'}
+              </span>
+            )}
             {isExcluded && (
               <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">
                 제외됨
