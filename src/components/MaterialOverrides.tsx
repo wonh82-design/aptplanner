@@ -102,9 +102,18 @@ export function MaterialOverrides({
    */
   const firstIdxCacheRef = useRef<Map<string, number>>(new Map());
 
+  /**
+   * work_type 별 '마지막 본 non-zero qty' 영구 캐시.
+   * 제외 후에도 BundleCard 의 등급 행 공사비를 계속 보여주기 위함.
+   * (예: 욕실 풀세트 제외해도 가성비/표준/고급 등급 행은 "이 등급으로 복원하면 얼마"
+   *  참고 금액을 그대로 표시.)
+   */
+  const lastNonZeroQtyRef = useRef<Map<string, number>>(new Map());
+
   // 1) 견적에 등장하는 work_type 집계 + 캐시에 있는 모든 wt 도 placeholder 로 보존
   const workInfoList = useMemo(() => {
     const cache = firstIdxCacheRef.current;
+    const qtyCache = lastNonZeroQtyRef.current;
     const map = new Map<string, WorkInfo>();
     quote.line_items.forEach((it, idx) => {
       if (!it.material_id) return;
@@ -119,11 +128,15 @@ export function MaterialOverrides({
         map.set(it.work_type, { wt: it.work_type, sub: it.subtotal, totalQty: it.qty, firstIdx });
       }
     });
+    // 현재 line_items 의 non-zero qty 는 qtyCache 갱신 (제외 시 fallback 으로 사용)
+    for (const [wt, info] of map.entries()) {
+      if (info.totalQty > 0) qtyCache.set(wt, info.totalQty);
+    }
     // 캐시에 있지만 line_items 에 없는 wt — placeholder 로 자리 유지
-    // (프리셋으로 빠진 케이스 / 사용자가 제외한 케이스 모두 포함)
+    // totalQty 는 마지막 non-zero qty 사용 → BundleCard 등급 행 공사비 유지
     for (const [wt, firstIdx] of cache.entries()) {
       if (!map.has(wt)) {
-        map.set(wt, { wt, sub: 0, totalQty: 0, firstIdx });
+        map.set(wt, { wt, sub: 0, totalQty: qtyCache.get(wt) ?? 0, firstIdx });
       }
     }
     // excludedKeys 의 wt 도 (혹시 캐시에도 없는 새 경우) 안전망
@@ -131,7 +144,7 @@ export function MaterialOverrides({
     for (const wt of excludedKeys) {
       if (!map.has(wt)) {
         const firstIdx = cache.get(wt) ?? fallbackIdx++;
-        map.set(wt, { wt, sub: 0, totalQty: 0, firstIdx });
+        map.set(wt, { wt, sub: 0, totalQty: qtyCache.get(wt) ?? 0, firstIdx });
       }
     }
     return Array.from(map.values());
@@ -693,8 +706,8 @@ export function MaterialOverrides({
               }
               isExcluded={
                 excludedKeys.has(item.work.wt) ||
-                // 캐시에 있지만 line_items 에서 빠진 경우 (프리셋 등으로 scope OFF) — 자동 제외 상태로
-                (item.work.sub === 0 && item.work.totalQty === 0)
+                // 캐시에 있지만 line_items 에서 빠진 경우 (sub=0 = placeholder) → 자동 제외 표시
+                item.work.sub === 0
               }
               onSelectMaterial={setMaterial}
               onClear={() => clearOverride(item.work.wt)}
@@ -714,7 +727,7 @@ export function MaterialOverrides({
               onClearBundle={() => clearBundleOverride(item.bundle)}
               onShowDetail={(wt) => setDetailWorkType(wt)}
               isExcluded={item.works.every(
-                (w) => excludedKeys.has(w.wt) || (w.sub === 0 && w.totalQty === 0)
+                (w) => excludedKeys.has(w.wt) || w.sub === 0
               )}
               onExclude={canEditScope ? () => {
                 // bundle 안의 모든 work_type 을 excludedKeys 에 추가 → 카드 보존
