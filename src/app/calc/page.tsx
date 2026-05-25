@@ -513,6 +513,10 @@ function ResultBanner({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {scenarios.map((s) => {
             const c = toneClass(s.tone);
+            // 평당 환산 — 10만원 단위 반올림
+            const pyeong = property.pyeong || 1;
+            const lowPerPy = r100k(s.low / pyeong);
+            const highPerPy = r100k(s.high / pyeong);
             return (
               <div key={s.key} className={`rounded-lg border ${c.border} ${c.bg} p-3 flex flex-col`}>
                 <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -527,6 +531,9 @@ function ResultBanner({
                 <div className={`text-base sm:text-lg font-extrabold tabular-nums ${c.value} mt-auto leading-tight`}>
                   {fmtKRWShort(s.low)} ~ {fmtKRWShort(s.high)}
                 </div>
+                <div className="text-[10px] text-zinc-500 tabular-nums mt-1 leading-tight">
+                  평당 <span className="font-semibold text-zinc-700">{fmtKRWShort(lowPerPy)} ~ {fmtKRWShort(highPerPy)}</span>
+                </div>
               </div>
             );
           })}
@@ -534,12 +541,6 @@ function ResultBanner({
         <div className="text-[11px] text-zinc-600 mt-3 leading-relaxed">
           ※ 모든 금액은 부가세(10%) 포함, 지역·연식 보정 및 10만원 단위 반올림. 시공 방식별 비율은 시장 평균 추정치이며, 업체·디자인 난이도에 따라 다를 수 있습니다.
         </div>
-      </div>
-
-      <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <Stat label="부가세 별도" value={fmtKRWShort(totals.grand_total)} />
-        <Stat label="평당 (부가세 포함)" value={`${fmtKRWShort(Math.round(totals.per_pyeong * 1.1))}/평`} />
-        <Stat label="세부 공종 및 자재 항목 수" value={`${quote.line_items.length}건`} />
       </div>
     </div>
   );
