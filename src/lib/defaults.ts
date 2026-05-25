@@ -82,6 +82,8 @@ export function defaultScope(): Scope {
       induction_line: true,
       plumbing_base: true,
       thermostat: true,
+      distribution_panel: true,    // 설비 기본 포함 (등급 자동 적용)
+      plumbing_relocation: false,  // 옵션 (사용자 별도 선택)
       silicon: true,
       // 기본 default = '이미 확장된 상태'이므로 신규 확장 시공 0건 → 신고 불필요
       expansion_report: false,

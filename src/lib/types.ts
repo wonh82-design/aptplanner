@@ -137,7 +137,9 @@ export type GlobalScope = {
   switch_outlet: boolean;
   induction_line: boolean;
   plumbing_base: boolean;      // 설비 기본공사 (수도·난방·하수 점검·보강) — electrical_base와 분리
-  thermostat: boolean;
+  thermostat: boolean;         // 난방 온도조절기
+  distribution_panel: boolean; // 분배기 교체 — 설비 기본 포함 (등급에 자동 적용)
+  plumbing_relocation: boolean;// 배관 변경 — 옵션 (사용자 선택)
   silicon: boolean;
   expansion_report: boolean;   // 구청 확장공사 신고
   // ── 목공사 (carpentry) — 6가지 sub-work ──

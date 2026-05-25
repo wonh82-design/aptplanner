@@ -115,8 +115,8 @@ export const BIG_WORK_GROUPS: BigWorkGroup[] = [
     id: 'plumbing',
     title: '설비 공사',
     icon: '🚰',
-    desc: '수도·하수 점검·보강 + 난방 온도조절기 + 난방배관 교체',
-    globalKeys: ['plumbing_base', 'thermostat', 'heating_pipe'],
+    desc: '설비기본·분배기·온도조절기 (기본) + 배관변경·난방배관 (옵션)',
+    globalKeys: ['plumbing_base', 'thermostat', 'distribution_panel', 'heating_pipe', 'plumbing_relocation'],
   },
   {
     id: 'wallpaper',
@@ -233,11 +233,13 @@ export const GLOBAL_GROUPS: GlobalGroup[] = [
     ],
   },
   {
-    icon: '🚰', title: '설비 공사', desc: '설비 기본 + 난방 온도조절기 + 난방배관',
+    icon: '🚰', title: '설비 공사', desc: '설비기본·분배기·온도조절기 + 옵션(배관변경·난방배관)',
     items: [
-      { key: 'plumbing_base', label: '설비 기본', desc: '수도·하수 점검·보강' },
-      { key: 'thermostat', label: '난방 온도조절기', desc: '거실+각 방 자동 산정' },
-      { key: 'heating_pipe', label: '난방배관 교체', desc: '20년+ 노후 시 권장', warning: '큰 비용' },
+      { key: 'plumbing_base', label: '설비 기본', desc: '수도·하수 점검·보강 (기본 포함)' },
+      { key: 'distribution_panel', label: '분배기 교체', desc: '난방 분배기 교체 (기본 포함)' },
+      { key: 'thermostat', label: '난방 온도조절기', desc: '거실+각 방 자동 산정 (기본 포함)' },
+      { key: 'plumbing_relocation', label: '배관 변경', desc: '옵션 — 주방·욕실 위치 변경 시' },
+      { key: 'heating_pipe', label: '난방배관 교체', desc: '옵션 — 20년+ 노후 시 권장', warning: '큰 비용' },
     ],
   },
   {

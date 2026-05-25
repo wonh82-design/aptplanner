@@ -470,9 +470,11 @@ export function MaterialOverrides({
         nextGlobal.induction_line = true;
         break;
       case 'plumbing':
+        // 기본 포함 3개 (설비기본·온도조절기·분배기) ON
         nextGlobal.plumbing_base = true;
         nextGlobal.thermostat = true;
-        // heating_pipe 는 노후 의심 시만 — 기본 OFF 유지
+        nextGlobal.distribution_panel = true;
+        // 옵션 2개 (배관변경·난방배관) 는 OFF 유지 — 사용자가 별도 선택
         break;
       case 'middoor':
         nextGlobal.middoor = true;
@@ -526,6 +528,8 @@ export function MaterialOverrides({
         nextGlobal.plumbing_base = false;
         nextGlobal.thermostat = false;
         nextGlobal.heating_pipe = false;
+        nextGlobal.distribution_panel = false;
+        nextGlobal.plumbing_relocation = false;
         break;
       case 'middoor':
         nextGlobal.middoor = false;

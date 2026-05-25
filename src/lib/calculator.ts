@@ -392,6 +392,14 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   if (scope.global.heating_pipe) {
     push(lineItem('', '전체', 'plumbing_heating', p.pyeong, grade, 'per_m2'));
   }
+  // 분배기 교체 — 설비 기본 포함 (기본 ON)
+  if (scope.global.distribution_panel) {
+    push(lineItem('', '전체', 'distribution_panel', 1, grade, 'per_set'));
+  }
+  // 배관 변경 — 옵션 (기본 OFF)
+  if (scope.global.plumbing_relocation) {
+    push(lineItem('', '전체', 'plumbing_relocation', 1, grade, 'per_set'));
+  }
 
   // re-sequence ids
   items.forEach((it, i) => { it.id = String(i + 1); });
