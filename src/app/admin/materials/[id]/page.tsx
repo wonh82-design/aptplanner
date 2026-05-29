@@ -296,40 +296,55 @@ function MaterialEditor({ materialId }: { materialId: string }) {
           </Field>
         </FieldGroup>
 
-        {/* 단가 */}
-        <FieldGroup title="단가">
-          <Field label="단위">
-            <select value={draft.unit_type} onChange={(e) => updateField('unit_type', e.target.value)} className="input">
-              <option value="per_m2">per_m2 (㎡)</option>
-              <option value="per_m">per_m (m)</option>
-              <option value="per_ea">per_ea (개)</option>
-              <option value="per_set">per_set (세트)</option>
-            </select>
-          </Field>
-          <Field label="자재가 (₩)">
-            <input
-              type="number"
-              inputMode="numeric"
-              value={draft.material_price === 0 ? '' : draft.material_price}
-              onChange={(e) => updateField('material_price', e.target.value === '' ? 0 : Number(e.target.value))}
-              placeholder="0"
-              className="input text-right tabular-nums"
-            />
-          </Field>
-          <Field label="시공비 (₩)">
-            <input
-              type="number"
-              inputMode="numeric"
-              value={draft.labor_price === 0 ? '' : draft.labor_price}
-              onChange={(e) => updateField('labor_price', e.target.value === '' ? 0 : Number(e.target.value))}
-              placeholder="0"
-              className="input text-right tabular-nums"
-            />
-          </Field>
-          <Field label="합계 (자동 계산)" full>
-            <input value={draft.total_unit_price.toLocaleString('ko-KR') + ' 원'} readOnly className="input bg-zinc-50 text-right tabular-nums font-bold" />
-          </Field>
-        </FieldGroup>
+        {/* 단가 — 샷시(window)는 룩업 표 기반이라 입력 영역 숨김 */}
+        {draft.sub_category === 'window' ? (
+          <FieldGroup title="단가">
+            <div className="sm:col-span-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-3">
+              <div className="text-xs font-bold text-amber-900 mb-1">
+                ⓘ 평형/베이/등급 룩업 기반 — 단가 입력 불가
+              </div>
+              <div className="text-[11px] text-amber-800 leading-relaxed">
+                샷시 공사비는 자재 단가가 아닌 <strong>우리집 평형·베이·등급 룩업 표</strong>에서 산출됩니다.
+                (소스: <code className="text-[10px] bg-white/60 px-1 rounded">src/lib/window-cost.ts</code>)<br />
+                여기서 단가를 입력해도 계산기는 무시합니다. 단가 표 자체를 바꾸려면 코드 수정이 필요해요.
+              </div>
+            </div>
+          </FieldGroup>
+        ) : (
+          <FieldGroup title="단가">
+            <Field label="단위">
+              <select value={draft.unit_type} onChange={(e) => updateField('unit_type', e.target.value)} className="input">
+                <option value="per_m2">per_m2 (㎡)</option>
+                <option value="per_m">per_m (m)</option>
+                <option value="per_ea">per_ea (개)</option>
+                <option value="per_set">per_set (세트)</option>
+              </select>
+            </Field>
+            <Field label="자재가 (₩)">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={draft.material_price === 0 ? '' : draft.material_price}
+                onChange={(e) => updateField('material_price', e.target.value === '' ? 0 : Number(e.target.value))}
+                placeholder="0"
+                className="input text-right tabular-nums"
+              />
+            </Field>
+            <Field label="시공비 (₩)">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={draft.labor_price === 0 ? '' : draft.labor_price}
+                onChange={(e) => updateField('labor_price', e.target.value === '' ? 0 : Number(e.target.value))}
+                placeholder="0"
+                className="input text-right tabular-nums"
+              />
+            </Field>
+            <Field label="합계 (자동 계산)" full>
+              <input value={draft.total_unit_price.toLocaleString('ko-KR') + ' 원'} readOnly className="input bg-zinc-50 text-right tabular-nums font-bold" />
+            </Field>
+          </FieldGroup>
+        )}
 
         {/* 외부 링크 */}
         <FieldGroup title="외부 링크">

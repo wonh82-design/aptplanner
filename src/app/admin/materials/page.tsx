@@ -485,6 +485,8 @@ function MaterialsList() {
                 const vMat = getDraftValue(m, 'material_price');
                 const vLab = getDraftValue(m, 'labor_price');
                 const vTotal = (typeof vMat === 'number' && typeof vLab === 'number') ? vMat + vLab : m.total_unit_price;
+                // 샷시(window) 는 평형/베이/등급 룩업 기반 — 단가 셀 입력 차단 + '룩업' 배지로 대체
+                const isLookupPricing = m.sub_category === 'window';
                 return (
                 <tr key={m.material_id} className={isDirty ? 'bg-amber-50/60' : 'hover:bg-blue-50/30'}>
                   <td className="px-3 py-2 font-mono text-[10px] text-zinc-500">
@@ -531,60 +533,79 @@ function MaterialsList() {
                       </>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600">
-                    {editMode ? (
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        value={vMat === 0 ? '' : vMat}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          updateDraft(m.material_id, 'material_price', v === '' ? 0 : Number(v));
-                        }}
-                        placeholder="0"
-                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0 text-right tabular-nums"
-                      />
-                    ) : (
-                      m.material_price.toLocaleString('ko-KR')
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600">
-                    {editMode ? (
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        value={vLab === 0 ? '' : vLab}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          updateDraft(m.material_id, 'labor_price', v === '' ? 0 : Number(v));
-                        }}
-                        placeholder="0"
-                        className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0 text-right tabular-nums"
-                      />
-                    ) : (
-                      m.labor_price.toLocaleString('ko-KR')
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900 font-bold border-l border-zinc-100">
-                    {vTotal.toLocaleString('ko-KR')}
-                  </td>
-                  {/* 평당 환산 = (24평 공사비) / 24 */}
-                  {/* 24평 공사비 = sub_category 의 24평 표준 qty × 합계단가 */}
-                  {(() => {
-                    const qty = qtyByWorkType.get(m.sub_category) ?? 0;
-                    const total24 = Math.round(qty * vTotal);
-                    const perPyeong = qty > 0 ? Math.round(total24 / 24) : 0;
-                    return (
-                      <>
-                        <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600 whitespace-nowrap">
-                          {qty > 0 ? perPyeong.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
-                        </td>
-                        <td className="px-3 py-2 text-right font-mono tabular-nums text-blue-700 font-semibold whitespace-nowrap">
-                          {qty > 0 ? total24.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
-                        </td>
-                      </>
-                    );
-                  })()}
+                  {isLookupPricing ? (
+                    // 샷시 — 단가 4셀(자재비/인건비/합계/평당/24평)을 '룩업' 배지로 통합
+                    <>
+                      <td className="px-3 py-2 text-right text-zinc-300">—</td>
+                      <td className="px-3 py-2 text-right text-zinc-300">—</td>
+                      <td className="px-3 py-2 text-center border-l border-zinc-100" colSpan={3}>
+                        <span
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold"
+                          title="평형/베이/등급 룩업 표 기반 (src/lib/window-cost.ts)"
+                        >
+                          <span aria-hidden>ⓘ</span>
+                          평형/베이/등급 룩업
+                        </span>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600">
+                        {editMode ? (
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            value={vMat === 0 ? '' : vMat}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              updateDraft(m.material_id, 'material_price', v === '' ? 0 : Number(v));
+                            }}
+                            placeholder="0"
+                            className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0 text-right tabular-nums"
+                          />
+                        ) : (
+                          m.material_price.toLocaleString('ko-KR')
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600">
+                        {editMode ? (
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            value={vLab === 0 ? '' : vLab}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              updateDraft(m.material_id, 'labor_price', v === '' ? 0 : Number(v));
+                            }}
+                            placeholder="0"
+                            className="text-[11px] border border-zinc-300 rounded px-1 py-0.5 bg-white w-full min-w-0 text-right tabular-nums"
+                          />
+                        ) : (
+                          m.labor_price.toLocaleString('ko-KR')
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900 font-bold border-l border-zinc-100">
+                        {vTotal.toLocaleString('ko-KR')}
+                      </td>
+                      {/* 평당 환산 = (24평 공사비) / 24 */}
+                      {/* 24평 공사비 = sub_category 의 24평 표준 qty × 합계단가 */}
+                      {(() => {
+                        const qty = qtyByWorkType.get(m.sub_category) ?? 0;
+                        const total24 = Math.round(qty * vTotal);
+                        const perPyeong = qty > 0 ? Math.round(total24 / 24) : 0;
+                        return (
+                          <>
+                            <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600 whitespace-nowrap">
+                              {qty > 0 ? perPyeong.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
+                            </td>
+                            <td className="px-3 py-2 text-right font-mono tabular-nums text-blue-700 font-semibold whitespace-nowrap">
+                              {qty > 0 ? total24.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
+                            </td>
+                          </>
+                        );
+                      })()}
+                    </>
+                  )}
                   <td className="px-3 py-2 text-center">
                     {m.image_url
                       ? <span className="text-emerald-600 font-bold">✓</span>
