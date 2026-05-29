@@ -118,6 +118,7 @@ function fullRenovateGlobal(current: Scope): Scope['global'] {
     consent: true,
     cleanup: true,
     expansion_report: needsExpansionReport(current),
+    act_permit: false,  // 행위허가는 구조변경 시 사용자 명시 선택
     // 목공사 — 올리모델링이므로 기본·천정 ON
     carpentry_base: true,
     carpentry_ceiling: true,
@@ -191,6 +192,7 @@ export const PRESETS: Preset[] = [
           cleanup: true,
           silicon: true,            // 마감 디테일은 일반적으로 포함
           expansion_report: needsExpansionReport(current),
+          act_permit: false,
           // 목공사 — 기본 목공 포함 (문틀·문선·기본 보강). 천정 목공은 옵션
           carpentry_base: true,
           carpentry_ceiling: false,

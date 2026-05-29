@@ -237,9 +237,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
           >
             <option value={2}>2개 (안방+작은방1)</option>
             <option value={3}>3개 (안방+작은방1·2)</option>
-            {value.pyeong >= 34 && (
-              <option value={4}>4개 (안방+작은방1·2·3)</option>
-            )}
+            <option value={4}>4개 (안방+작은방1,2,3)</option>
           </select>
         </Field>
 

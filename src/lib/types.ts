@@ -145,6 +145,7 @@ export type GlobalScope = {
   consent: boolean;           // 기타 — 동의서 징구
   cleanup: boolean;           // 기타 — 준공 청소
   expansion_report: boolean;   // 구청 확장공사 신고
+  act_permit: boolean;         // 구청 행위허가 신고 — 구조변경·평면수정 시 필수 (확장과 독립)
   // ── 목공사 (carpentry) — 6가지 sub-work ──
   carpentry_base: boolean;     // 기본 목공사 (문틀·문선·기본 보강)
   carpentry_ceiling: boolean;  // 천정 목공 (평천↔우물천, 매입조명 박스 등)

@@ -25,9 +25,10 @@ import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
   bayWidthForRoom, balconyAreaForRoom, doorCount, downlightCount,
-  bathroomArea, kitchenLength,
+  bathroomArea, kitchenLength, adjustedRoomFlooringArea,
 } from './areas';
 import { getPrimaryMaterial, getMaterialById, labelOf } from './materials';
+import { lookupWindowCost } from './window-cost';
 
 const WALL_RATIO = 2.8;             // 도배 면적 = 바닥 × 2.8 (벽면 환산)
 const BASEBOARD_HEIGHT = 0.343;     // 걸레받이 ㎡ 환산 계수 (시트 v4 기준)
@@ -120,6 +121,42 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
+/**
+ * 샷시(window) 전용 LineItem 생성기.
+ * 자재 단가 대신 룩업 표(평형/베이/등급) 기반 총가를 사용한다.
+ *  - share: 해당 방의 베이폭 / 활성 방 전체 베이폭 (0~1)
+ *  - totalCost: lookupWindowCost(pyeong, bay, gradeGroup) 결과
+ *  - subtotal = round(share × totalCost)
+ * 자재는 라벨 표시용으로만 선택 — total_unit_price 는 무시.
+ */
+function windowLineItem(
+  room: string,
+  share: number,
+  totalCost: number,
+  grade: GradeSelection,
+): LineItem | null {
+  if (share <= 0 || totalCost <= 0) return null;
+  const overrideId = grade.material_overrides?.['window'];
+  const overrideMat = overrideId ? getMaterialById(overrideId) : null;
+  const mat = overrideMat && overrideMat.sub_category === 'window'
+    ? overrideMat
+    : getPrimaryMaterial('window', effectiveGrade('window', grade));
+  if (!mat) return null;
+  return {
+    id: '',
+    room,
+    work_type: 'window',
+    category: labelOf('window'),
+    unit_type: 'per_set',
+    qty: round2(share),
+    grade: gradeGroupOf(mat.primary_grade as Grade),
+    material_id: mat.material_id,
+    material_label: mat.installer_spec || `${mat.brand ?? ''} ${mat.product_line ?? ''}`.trim(),
+    unit_price: totalCost,
+    subtotal: Math.round(share * totalCost),
+  };
+}
+
 /** 메인 함수: Property+Scope+Grade → LineItem[] */
 export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection): LineItem[] {
   const items: LineItem[] = [];
@@ -153,20 +190,28 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     }
   }
 
-  // ===== 2. 샷시 — sash=Y 방의 외부창 분만 emit (베이폭 비율 안분) =====
-  // v5 엑셀 정합: 외부창 면적 × (sash=Y 방의 베이폭 합 / 활성 방 전체 베이폭 합).
-  // 확장 후 새 외부창은 외부창 면적 정의 자체에 포함되어 있으므로 별도 라인 emit 금지 (이중 계상 방지).
+  // ===== 2. 샷시 — 평형대·베이·등급 룩업 (자재 단가 미사용) =====
+  // 자재마스터 window 자재의 total_unit_price 는 0 으로 두고, 이 룩업 표가 진실의 원천.
+  // (Obsidian: BIZ/apt planner cost caliltor logic.md '평형대별 샷시 공사비')
+  //  포함 범위: 거실·안방·작은방·주방 창 + 안방 발코니 터닝도어 + 철거·사다리차·이윤 15%.
+  //
+  // 룸별 분배: sash=Y 방의 베이폭 / 활성 방 전체 베이폭 비율로 룩업 총가를 안분.
+  //  - 모든 활성 방 sash=Y → 합계 = 룩업가
+  //  - 일부만 sash=Y → 베이폭 비율만큼 룩업가 차감
   const sashRooms = activeRooms(p).filter(r => scope.rooms[r as keyof Scope['rooms']]?.sash);
   if (sashRooms.length > 0) {
     const bayWidthSum = activeRooms(p).reduce((s, r) => s + bayWidthForRoom(r, p.pyeong), 0);
-    if (bayWidthSum > 0) {
+    const sashGrade = effectiveGrade('window', grade);
+    const totalSashCost = lookupWindowCost(p.pyeong, p.bay, sashGrade);
+    if (bayWidthSum > 0 && totalSashCost > 0) {
       for (const r of sashRooms) {
-        const w = bayWidthForRoom(r, p.pyeong);
-        const qty = windowArea * (w / bayWidthSum);
-        push(lineItem('', r, 'window', qty, grade, 'per_m2'));
+        const share = bayWidthForRoom(r, p.pyeong) / bayWidthSum;
+        push(windowLineItem(r, share, totalSashCost, grade));
       }
     }
   }
+  // windowArea 는 더 이상 사용하지 않지만 outsideWindowArea import 자체는 향후 확장 여지를 위해 유지.
+  void windowArea;
 
   // ===== 3. 공간별: 바닥재 / 도배 / 몰딩 =====
   for (const roomId of activeRooms(p)) {
@@ -174,8 +219,11 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     if (!rs) continue;
     const area = roomAreaForId(roomId, p.pyeong, p.bay);
     const perim = roomPerimeterForId(roomId, p.pyeong);
+    // 마루는 평형 기반 정규화 면적 사용 — 방 수와 무관하게 총 시공면적 일정.
+    // 도배·몰딩은 룸 분할 시 가벽 둘레가 늘어나는 현실 반영 → 룸별 raw area 유지.
+    const flooringArea = adjustedRoomFlooringArea(roomId, p);
 
-    if (rs.flooring) push(lineItem('', roomId, '마루', area, grade, 'per_m2'));
+    if (rs.flooring) push(lineItem('', roomId, '마루', flooringArea, grade, 'per_m2'));
     if (rs.wallpaper) push(lineItem('', roomId, '도배', area * WALL_RATIO, grade, 'per_m2'));
     if (rs.molding) {
       if (scope.global.no_molding) {
@@ -400,6 +448,10 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     // 준공청소 — 평당 단위 (per_pyeong)
     push(lineItem('', '전체', 'cleanup', p.pyeong, grade, 'per_ea'));
   }
+  if (scope.global.act_permit) {
+    // 구청 행위허가 신고 — 구조변경·평면수정 시 필수 (확장과 독립)
+    push(lineItem('', '전체', 'act_permit', 1, grade, 'per_set'));
+  }
 
   // re-sequence ids
   items.forEach((it, i) => { it.id = String(i + 1); });
@@ -413,6 +465,7 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
  */
 const SPECIAL_WORK_TYPE_CATEGORY: Record<string, string> = {
   expansion_report: '확장',
+  act_permit: '확장',
   door_no_frame: '목공사',
 };
 

@@ -91,9 +91,13 @@ export function exclusiveAreaM2(pyeong: number): number {
 
 /** 평형 기반 방 개수(거실 제외) 권장값 */
 export function recommendedRoomCount(pyeong: number): 2 | 3 | 4 | 5 {
-  // 거실 외 침실 수. 20평대 보통 2룸(안방+작방1), 30평대+ 3룸(안방+작방1+작방2)
+  // 거실 외 침실 수.
+  //  20평대 미만 → 2룸 (안방+작방1)
+  //  20~40평대 → 3룸 (안방+작방1·2)
+  //  50평대+ → 4룸 (안방+작방1·2·3)
   if (pyeong < 22) return 2;
-  return 3;
+  if (pyeong < 50) return 3;
+  return 4;
 }
 
 /** 우리집 시트의 "스위치/콘센트 평형별 자동 산출" 룩업 */
@@ -162,6 +166,42 @@ export function activeRooms(p: Property): string[] {
   if (p.rooms >= 3) rooms.push('작은방2');
   if (p.rooms >= 4) rooms.push('작은방3');
   return rooms;
+}
+
+/**
+ * 평형 기반 표준 마감면적 (㎡) — 방 수와 무관.
+ * 마루는 평형이 같으면 시공 면적이 같아야 한다 (가벽으로 분할해도 총 마감면적 동일).
+ * 표준 3룸(거실·주방·안방·작방1·작방2) 합을 baseline 으로 사용 — 30평 기준 회귀 유지.
+ */
+export function standardFloorArea(p: Property): number {
+  return [
+    roomAreaForId('거실', p.pyeong, p.bay),
+    roomAreaForId('주방', p.pyeong, p.bay),
+    roomAreaForId('안방', p.pyeong, p.bay),
+    roomAreaForId('작은방1', p.pyeong, p.bay),
+    roomAreaForId('작은방2', p.pyeong, p.bay),
+  ].reduce((a, b) => a + b, 0);
+}
+
+/**
+ * 마루 시공 면적 — 활성 공간 면적을 평형 기반 표준 면적으로 정규화.
+ *
+ *  · 4룸 평면: 작방3 추가로 활성 합이 늘어나도 scale = TARGET/activeRaw < 1 로 보정
+ *    → 각 룸 면적이 비례 축소 → 총 마루 면적은 표준값으로 수렴
+ *  · 2룸 평면: 활성 합이 적어 scale > 1 → 각 룸이 비례 확장 (거실/주방이 더 넓다는 가정)
+ *
+ * 같은 평형이면 sum(activeRooms 의 adjustedRoomFlooringArea) == standardFloorArea 가 보장됨.
+ */
+export function adjustedRoomFlooringArea(roomId: string, p: Property): number {
+  const target = standardFloorArea(p);
+  const active = activeRooms(p);
+  const activeRaw = active.reduce(
+    (s, r) => s + roomAreaForId(r, p.pyeong, p.bay),
+    0,
+  );
+  if (activeRaw === 0) return 0;
+  const my = roomAreaForId(roomId, p.pyeong, p.bay);
+  return my * (target / activeRaw);
 }
 
 export function activeBathrooms(p: Property): string[] {

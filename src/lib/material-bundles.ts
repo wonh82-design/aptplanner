@@ -131,8 +131,9 @@ export const WORK_BUNDLES: WorkBundle[] = [
   {
     id: 'etc',
     label: '기타',
-    desc: '실리콘 · 보양 · 동의서 · 준공청소 · 확장공사 신고',
-    workTypes: ['silicon_labor', 'silicon_bio', 'silicon_modified', 'protection', 'consent', 'cleanup', 'expansion_report'],
+    desc: '실리콘 · 보양 · 동의서 · 준공청소 · 확장공사 신고 · 행위허가 신고',
+    // silicon 자재의 등급 변형(silicon_bio/silicon_modified)은 silicon_labor 행에서 등급 토글로 선택.
+    workTypes: ['silicon_labor', 'protection', 'consent', 'cleanup', 'expansion_report', 'act_permit'],
     displayOrder: 900,
   },
 ];

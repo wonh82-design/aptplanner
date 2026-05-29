@@ -169,6 +169,7 @@ export const WORK_TYPE_LABEL: Record<string, string> = {
   consent: '동의서 징구',
   cleanup: '준공 청소',
   expansion_report: '확장공사 신고',
+  act_permit: '행위허가 신고',
   기타: '기타',
 };
 

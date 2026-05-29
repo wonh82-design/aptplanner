@@ -219,9 +219,10 @@ export const GLOBAL_GROUPS: GlobalGroup[] = [
     ],
   },
   {
-    icon: '🏗️', title: '확장공사', desc: '발코니 확장 신고',
+    icon: '🏗️', title: '확장공사', desc: '발코니 확장 신고·행위허가',
     items: [
       { key: 'expansion_report', label: '구청 확장공사 신고', desc: '확장 시 필수' },
+      { key: 'act_permit', label: '구청 행위허가 신고', desc: '구조변경·평면수정 시 필수' },
     ],
   },
   {

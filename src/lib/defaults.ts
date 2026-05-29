@@ -90,6 +90,7 @@ export function defaultScope(): Scope {
       cleanup: true,               // 기타 — 준공청소 (기본 포함)
       // 기본 default = '이미 확장된 상태'이므로 신규 확장 시공 0건 → 신고 불필요
       expansion_report: false,
+      act_permit: false,           // 기타 — 행위허가 신고 (구조변경 시만 opt-in)
       // ── 목공사 6 sub-work ──
       // 기본 목공·천정 목공은 올리모델링의 통상 포함 항목 → 기본 ON
       carpentry_base: true,

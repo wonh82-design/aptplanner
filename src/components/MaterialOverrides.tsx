@@ -7,6 +7,7 @@ import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort, fmtKRWShortVat } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength } from '@/lib/areas';
+import { lookupWindowCost } from '@/lib/window-cost';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
 import { WORK_BUNDLES, bundleForWorkType, type WorkBundle } from '@/lib/material-bundles';
 import { BIG_WORK_GROUPS, defaultRoomsForWork, type BigWorkGroup } from '@/lib/scope-meta';
@@ -171,6 +172,27 @@ export function MaterialOverrides({
       }
     }
 
+    /**
+     * '기타' 번들 특수 처리 — declared workTypes 전부 노출 (각 항목 ON/OFF 가능하도록).
+     * 다른 번들과 달리 act_permit 처럼 default OFF 인 항목도 사용자가 클릭으로 ON 할 수 있어야 한다.
+     */
+    const etcBundle = WORK_BUNDLES.find((b) => b.id === 'etc');
+    if (etcBundle) {
+      let bucket = bundleBuckets.get('etc');
+      const presentWts = new Set(bucket?.works.map((w) => w.wt) ?? []);
+      for (const wt of etcBundle.workTypes) {
+        if (presentWts.has(wt)) continue;
+        // 이 wt의 자재가 등록되어 있을 때만 행으로 보여줌 (등록 안 된 빈 wt 회피).
+        const matsExist = materialsFor(wt).length > 0;
+        if (!matsExist) continue;
+        if (!bucket) {
+          bucket = { bundle: etcBundle, works: [], sub: 0, firstIdx: 999999 };
+          bundleBuckets.set('etc', bucket);
+        }
+        bucket.works.push({ wt, sub: 0, totalQty: 0, firstIdx: 999999 });
+      }
+    }
+
     const items: DisplayItem[] = [];
     for (const s of singles) items.push({ kind: 'single', work: s, label: labelOf(s.wt), firstIdx: s.firstIdx });
     for (const b of bundleBuckets.values()) items.push({ kind: 'bundle', bundle: b.bundle, works: b.works, sub: b.sub, firstIdx: b.firstIdx });
@@ -332,6 +354,7 @@ export function MaterialOverrides({
     consent: 'consent',
     cleanup: 'cleanup',
     expansion_report: 'expansion_report',
+    act_permit: 'act_permit',
     balcony_floor_tile: 'balcony_floor_tile',
     balcony_paint: 'balcony_paint',
     sliding_door: 'middoor',
@@ -727,6 +750,7 @@ export function MaterialOverrides({
                 // 캐시에 있지만 line_items 에서 빠진 경우 (sub=0 = placeholder) → 자동 제외 표시
                 item.work.sub === 0
               }
+              property={quote.property}
               onSelectMaterial={setMaterial}
               onClear={() => clearOverride(item.work.wt)}
               onShowDetail={() => setDetailWorkType(item.work.wt)}
@@ -852,6 +876,7 @@ function isPrimaryMaterial(m: Material, allInGrade: Material[]): boolean {
  */
 function SingleCard({
   work, label, effectiveGrade: curGrade, effectiveMaterialId, hasOverride, isExcluded,
+  property,
   onSelectMaterial, onClear, onShowDetail, onGradeRadio,
 }: {
   work: WorkInfo;
@@ -861,6 +886,10 @@ function SingleCard({
   hasOverride: boolean;
   /** '제외' 라디오로 빠진 상태 — 카드 회색 처리 + radio "제외" 선택 표시 */
   isExcluded: boolean;
+  /**
+   * 우리집 현황 — work_type 별 특수 단가 계산에 사용 (예: window 는 평형/베이/등급 룩업).
+   */
+  property: Property;
   onSelectMaterial: (m: Material) => void;
   onClear: () => void;
   onShowDetail: () => void;
@@ -946,20 +975,34 @@ function SingleCard({
               className="flex gap-2 overflow-x-auto p-2.5 snap-x snap-mandatory scrollbar-thin"
               style={{ scrollbarWidth: 'thin' }}
             >
-              {sortedMaterials.map(({ material, isPrimary }) => (
-                <div
-                  key={material.material_id}
-                  className="flex-shrink-0 w-40 sm:w-44 snap-start"
-                >
-                  <MaterialCard
-                    material={material}
-                    isPrimary={isPrimary}
-                    isSelected={effectiveMaterialId === material.material_id}
-                    totalQty={work.totalQty}
-                    onSelect={() => onSelectMaterial(material)}
-                  />
-                </div>
-              ))}
+              {sortedMaterials.map(({ material, isPrimary }) => {
+                // 샷시: 자재 단가 대신 평형/베이/등급 룩업 단가를 사용 (window-cost.ts).
+                //  - 각 카드는 그 자재의 grade group 에 해당하는 룩업가를 보여준다.
+                //  - 같은 등급군 안의 여러 자재(예: '표준 추천', '표준')는 모두 같은 룩업가 표시.
+                const homeTotalOverride =
+                  material.sub_category === 'window'
+                    ? lookupWindowCost(
+                        property.pyeong,
+                        property.bay,
+                        gradeGroupOf(material.primary_grade as Grade),
+                      )
+                    : undefined;
+                return (
+                  <div
+                    key={material.material_id}
+                    className="flex-shrink-0 w-40 sm:w-44 snap-start"
+                  >
+                    <MaterialCard
+                      material={material}
+                      isPrimary={isPrimary}
+                      isSelected={effectiveMaterialId === material.material_id}
+                      totalQty={work.totalQty}
+                      homeTotalOverride={homeTotalOverride}
+                      onSelect={() => onSelectMaterial(material)}
+                    />
+                  </div>
+                );
+              })}
             </div>
             {/* 우측 페이드 — 더 있음을 시각적으로 암시 (스크롤 가능 시) */}
             {sortedMaterials.length > 4 && (
@@ -1017,18 +1060,26 @@ function ExcludeToggleButton({ isExcluded, onClick }: { isExcluded: boolean; onC
 // =====================================================
 
 const MaterialCard = memo(function MaterialCard({
-  material, isPrimary, isSelected, totalQty, onSelect,
+  material, isPrimary, isSelected, totalQty, homeTotalOverride, onSelect,
 }: {
   material: Material;
   isPrimary: boolean;
   isSelected: boolean;
   totalQty: number;
+  /**
+   * 우리집 총공사비 override — 자재 단가 × qty 공식이 맞지 않는 항목에 사용.
+   * (현재: 샷시 window — 평형/베이/등급 룩업 결과를 그대로 표시)
+   * undefined 면 기본 공식 `totalQty × material.total_unit_price` 사용.
+   */
+  homeTotalOverride?: number;
   onSelect: () => void;
 }) {
   // 색상은 그룹 기준 (가성비/표준/고급/단일등급) — "표준 추천" 도 표준 색
   const meta = GRADE_META[gradeGroupOf(material.primary_grade as Grade)];
   const isRecommended = isRecommendedGrade(material.primary_grade as Grade);
-  const homeTotal = Math.round(totalQty * material.total_unit_price);
+  const homeTotal = homeTotalOverride !== undefined
+    ? homeTotalOverride
+    : Math.round(totalQty * material.total_unit_price);
   const realUrl = normalizeImageUrl(material.image_url ?? null, 600);
   const useDummy = !realUrl && shouldUseDummyImages();
   const imageUrl = realUrl || (useDummy ? placeholderImageUrl(material.material_id, 600) : null);
@@ -1297,7 +1348,7 @@ function BundleCard({
             현재 {fmtKRWShortVat(totalSub)}
           </span>
           <div className="flex items-center gap-2 flex-wrap">
-            {!HIDE_COMPONENTS_BUNDLES.has(bundle.id) && (
+            {!HIDE_COMPONENTS_BUNDLES.has(bundle.id) && bundle.id !== 'etc' && (
               <button
                 onClick={() => setShowComponents(s => !s)}
                 className={`text-[10px] font-semibold px-2 py-1 rounded border transition whitespace-nowrap ${
@@ -1325,7 +1376,8 @@ function BundleCard({
         </div>
       </div>
 
-      {/* 등급별 행 — 세트 합계 */}
+      {/* 등급별 행 — 세트 합계 (기타 번들 제외: 각 항목별 행만 표시) */}
+      {bundle.id !== 'etc' && (
       <div className="divide-y divide-zinc-100">
         {/*
          * 커스텀 구성 행 (가성비 위 위치)
@@ -1435,6 +1487,7 @@ function BundleCard({
           );
         })}
       </div>
+      )}
 
       {/* 구성 자재 영역 (펼침 시) — carpentry는 sub-work 토글, 그 외 bundle은 등급 토글.
           HIDE_COMPONENTS_BUNDLES에 속한 번들은 펼침 자체 비활성. */}
@@ -1442,9 +1495,11 @@ function BundleCard({
         bundle.id === 'carpentry' && scope && onScopeChange ? (
           <CarpentryScopePanel scope={scope} onScopeChange={onScopeChange} />
         ) : (
-          <div className="border-t-2 border-zinc-200 bg-zinc-50/40 px-3 py-3">
+          <div className={`bg-zinc-50/40 px-3 py-3 ${bundle.id === 'etc' ? '' : 'border-t-2 border-zinc-200'}`}>
             <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2">
-              구성 자재 — 항목별로 다른 등급 선택 가능
+              {bundle.id === 'etc'
+                ? '포함 항목 — 각 항목 ON/OFF 선택'
+                : '구성 자재 — 항목별로 다른 등급 선택 가능'}
             </div>
             <div className="space-y-1.5">
               {works.map(w => (
@@ -1611,26 +1666,31 @@ function ComponentRow({
   const currentMat = getPrimaryMaterial(work.wt, effectiveGrade);
   const hasToggle = onToggleExclude !== undefined;
 
+  /**
+   * 등급 변형 보유 여부 — 단일등급 자재만 있으면 등급 토글 비표시.
+   * 보양·동의서·청소·행위허가처럼 단일 자재인 행에서 라벨 변경 불필요.
+   */
+  const allMats = materialsFor(work.wt);
+  const hasGradeVariations = allMats.some(
+    (m) => gradeGroupOf(m.primary_grade as Grade) !== '단일등급',
+  );
+
   return (
     <div className={`flex items-center gap-2 rounded-md border px-2.5 py-1.5 transition ${
       isExcluded ? 'border-zinc-200 bg-zinc-50' : 'border-zinc-200 bg-white'
     }`}>
-      {/* 왼쪽 ON/OFF 체크박스 — onToggleExclude 전달 시에만 표시 */}
+      {/* 왼쪽 ON/OFF 라디오 — 다른 공종 등급 행과 동일한 원형 라디오 형태 */}
       {hasToggle && (
         <button
           type="button"
           onClick={onToggleExclude}
           aria-pressed={!isExcluded}
           title={isExcluded ? '이 항목을 견적에 포함' : '이 항목을 견적에서 제외'}
-          className={`flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded border-2 transition ${
-            isExcluded
-              ? 'border-zinc-300 bg-white text-transparent hover:border-emerald-400'
-              : 'border-blue-600 bg-blue-600 text-white hover:bg-blue-700'
-          }`}
+          className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full border-2 transition border-zinc-300 hover:border-blue-400"
         >
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden>
-            <path d="M2 6.5L4.5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          {!isExcluded && (
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+          )}
         </button>
       )}
       <div className="flex-1 min-w-0">
@@ -1657,27 +1717,29 @@ function ComponentRow({
           {fmtKRWShortVat(work.sub)}
         </div>
       )}
-      {/* 등급 토글 3버튼 — 제외 상태면 흐리게 (선택 가능하지만 시각적으로 약하게) */}
-      <div className={`inline-flex rounded-md border border-zinc-200 overflow-hidden text-[10px] flex-shrink-0 ${
-        isExcluded ? 'opacity-50' : ''
-      }`}>
-        {GRADES.map(g => {
-          const selected = effectiveGrade === g;
-          const meta = GRADE_META[g];
-          return (
-            <button
-              key={g}
-              type="button"
-              onClick={() => onSelectGrade(g)}
-              className={`px-2 py-1 border-r last:border-r-0 border-r-zinc-200 transition ${
-                selected ? `${meta.bg} ${meta.color} font-bold` : 'bg-white text-zinc-600 hover:bg-zinc-50'
-              }`}
-            >
-              {g}
-            </button>
-          );
-        })}
-      </div>
+      {/* 등급 토글 3버튼 — 등급 변형이 있는 항목에서만 표시 */}
+      {hasGradeVariations && (
+        <div className={`inline-flex rounded-md border border-zinc-200 overflow-hidden text-[10px] flex-shrink-0 ${
+          isExcluded ? 'opacity-50' : ''
+        }`}>
+          {GRADES.map(g => {
+            const selected = effectiveGrade === g;
+            const meta = GRADE_META[g];
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => onSelectGrade(g)}
+                className={`px-2 py-1 border-r last:border-r-0 border-r-zinc-200 transition ${
+                  selected ? `${meta.bg} ${meta.color} font-bold` : 'bg-white text-zinc-600 hover:bg-zinc-50'
+                }`}
+              >
+                {g}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
