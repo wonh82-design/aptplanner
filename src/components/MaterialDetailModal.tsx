@@ -281,6 +281,7 @@ function PriceRow({
 }) {
   const unitShort =
     unit === 'per_m2' ? '/㎡' :
+    unit === 'per_pyeong' ? '/평' :
     unit === 'per_m'  ? '/m'  :
     unit === 'per_ea' ? '/개' :
     unit === 'per_set' ? '/세트' : '';

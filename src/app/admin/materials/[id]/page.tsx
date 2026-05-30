@@ -315,6 +315,7 @@ function MaterialEditor({ materialId }: { materialId: string }) {
             <Field label="단위">
               <select value={draft.unit_type} onChange={(e) => updateField('unit_type', e.target.value)} className="input">
                 <option value="per_m2">per_m2 (㎡)</option>
+                <option value="per_pyeong">per_pyeong (평) — 1평=3.3㎡</option>
                 <option value="per_m">per_m (m)</option>
                 <option value="per_ea">per_ea (개)</option>
                 <option value="per_set">per_set (세트)</option>

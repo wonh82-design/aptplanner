@@ -901,6 +901,7 @@ export function Footer() {
 export function unitShort(u: string): string {
   switch (u) {
     case 'per_m2': return '㎡';
+    case 'per_pyeong': return '평';
     case 'per_m': return 'm';
     case 'per_ea': return 'ea';
     case 'per_set': return 'set';
