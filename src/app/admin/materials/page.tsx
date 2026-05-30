@@ -167,19 +167,21 @@ function MaterialsList() {
    * default scope 에서 해당 sub_category 가 OFF 면 qty=0.
    * materials 가 변경되면 자동 재계산 (자재 단가·등급 영향).
    *
-   * 레거시 영문 work_type alias 처리:
-   *  - 과거 스키마에서 work_type='flooring'/'wallpaper' (영문) → 현재 sub_category='마루'/'도배' (한글)
-   *  - 운영 DB 에 옛 영문 sub_category 가 남아있는 자재(예: MAT-FL-006) 도 매칭되도록
-   *    같은 qty 를 영문 키에도 복제 저장.
+   * SUB_CATEGORY_ALIAS — 계산기가 emit 하는 work_type 과 다르지만
+   * 같은 면적/물량을 차지하는 대체 자재 sub_category 들:
+   *   · 레거시 영문 (옛 스키마 work_type='flooring'/'wallpaper' → 한글 '마루'/'도배')
+   *   · 같은 공종의 다른 자재 타입 (예: 바닥재의 '마루' vs '장판' — 면적 동일)
+   * 새 alias 추가 시 이 표만 갱신.
    */
   const qtyByWorkType = useMemo(() => {
     const STD_PROPERTY: Property = {
       pyeong: 24, bay: 3, rooms: 3, common_bath: 1, master_bath: 1,
       balcony_depth_m: 1.5, region: 'gyeonggi', age: '15-30',
     };
-    // 한글 work_type → 옛 영문 alias 목록. 새 항목 추가 시 여기에만 등록하면 자동 매칭.
-    const LEGACY_ALIAS: Record<string, string[]> = {
-      '마루': ['flooring'],
+    const SUB_CATEGORY_ALIAS: Record<string, string[]> = {
+      // 마루 = wood flooring · 장판 = PVC sheet flooring · flooring = 옛 영문
+      // 셋 다 바닥 마감재로 같은 면적 차지 → 동일 qty 적용
+      '마루': ['flooring', '장판'],
       '도배': ['wallpaper'],
     };
     try {
@@ -188,8 +190,8 @@ function MaterialsList() {
       for (const it of q.line_items) {
         const wt = it.work_type;
         map.set(wt, (map.get(wt) ?? 0) + it.qty);
-        // 영문 alias 도 동일 qty 로 매핑 — 레거시 sub_category 자재 호환
-        for (const alias of LEGACY_ALIAS[wt] ?? []) {
+        // alias 도 동일 qty 로 매핑 — 대체 자재·레거시 sub_category 호환
+        for (const alias of SUB_CATEGORY_ALIAS[wt] ?? []) {
           map.set(alias, (map.get(alias) ?? 0) + it.qty);
         }
       }
