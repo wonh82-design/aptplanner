@@ -166,17 +166,32 @@ function MaterialsList() {
    * 각 자재의 24평 기준 예상 공사비 = qty × total_unit_price.
    * default scope 에서 해당 sub_category 가 OFF 면 qty=0.
    * materials 가 변경되면 자동 재계산 (자재 단가·등급 영향).
+   *
+   * 레거시 영문 work_type alias 처리:
+   *  - 과거 스키마에서 work_type='flooring'/'wallpaper' (영문) → 현재 sub_category='마루'/'도배' (한글)
+   *  - 운영 DB 에 옛 영문 sub_category 가 남아있는 자재(예: MAT-FL-006) 도 매칭되도록
+   *    같은 qty 를 영문 키에도 복제 저장.
    */
   const qtyByWorkType = useMemo(() => {
     const STD_PROPERTY: Property = {
       pyeong: 24, bay: 3, rooms: 3, common_bath: 1, master_bath: 1,
       balcony_depth_m: 1.5, region: 'gyeonggi', age: '15-30',
     };
+    // 한글 work_type → 옛 영문 alias 목록. 새 항목 추가 시 여기에만 등록하면 자동 매칭.
+    const LEGACY_ALIAS: Record<string, string[]> = {
+      '마루': ['flooring'],
+      '도배': ['wallpaper'],
+    };
     try {
       const q = buildQuote(STD_PROPERTY, defaultScope(), defaultGrade());
       const map = new Map<string, number>();
       for (const it of q.line_items) {
-        map.set(it.work_type, (map.get(it.work_type) ?? 0) + it.qty);
+        const wt = it.work_type;
+        map.set(wt, (map.get(wt) ?? 0) + it.qty);
+        // 영문 alias 도 동일 qty 로 매핑 — 레거시 sub_category 자재 호환
+        for (const alias of LEGACY_ALIAS[wt] ?? []) {
+          map.set(alias, (map.get(alias) ?? 0) + it.qty);
+        }
       }
       return map;
     } catch {
@@ -444,8 +459,8 @@ function MaterialsList() {
       {/* 테이블 */}
       <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs table-fixed min-w-[1200px]">
-            {/* 명시적 컬럼 폭 — 1200px 기준으로 PC 한 화면에 모두 노출 */}
+          <table className="w-full text-xs table-fixed min-w-[1110px]">
+            {/* 명시적 컬럼 폭 — 1110px 기준으로 PC 한 화면에 모두 노출 (평당환산 컬럼 제거 후 -90px) */}
             <colgroup>
               <col className="w-[92px]" />   {/* ID */}
               <col className="w-[68px]" />   {/* 대공종 */}
@@ -455,7 +470,6 @@ function MaterialsList() {
               <col className="w-[84px]" />   {/* 자재비 */}
               <col className="w-[84px]" />   {/* 인건비 */}
               <col className="w-[96px]" />   {/* 합계단가 */}
-              <col className="w-[90px]" />   {/* 평당 환산 */}
               <col className="w-[110px]" />  {/* 24평 공사비 */}
               <col className="w-[56px]" />   {/* 이미지 */}
               <col className="w-[96px]" />   {/* 액션 */}
@@ -470,7 +484,6 @@ function MaterialsList() {
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">자재비</th>
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">인건비</th>
                 <SortableTh label="합계단가" sortKey="price" current={sortKey} dir={sortDir} onClick={toggleSort} align="right" />
-                <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">평당 환산</th>
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600 whitespace-nowrap">24평 공사비</th>
                 <SortableTh label="이미지" sortKey="image" current={sortKey} dir={sortDir} onClick={toggleSort} align="center" />
                 <th className="px-3 py-2 text-right font-semibold text-zinc-600"></th>
@@ -534,11 +547,11 @@ function MaterialsList() {
                     )}
                   </td>
                   {isLookupPricing ? (
-                    // 샷시 — 단가 4셀(자재비/인건비/합계/평당/24평)을 '룩업' 배지로 통합
+                    // 샷시 — 단가 3셀(자재비/인건비/합계+24평)을 '룩업' 배지로 통합
                     <>
                       <td className="px-3 py-2 text-right text-zinc-300">—</td>
                       <td className="px-3 py-2 text-right text-zinc-300">—</td>
-                      <td className="px-3 py-2 text-center border-l border-zinc-100" colSpan={3}>
+                      <td className="px-3 py-2 text-center border-l border-zinc-100" colSpan={2}>
                         <span
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold"
                           title="평형/베이/등급 룩업 표 기반 (src/lib/window-cost.ts)"
@@ -587,21 +600,15 @@ function MaterialsList() {
                       <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-900 font-bold border-l border-zinc-100">
                         {vTotal.toLocaleString('ko-KR')}
                       </td>
-                      {/* 평당 환산 = (24평 공사비) / 24 */}
-                      {/* 24평 공사비 = sub_category 의 24평 표준 qty × 합계단가 */}
+                      {/* 24평 공사비 = sub_category 의 24평 표준 qty × 합계단가
+                         (qtyByWorkType 는 영문 alias 도 매핑 — 레거시 sub_category 자재 호환) */}
                       {(() => {
                         const qty = qtyByWorkType.get(m.sub_category) ?? 0;
                         const total24 = Math.round(qty * vTotal);
-                        const perPyeong = qty > 0 ? Math.round(total24 / 24) : 0;
                         return (
-                          <>
-                            <td className="px-3 py-2 text-right font-mono tabular-nums text-zinc-600 whitespace-nowrap">
-                              {qty > 0 ? perPyeong.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
-                            </td>
-                            <td className="px-3 py-2 text-right font-mono tabular-nums text-blue-700 font-semibold whitespace-nowrap">
-                              {qty > 0 ? total24.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
-                            </td>
-                          </>
+                          <td className="px-3 py-2 text-right font-mono tabular-nums text-blue-700 font-semibold whitespace-nowrap">
+                            {qty > 0 ? total24.toLocaleString('ko-KR') : <span className="text-zinc-300">—</span>}
+                          </td>
                         );
                       })()}
                     </>
