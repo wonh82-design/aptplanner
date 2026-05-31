@@ -63,13 +63,16 @@ export default function Landing() {
               {t.hero.title2}
             </h1>
 
-            {/* Subtitle 영역 — 이전 WHY 섹션의 헤딩 카피를 흡수 */}
-            <p className="text-lg sm:text-xl font-semibold text-white leading-snug mb-3">
+            {/* Subtitle 영역 — 이전 WHY 섹션의 헤딩 카피를 흡수
+                subtitle 본문이 비어있으면 headline 만 노출 (불필요한 공백 방지) */}
+            <p className={`text-lg sm:text-xl font-semibold text-white leading-snug ${t.hero.subtitle ? 'mb-3' : 'mb-10'}`}>
               {t.hero.subtitleHeadline}
             </p>
-            <p className="text-[15px] sm:text-base text-zinc-200 leading-relaxed max-w-xl mb-10">
-              {t.hero.subtitle}
-            </p>
+            {t.hero.subtitle && (
+              <p className="text-[15px] sm:text-base text-zinc-200 leading-relaxed max-w-xl mb-10">
+                {t.hero.subtitle}
+              </p>
+            )}
 
             {/* 메인 CTA */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">

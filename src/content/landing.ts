@@ -29,8 +29,9 @@ export const LANDING_COPY = {
     title1: '인테리어의 시작은',
     title2: '우리집 공사계획부터.',
     // subtitle = WHY 섹션에서 이동한 카피 (제목 한 줄 + 설명 단락)
+    // subtitle 을 비워두면 headline 만 표시됨 (page.tsx 가 조건부 렌더링).
     subtitleHeadline: '우리집 상황과 내 예산에 맞는 정확한 공사범위를 정하는 것, 그것이 시작입니다',
-    subtitle:
+    subtitle: '',
     cta: '우리집 인테리어 계획하기',
     miniCtaTitle: '3분이면 완성',
     miniCtaSubtitle: '가입·결제 없이 무료',
