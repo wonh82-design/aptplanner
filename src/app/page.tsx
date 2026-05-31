@@ -16,16 +16,17 @@ export const metadata = {
   description: LANDING_COPY.meta.description,
 };
 
-// ── Unsplash 무료 인테리어 사진 ────────────────────────────────
-// 직접 hotlink. 향후 자체 사진으로 교체 시 src 만 갈면 됨.
+// ── 이미지 소스 ────────────────────────────────────────────────
+// Hero / 중간 배경: Unsplash 무료 인테리어 사진 (직접 hotlink, 향후 교체 시 src 만 갈면 됨)
+// STEP 이미지: public/ 폴더의 자체 캡처본. /step1.png … (public/ 기준 상대경로)
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=2400&q=80';
 const MID_IMAGE =
   'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=2000&q=80';
 const STEP_IMAGES = [
-  'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=80',
+  '/step1.png',
+  '/step2.png',
+  '/step3.png',
 ];
 
 export default function Landing() {
@@ -311,13 +312,14 @@ function StepCard({
 }: { n: string; img: string; imgAlt: string; title: string; desc: string }) {
   return (
     <div className="flex flex-col">
-      <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-5 bg-zinc-100">
+      {/* 실제 화면 캡처 — 16:10 와이드, object-contain 으로 전체 노출 */}
+      <div className="relative aspect-[16/10] rounded-xl overflow-hidden mb-5 bg-zinc-100 border border-zinc-200">
         <Image
           src={img}
           alt={imgAlt}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover"
+          className="object-contain"
         />
         <div className="absolute top-3 left-3 inline-flex w-8 h-8 items-center justify-center rounded-full bg-white text-zinc-900 font-bold text-sm shadow">
           {n}
