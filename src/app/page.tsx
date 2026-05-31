@@ -120,15 +120,30 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== Why — 비교 카드 (헤딩은 hero 로 이동, 카드만 유지) ===== */}
+      {/* ===== How it works — 3단계 (1행 1스텝, 좌측 큰 캡처 + 우측 텍스트) ===== */}
       <section className="bg-stone-50">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-6 text-center">
-            {t.why.eyebrow}
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
+          <div className="max-w-2xl mb-14">
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">
+              {t.how.eyebrow}
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
+              {t.how.title}
+            </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <CompareCard tone="bad"  title={t.why.badCard.title}  items={t.why.badCard.items as readonly string[]} />
-            <CompareCard tone="good" title={t.why.goodCard.title} items={t.why.goodCard.items as readonly string[]} />
+
+          {/* 세로 스택 — 1·2·3단계가 차례로 아래로 노출 */}
+          <div className="flex flex-col gap-14 sm:gap-20">
+            {t.how.steps.map((s, i) => (
+              <StepCard
+                key={i}
+                n={String(i + 1)}
+                img={STEP_IMAGES[i]}
+                imgAlt={s.imgAlt}
+                title={s.title}
+                desc={s.desc}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -154,29 +169,15 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== How it works — 3단계 (사진 포함) ===== */}
+      {/* ===== Why — 비교 카드 (헤딩은 hero 로 이동, 카드만 유지) ===== */}
       <section className="bg-stone-50">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
-          <div className="max-w-2xl mb-14">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">
-              {t.how.eyebrow}
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
-              {t.how.title}
-            </h2>
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-6 text-center">
+            {t.why.eyebrow}
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {t.how.steps.map((s, i) => (
-              <StepCard
-                key={i}
-                n={String(i + 1)}
-                img={STEP_IMAGES[i]}
-                imgAlt={s.imgAlt}
-                title={s.title}
-                desc={s.desc}
-              />
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <CompareCard tone="bad"  title={t.why.badCard.title}  items={t.why.badCard.items as readonly string[]} />
+            <CompareCard tone="good" title={t.why.goodCard.title} items={t.why.goodCard.items as readonly string[]} />
           </div>
         </div>
       </section>
@@ -310,26 +311,39 @@ function ProblemCard({ n, title, desc }: { n: string; title: string; desc: strin
   );
 }
 
+/**
+ * StepCard — 한 단계 = 한 행 (1 row 1 step).
+ *  · 데스크탑(md+): 좌측 큰 이미지(3) + 우측 텍스트(2) 의 horizontal layout
+ *  · 모바일: 위 이미지 + 아래 텍스트 (자동 stack)
+ *  · 이미지는 16:10 와이드, object-contain 으로 UI 전체 노출 (잘림 없음)
+ */
 function StepCard({
   n, img, imgAlt, title, desc,
 }: { n: string; img: string; imgAlt: string; title: string; desc: string }) {
   return (
-    <div className="flex flex-col">
-      {/* 실제 화면 캡처 — 16:10 와이드, object-contain 으로 전체 노출 */}
-      <div className="relative aspect-[16/10] rounded-xl overflow-hidden mb-5 bg-zinc-100 border border-zinc-200">
+    <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-6 md:gap-12 items-center">
+      {/* 좌측: 실제 화면 캡처 — 큰 영역 (md+ 60% width) */}
+      <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-white border border-zinc-200 shadow-md">
         <Image
           src={img}
           alt={imgAlt}
           fill
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes="(max-width: 768px) 100vw, 60vw"
           className="object-contain"
         />
-        <div className="absolute top-3 left-3 inline-flex w-8 h-8 items-center justify-center rounded-full bg-white text-zinc-900 font-bold text-sm shadow">
+        <div className="absolute top-4 left-4 inline-flex w-10 h-10 items-center justify-center rounded-full bg-zinc-900 text-white font-bold text-base shadow-lg">
           {n}
         </div>
       </div>
-      <h3 className="font-bold text-zinc-900 mb-2 text-[17px]">{title}</h3>
-      <p className="text-[14px] text-zinc-600 leading-relaxed">{desc}</p>
+      {/* 우측: 텍스트 — 1행 1스텝이라 여백 넉넉, 폰트 크게 */}
+      <div>
+        <h3 className="font-bold text-zinc-900 mb-3 text-xl sm:text-2xl leading-snug">
+          {title}
+        </h3>
+        <p className="text-[15px] sm:text-base text-zinc-600 leading-relaxed">
+          {desc}
+        </p>
+      </div>
     </div>
   );
 }
