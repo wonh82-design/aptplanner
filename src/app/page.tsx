@@ -62,7 +62,11 @@ export default function Landing() {
               {t.hero.title2}
             </h1>
 
-            <p className="text-base sm:text-lg text-zinc-200 leading-relaxed max-w-xl mb-10">
+            {/* Subtitle 영역 — 이전 WHY 섹션의 헤딩 카피를 흡수 */}
+            <p className="text-lg sm:text-xl font-semibold text-white leading-snug mb-3">
+              {t.hero.subtitleHeadline}
+            </p>
+            <p className="text-[15px] sm:text-base text-zinc-200 leading-relaxed max-w-xl mb-10">
               {t.hero.subtitle}
             </p>
 
@@ -94,6 +98,11 @@ export default function Landing() {
                 <div>{t.hero.miniCtaSubtitle}</div>
               </div>
             </div>
+
+            {/* CTA 아래 보조 설명 — 기존 subtitle 자리에서 이동한 카피 */}
+            <p className="mt-8 text-[14px] sm:text-[15px] text-zinc-300 leading-relaxed max-w-xl">
+              {t.hero.belowCta}
+            </p>
           </div>
         </div>
       </section>
@@ -107,21 +116,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== Why — 기존 vs apt-planner 비교 ===== */}
+      {/* ===== Why — 비교 카드 (헤딩은 hero 로 이동, 카드만 유지) ===== */}
       <section className="bg-stone-50">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
-          <div className="max-w-2xl mb-14">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">
-              {t.why.eyebrow}
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight mb-5">
-              {t.why.title}
-            </h2>
-            <p className="text-zinc-600 leading-relaxed text-[15px]">
-              {t.why.body}
-            </p>
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-6 text-center">
+            {t.why.eyebrow}
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <CompareCard tone="bad"  title={t.why.badCard.title}  items={t.why.badCard.items as readonly string[]} />
             <CompareCard tone="good" title={t.why.goodCard.title} items={t.why.goodCard.items as readonly string[]} />
