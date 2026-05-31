@@ -110,9 +110,9 @@ export const LANDING_COPY = {
         desc: '평형·베이·확장 상태 등 기본 정보. 1분이면 충분합니다.',
       },
       {
-        title: '공사 범위·자재 등급',
-        imgAlt: '공사 범위·자재 등급',
-        desc: '어디까지 공사할지, 자재는 어떤 등급으로 할지 실시간 비교.',
+        title: '공사 범위·자재 선택',
+        imgAlt: '공사 범위·자재 선택',
+        desc: '공사범위, 자재등급에 따라 실시간 공사비 비교.',
       },
       {
         title: '실시간 공사비 산출',
@@ -126,7 +126,7 @@ export const LANDING_COPY = {
   finalCta: {
     title1: '3분 투자로 예산에 맞는',
     title2: '우리집 공사계획을 완성해보세요',
-    subtitle: '가입도, 결제도, 전화번호도 필요 없습니다. 마음에 안 들면 그냥 닫으셔도 됩니다.',
+    subtitle: '가입도, 결제도 필요 없습니다',
     cta: '우리집 공사비 계산하기',
     footnote: '±5% 시장가 정확도 · 결과 PDF 무료 다운로드',
   },
@@ -135,7 +135,7 @@ export const LANDING_COPY = {
   footer: {
     brandName: 'apt-planner',
     brandDesc:
-      '인테리어 처음 하는 소비자가 정직하고 실력있는 업체를 고를 수 있도록 돕는 공사계획 도구입니다.',
+      '인테리어 처음 하는 소비자가 정직하고 실력있는 업체를 고를 수 있도록 돕는 도구입니다.',
     neutralityHeading: '100% 소비자 편',
     neutralityBody:
       'apt-planner는 어떤 인테리어 업체와도 광고비·수수료·제휴 관계가 없습니다. 100% 소비자 편의를 위해 운영됩니다.',
