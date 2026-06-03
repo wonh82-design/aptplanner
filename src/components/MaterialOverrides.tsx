@@ -89,8 +89,6 @@ export function MaterialOverrides({
   const [showAll, setShowAll] = useState(true);
   // '자세히' 모달 — 어떤 work_type을 펼쳤는지
   const [detailWorkType, setDetailWorkType] = useState<string | null>(null);
-  // 욕실 개별 컴포넌트 자재 선택 모달 — { 공종, 네임스페이스 키, 욕실명 }
-  const [bathPicker, setBathPicker] = useState<{ wt: string; key: string; room: string } | null>(null);
   // 일괄 등급 선택 popover
   const [bulkOpen, setBulkOpen] = useState(false);
   /**
@@ -297,16 +295,6 @@ export function MaterialOverrides({
       delete matOv[w.key];
     }
     onChange({ ...value, overrides, material_overrides: matOv });
-  }
-
-  /** 욕실 개별 컴포넌트 자재 변경 (네임스페이스 키 사용) */
-  function setBathMaterial(key: string, material: Material) {
-    const group = gradeGroupOf(material.primary_grade as Grade);
-    onChange({
-      ...value,
-      overrides: { ...value.overrides, [key]: group },
-      material_overrides: { ...value.material_overrides, [key]: material.material_id },
-    });
   }
 
   /** 욕실 세트 초기화 — 해당 욕실 모든 키의 override 제거 */
@@ -873,7 +861,6 @@ export function MaterialOverrides({
                 setBathGrade(item.works, g);
               }}
               onClear={() => clearBath(item.works)}
-              onPickComponent={(w) => setBathPicker({ wt: w.wt, key: w.key, room: item.room })}
               onExclude={canEditScope ? () => setBathEnabled(item.room, false) : undefined}
               onRestore={canEditScope ? () => setBathEnabled(item.room, true) : undefined}
             />
@@ -966,25 +953,6 @@ export function MaterialOverrides({
         />
       )}
 
-      {/* 욕실 개별 컴포넌트 자재 선택 모달 (공용/부부 독립) */}
-      {bathPicker && (
-        <BathMaterialPicker
-          workType={bathPicker.wt}
-          room={bathPicker.room}
-          selectedMaterialId={
-            value.material_overrides[bathPicker.key] ??
-            getPrimaryMaterial(bathPicker.wt, effectiveGrade(bathPicker.key))?.material_id ??
-            null
-          }
-          totalQty={
-            displayItems
-              .flatMap((d) => (d.kind === 'bath' ? d.works : []))
-              .find((w) => w.key === bathPicker.key)?.totalQty ?? 1
-          }
-          onSelect={(m) => { setBathMaterial(bathPicker.key, m); setBathPicker(null); }}
-          onClose={() => setBathPicker(null)}
-        />
-      )}
 
       {displayItems.length > TOP_N && (
         <button
@@ -1203,7 +1171,7 @@ function ExcludeToggleButton({ isExcluded, onClick }: { isExcluded: boolean; onC
 // =====================================================
 
 const MaterialCard = memo(function MaterialCard({
-  material, isPrimary, isSelected, totalQty, homeTotalOverride, componentLabel, onSelect,
+  material, isPrimary, isSelected, totalQty, homeTotalOverride, componentLabel, interactive = true, onSelect,
 }: {
   material: Material;
   isPrimary: boolean;
@@ -1220,6 +1188,11 @@ const MaterialCard = memo(function MaterialCard({
    * 지정 시 카드 최상단에 공종명 헤더를 노출 — 욕실 풀세트 구성 카드에서 사용.
    */
   componentLabel?: string;
+  /**
+   * 클릭 가능 여부. false 면 표시 전용 (클릭·키보드·hover/cursor 비활성).
+   * 욕실 구성 카드처럼 '보여주기만' 하는 카드에 사용.
+   */
+  interactive?: boolean;
   onSelect: () => void;
 }) {
   // 색상은 그룹 기준 (가성비/표준/고급/단일등급) — "표준 추천" 도 표준 색
@@ -1242,15 +1215,17 @@ const MaterialCard = memo(function MaterialCard({
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={onSelect}
-      onKeyDown={handleKeyDown}
-      aria-pressed={isSelected}
-      className={`group relative w-full flex flex-col rounded-lg border-2 overflow-hidden text-left transition-all active:scale-[0.99] cursor-pointer ${
+      {...(interactive
+        ? { role: 'button', tabIndex: 0, onClick: onSelect, onKeyDown: handleKeyDown, 'aria-pressed': isSelected }
+        : {})}
+      className={`group relative w-full flex flex-col rounded-lg border-2 overflow-hidden text-left transition-all ${
+        interactive ? 'active:scale-[0.99] cursor-pointer' : ''
+      } ${
         isSelected
           ? `${meta.ring.replace('ring-', 'border-')} ring-2 ${meta.ring} shadow-md`
-          : 'border-zinc-200 hover:border-zinc-400 hover:shadow-sm'
+          : interactive
+            ? 'border-zinc-200 hover:border-zinc-400 hover:shadow-sm'
+            : 'border-zinc-200'
       }`}
     >
       {/* 세트 구성 카드 — 공종명 헤더 (componentLabel 지정 시) */}
@@ -1753,7 +1728,7 @@ function BundleCard({
 
 function BathCard({
   room, works, totalSub, gradeSelection, effectiveGrade, isExcluded,
-  onSelectGrade, onClear, onPickComponent, onExclude, onRestore,
+  onSelectGrade, onClear, onExclude, onRestore,
 }: {
   room: string;
   works: WorkInfo[];
@@ -1763,7 +1738,6 @@ function BathCard({
   isExcluded: boolean;
   onSelectGrade: (g: GradeGroup) => void;
   onClear: () => void;
-  onPickComponent: (w: WorkInfo) => void;
   onExclude?: () => void;
   onRestore?: () => void;
 }) {
@@ -1880,11 +1854,11 @@ function BathCard({
         })}
       </div>
 
-      {/* 구성 컴포넌트 카드 (타일 시공팀은 집계 단계에서 제외됨) */}
+      {/* 구성 컴포넌트 카드 (타일 시공팀은 집계 단계에서 제외됨) — 표시 전용 (클릭 시 추가 화면 없음) */}
       {!isExcluded && (
         <div className="bg-zinc-50/40 px-3 py-3 border-t-2 border-zinc-200">
           <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2">
-            {room} 구성 자재 — {bundleGrade === 'mixed' ? '항목별 등급' : `${bundleGrade} 등급`} 기준 · 카드 클릭 시 개별 변경
+            {room} 구성 자재 — {bundleGrade === 'mixed' ? '항목별 등급' : `${bundleGrade} 등급`} 기준
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
             {works.map((w) => {
@@ -1898,67 +1872,14 @@ function BathCard({
                   isSelected={false}
                   totalQty={w.totalQty}
                   componentLabel={labelOf(w.wt)}
-                  onSelect={() => onPickComponent(w)}
+                  interactive={false}
+                  onSelect={() => {}}
                 />
               );
             })}
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-// =====================================================
-// BathMaterialPicker — 욕실 컴포넌트 1개의 자재 선택 모달 (공용/부부 독립)
-//   materialsFor(workType) 전체를 카드 그리드로 노출, 클릭 시 네임스페이스 키에 자재 적용.
-// =====================================================
-
-function BathMaterialPicker({
-  workType, room, selectedMaterialId, totalQty, onSelect, onClose,
-}: {
-  workType: string;
-  room: string;
-  selectedMaterialId: string | null;
-  totalQty: number;
-  onSelect: (m: Material) => void;
-  onClose: () => void;
-}) {
-  const label = labelOf(workType);
-  const mats = materialsFor(workType);
-  return (
-    <div className="fixed inset-0 z-50 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="sticky top-0 z-10 bg-white border-b border-zinc-200 px-5 py-4 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-0.5">{room} 자재 선택</div>
-            <h2 className="text-lg font-bold text-zinc-900 truncate">{label}</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">카드를 클릭하면 {room}의 {label} 자재가 변경됩니다.</p>
-          </div>
-          <button onClick={onClose} className="flex-shrink-0 text-zinc-400 hover:text-zinc-900 text-2xl leading-none -mt-1" aria-label="닫기">×</button>
-        </div>
-        <div className="px-5 py-5">
-          {mats.length === 0 ? (
-            <div className="py-10 text-center text-sm text-zinc-400 italic">등록된 자재가 없습니다</div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-              {mats.map((m) => (
-                <MaterialCard
-                  key={m.material_id}
-                  material={m}
-                  isPrimary={false}
-                  isSelected={selectedMaterialId === m.material_id}
-                  totalQty={totalQty}
-                  onSelect={() => onSelect(m)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="sticky bottom-0 bg-white border-t border-zinc-200 px-5 py-3 flex justify-end">
-          <button onClick={onClose} className="px-5 py-2 rounded-lg border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 font-semibold text-sm transition">닫기</button>
-        </div>
-      </div>
     </div>
   );
 }
