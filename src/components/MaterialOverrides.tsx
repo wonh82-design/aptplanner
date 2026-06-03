@@ -1298,6 +1298,22 @@ function BundleCard({
   }, [works]);
   const bundleTotalAtGrade = (g: GradeGroup) => totalsByGrade[g];
 
+  /**
+   * 실제로 자재가 존재하는 등급 그룹만 등급 행으로 노출.
+   * (자재마스터에서 특정 등급 자재를 모두 삭제하면 그 등급 행이 사라짐)
+   *  - getPrimaryMaterial 의 cross-grade 폴백을 우회하려고 materialsFor 로 직접 판정.
+   *  - 번들 내 work_type 중 하나라도 해당 등급 자재를 가지면 그 등급은 '있음'.
+   *  - 방어: 결과가 비면 (전부 단일등급 등) 기존 GRADES 전체로 폴백.
+   */
+  const availableGrades = useMemo(() => {
+    const present = GRADES.filter((g) =>
+      works.some((w) =>
+        materialsFor(w.wt).some((m) => gradeGroupOf(m.primary_grade as Grade) === g),
+      ),
+    );
+    return present.length > 0 ? present : GRADES;
+  }, [works]);
+
   return (
     <div className={`rounded-lg border ${hasAnyOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
       {/* 헤더 — 모바일: 2단 / sm+: 1단 */}
@@ -1447,7 +1463,7 @@ function BundleCard({
           </button>
         )}
 
-        {GRADES.map(g => {
+        {availableGrades.map(g => {
           const total = bundleTotalAtGrade(g);
           const selected = !isExcluded && bundleGrade === g;
           const meta = GRADE_META[g];
