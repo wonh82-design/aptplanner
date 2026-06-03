@@ -38,6 +38,30 @@ export function isRecommendedGrade(g: Grade): boolean {
   return g === '가성비 추천' || g === '표준 추천' || g === '고급 추천';
 }
 
+/**
+ * 공종별 '최소 등급 floor' — 일괄/기본 등급이 이 값보다 낮으면 이 값으로 올림.
+ *  · 시스템 에어컨(aircon/aircon_outdoor): 가성비 라인업 미운영 → 최소 표준.
+ *    → 일괄 등급 '가성비' 선택 시에도 에어컨은 '표준' 으로 적용·표시되며,
+ *      일괄 '가성비'·'표준' 두 등급 모두 에어컨 '표준' 에 연동된다.
+ */
+export const GRADE_FLOOR: Record<string, GradeGroup> = {
+  aircon: '표준',
+  aircon_outdoor: '표준',
+};
+
+/** 등급 서열 — 가성비(0) < 표준(1) < 고급(2). 단일등급은 비교 제외(0). */
+const GRADE_RANK: Record<GradeGroup, number> = { '가성비': 0, '단일등급': 0, '표준': 1, '고급': 2 };
+export function gradeRank(g: GradeGroup): number {
+  return GRADE_RANK[g] ?? 0;
+}
+
+/** 공종에 floor 가 있으면 그보다 낮은 등급을 floor 로 올림. 없으면 그대로. */
+export function applyGradeFloor(workType: string, g: GradeGroup): GradeGroup {
+  const floor = GRADE_FLOOR[workType];
+  if (!floor) return g;
+  return gradeRank(g) < gradeRank(floor) ? floor : g;
+}
+
 export type YesNo = 'Y' | 'N' | '-';
 
 export type RoomId = '거실' | '주방' | '안방' | '작은방1' | '작은방2' | '작은방3';

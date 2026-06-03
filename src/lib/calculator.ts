@@ -20,7 +20,7 @@ import type {
   Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade, GradeGroup,
   RegionId, AgeId,
 } from './types';
-import { gradeGroupOf, bathOverrideKey } from './types';
+import { gradeGroupOf, bathOverrideKey, applyGradeFloor } from './types';
 import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
@@ -101,10 +101,12 @@ function lineItem(
   // 우선순위: material_overrides[overrideKey] > (workType, effectiveGrade(overrideKey))의 주력자재
   const overrideId = grade.material_overrides?.[overrideKey];
   const overrideMat = overrideId ? getMaterialById(overrideId) : null;
+  // 등급 결정 후 공종별 최소 등급 floor 적용 (예: 에어컨은 가성비 → 표준)
+  const resolvedGrade = applyGradeFloor(workType, effectiveGrade(overrideKey, grade));
   // override가 해당 work_type이 아니면 무시 (안전망)
   const mat = overrideMat && overrideMat.sub_category === workType
     ? overrideMat
-    : getPrimaryMaterial(workType, effectiveGrade(overrideKey, grade));
+    : getPrimaryMaterial(workType, resolvedGrade);
   if (!mat) return null;
   const unit = mat.unit_type || fallbackUnit;
   const unitPrice = mat.total_unit_price;

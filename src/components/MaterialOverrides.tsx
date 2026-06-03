@@ -3,7 +3,7 @@
 import { memo, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
-import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES } from '@/lib/types';
+import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort, fmtKRWShortVat } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength, airconInstallRooms } from '@/lib/areas';
@@ -250,8 +250,12 @@ export function MaterialOverrides({
   const TOP_N = 5;
   const visible = showAll ? displayItems : displayItems.slice(0, TOP_N);
 
-  const effectiveGrade = (wt: string): GradeGroup =>
-    (value.overrides[wt] as GradeGroup) ?? value.default;
+  // 등급 결정: override > default, 그 후 공종별 최소 등급 floor 적용 (에어컨 가성비 → 표준).
+  // key 가 욕실 네임스페이스(`wt@@욕실`)면 plain wt 로 floor 판정 (욕실은 floor 없음 → 무영향).
+  const effectiveGrade = (key: string): GradeGroup => {
+    const wt = key.includes('@@') ? key.slice(0, key.indexOf('@@')) : key;
+    return applyGradeFloor(wt, (value.overrides[key] as GradeGroup) ?? value.default);
+  };
 
   /** 단일 work_type 등급 변경 */
   function setGrade(wt: string, g: GradeGroup) {
@@ -1461,12 +1465,18 @@ function BundleCard({
    *  - 방어: 결과가 비면 (전부 단일등급 등) 기존 GRADES 전체로 폴백.
    */
   const availableGrades = useMemo(() => {
-    const present = GRADES.filter((g) =>
+    // 공종 floor 보다 낮은 등급은 숨김 (예: 에어컨 가성비 행 비표시)
+    const floorRank = works.reduce((mx, w) => {
+      const fl = GRADE_FLOOR[w.wt];
+      return fl ? Math.max(mx, gradeRank(fl)) : mx;
+    }, 0);
+    const aboveFloor = GRADES.filter((g) => gradeRank(g) >= floorRank);
+    const present = aboveFloor.filter((g) =>
       works.some((w) =>
         materialsFor(w.wt).some((m) => gradeGroupOf(m.primary_grade as Grade) === g),
       ),
     );
-    return present.length > 0 ? present : GRADES;
+    return present.length > 0 ? present : aboveFloor;
   }, [works]);
 
   return (
