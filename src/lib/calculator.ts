@@ -20,7 +20,7 @@ import type {
   Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade, GradeGroup,
   RegionId, AgeId,
 } from './types';
-import { gradeGroupOf } from './types';
+import { gradeGroupOf, bathOverrideKey } from './types';
 import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
@@ -81,7 +81,13 @@ function effectiveGrade(work: string, sel: GradeSelection): GradeGroup {
   return sel.overrides[work] ?? sel.default;
 }
 
-/** LineItem 한 줄 생성 헬퍼. material이 없거나 qty=0이면 null 반환 */
+/**
+ * LineItem 한 줄 생성 헬퍼. material이 없거나 qty=0이면 null 반환.
+ * overrideKey: 등급·자재 override 조회 키 (기본 = workType).
+ *   욕실 공용/부부 분리 시 `bath_basin@@부부욕실` 같은 네임스페이스 키를 넘겨
+ *   같은 work_type 이라도 욕실별로 다른 등급·자재를 적용한다.
+ *   자재 조회·라벨·카테고리는 항상 plain workType 기준.
+ */
 function lineItem(
   id: string,
   room: string,
@@ -89,15 +95,16 @@ function lineItem(
   qty: number,
   grade: GradeSelection,
   fallbackUnit: string = 'per_ea',
+  overrideKey: string = workType,
 ): LineItem | null {
   if (qty <= 0) return null;
-  // 우선순위: material_overrides > (work_type, effectiveGrade)의 주력자재
-  const overrideId = grade.material_overrides?.[workType];
+  // 우선순위: material_overrides[overrideKey] > (workType, effectiveGrade(overrideKey))의 주력자재
+  const overrideId = grade.material_overrides?.[overrideKey];
   const overrideMat = overrideId ? getMaterialById(overrideId) : null;
   // override가 해당 work_type이 아니면 무시 (안전망)
   const mat = overrideMat && overrideMat.sub_category === workType
     ? overrideMat
-    : getPrimaryMaterial(workType, effectiveGrade(workType, grade));
+    : getPrimaryMaterial(workType, effectiveGrade(overrideKey, grade));
   if (!mat) return null;
   const unit = mat.unit_type || fallbackUnit;
   const unitPrice = mat.total_unit_price;
@@ -309,16 +316,18 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
                  || wt === 'bath_faucet' || wt === 'bath_toilet' || wt === 'bath_accessory') {
         qty = 1;
       }
-      push(lineItem('', bath, wt, qty, grade));
+      // 욕실별 네임스페이스 키 → 공용/부부 독립 등급·자재
+      push(lineItem('', bath, wt, qty, grade, 'per_ea', bathOverrideKey(wt, bath)));
     }
+    // 욕실 설치비 — 욕실별 1식 (공용/부부 각각)
+    push(lineItem('', bath, 'bath_install', 1, grade, 'per_ea', bathOverrideKey('bath_install', bath)));
   }
 
-  // 욕실 설치비 + 타일 시공팀
+  // 타일 시공팀 — 전체 공유 (욕실 수 × 2). 욕실별 분리 대상 아님.
   const bathCount = activeBathrooms(p).filter(b =>
     b === '공용욕실' ? scope.global.common_bath_set : scope.global.master_bath_set
   ).length;
   if (bathCount > 0) {
-    push(lineItem('', '전체', 'bath_install', bathCount, grade));
     push(lineItem('', '전체', 'tile_labor', bathCount * 2, grade));
   }
 

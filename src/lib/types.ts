@@ -43,6 +43,19 @@ export type YesNo = 'Y' | 'N' | '-';
 export type RoomId = '거실' | '주방' | '안방' | '작은방1' | '작은방2' | '작은방3';
 export type BathId = '공용욕실' | '부부욕실';
 
+/** 욕실 이름 집합 — line_item.room 이 욕실인지 판별용 */
+export const BATH_ROOM_NAMES: readonly string[] = ['공용욕실', '부부욕실'];
+
+/**
+ * 욕실(공용/부부)별 등급·자재 override 네임스페이스 키.
+ * work_type 과 욕실명을 결합 → 공용/부부 욕실이 같은 공종이라도 독립된 등급·자재를 갖는다.
+ * 예: bathOverrideKey('bath_basin', '부부욕실') === 'bath_basin@@부부욕실'
+ * GradeSelection.overrides / material_overrides 의 키로 사용.
+ */
+export function bathOverrideKey(workType: string, bath: string): string {
+  return `${workType}@@${bath}`;
+}
+
 /** 자재마스터 1행 */
 export type Material = {
   material_id: string;

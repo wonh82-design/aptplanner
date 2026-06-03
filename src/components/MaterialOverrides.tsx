@@ -3,7 +3,7 @@
 import { memo, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
-import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
+import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort, fmtKRWShortVat } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength, airconInstallRooms } from '@/lib/areas';
@@ -66,12 +66,18 @@ const CUSTOM_META = {
   label: '사용자 맞춤',
 };
 
-/** 한 work_type의 집계 정보 */
-type WorkInfo = { wt: string; sub: number; totalQty: number; firstIdx: number };
-/** 표시 단위: 단일 work_type 또는 묶음(bundle) */
+/**
+ * 한 work_type(또는 욕실별 work_type)의 집계 정보.
+ *  - wt: plain work_type (자재 조회·라벨·카테고리용)
+ *  - key: 등급·자재 override 키 (기본 = wt, 욕실 분리 시 `bath_basin@@부부욕실`)
+ *  - room: 욕실 공종이면 욕실명 (공용욕실/부부욕실), 아니면 undefined
+ */
+type WorkInfo = { wt: string; sub: number; totalQty: number; firstIdx: number; key: string; room?: string };
+/** 표시 단위: 단일 work_type · 묶음(bundle) · 욕실(공용/부부 분리) */
 type DisplayItem =
   | { kind: 'single'; work: WorkInfo; label: string; firstIdx: number }
-  | { kind: 'bundle'; bundle: WorkBundle; works: WorkInfo[]; sub: number; firstIdx: number };
+  | { kind: 'bundle'; bundle: WorkBundle; works: WorkInfo[]; sub: number; firstIdx: number }
+  | { kind: 'bath'; room: string; works: WorkInfo[]; sub: number; firstIdx: number };
 
 export function MaterialOverrides({
   quote, value, onChange,
@@ -83,6 +89,8 @@ export function MaterialOverrides({
   const [showAll, setShowAll] = useState(true);
   // '자세히' 모달 — 어떤 work_type을 펼쳤는지
   const [detailWorkType, setDetailWorkType] = useState<string | null>(null);
+  // 욕실 개별 컴포넌트 자재 선택 모달 — { 공종, 네임스페이스 키, 욕실명 }
+  const [bathPicker, setBathPicker] = useState<{ wt: string; key: string; room: string } | null>(null);
   // 일괄 등급 선택 popover
   const [bulkOpen, setBulkOpen] = useState(false);
   /**
@@ -111,41 +119,54 @@ export function MaterialOverrides({
    */
   const lastNonZeroQtyRef = useRef<Map<string, number>>(new Map());
 
-  // 1) 견적에 등장하는 work_type 집계 + 캐시에 있는 모든 wt 도 placeholder 로 보존
+  // 1) 견적에 등장하는 work_type 집계 + 캐시에 있는 모든 항목도 placeholder 로 보존.
+  //    욕실 공종(room ∈ 욕실)은 `work_type@@욕실명` 네임스페이스 키로 분리 집계 →
+  //    공용/부부 욕실이 독립 카드로 표시된다. tile_labor(타일 시공팀)는 카드 비표시.
   const workInfoList = useMemo(() => {
     const cache = firstIdxCacheRef.current;
     const qtyCache = lastNonZeroQtyRef.current;
+    const isBathRoom = (room: string) => BATH_ROOM_NAMES.includes(room);
+    /** 네임스페이스 키 → { wt, room } 복원 (placeholder 재구성용) */
+    const parseKey = (key: string): { wt: string; room?: string } => {
+      const i = key.indexOf('@@');
+      return i >= 0 ? { wt: key.slice(0, i), room: key.slice(i + 2) } : { wt: key };
+    };
     const map = new Map<string, WorkInfo>();
     quote.line_items.forEach((it, idx) => {
       if (!it.material_id) return;
-      // 처음 등장 시 캐시에 기록
-      if (!cache.has(it.work_type)) cache.set(it.work_type, idx);
-      const firstIdx = cache.get(it.work_type)!;
-      const prev = map.get(it.work_type);
+      if (it.work_type === 'tile_labor') return; // 타일 시공팀 — 카드 비표시
+      const bath = isBathRoom(it.room);
+      const entryKey = bath ? bathOverrideKey(it.work_type, it.room) : it.work_type;
+      if (!cache.has(entryKey)) cache.set(entryKey, idx);
+      const firstIdx = cache.get(entryKey)!;
+      const prev = map.get(entryKey);
       if (prev) {
         prev.sub += it.subtotal;
         prev.totalQty += it.qty;
       } else {
-        map.set(it.work_type, { wt: it.work_type, sub: it.subtotal, totalQty: it.qty, firstIdx });
+        map.set(entryKey, {
+          wt: it.work_type, key: entryKey, room: bath ? it.room : undefined,
+          sub: it.subtotal, totalQty: it.qty, firstIdx,
+        });
       }
     });
     // 현재 line_items 의 non-zero qty 는 qtyCache 갱신 (제외 시 fallback 으로 사용)
-    for (const [wt, info] of map.entries()) {
-      if (info.totalQty > 0) qtyCache.set(wt, info.totalQty);
+    for (const [k, info] of map.entries()) {
+      if (info.totalQty > 0) qtyCache.set(k, info.totalQty);
     }
-    // 캐시에 있지만 line_items 에 없는 wt — placeholder 로 자리 유지
-    // totalQty 는 마지막 non-zero qty 사용 → BundleCard 등급 행 공사비 유지
-    for (const [wt, firstIdx] of cache.entries()) {
-      if (!map.has(wt)) {
-        map.set(wt, { wt, sub: 0, totalQty: qtyCache.get(wt) ?? 0, firstIdx });
+    // 캐시에 있지만 line_items 에 없는 항목 — placeholder 로 자리 유지
+    for (const [entryKey, firstIdx] of cache.entries()) {
+      if (!map.has(entryKey)) {
+        const { wt, room } = parseKey(entryKey);
+        map.set(entryKey, { wt, key: entryKey, room, sub: 0, totalQty: qtyCache.get(entryKey) ?? 0, firstIdx });
       }
     }
-    // excludedKeys 의 wt 도 (혹시 캐시에도 없는 새 경우) 안전망
+    // excludedKeys (generic work_type) 안전망
     let fallbackIdx = quote.line_items.length + 1000;
     for (const wt of excludedKeys) {
       if (!map.has(wt)) {
         const firstIdx = cache.get(wt) ?? fallbackIdx++;
-        map.set(wt, { wt, sub: 0, totalQty: qtyCache.get(wt) ?? 0, firstIdx });
+        map.set(wt, { wt, key: wt, sub: 0, totalQty: qtyCache.get(wt) ?? 0, firstIdx });
       }
     }
     return Array.from(map.values());
@@ -154,9 +175,23 @@ export function MaterialOverrides({
   // 2) bundle 단위로 그룹핑 → DisplayItem 리스트
   const displayItems = useMemo<DisplayItem[]>(() => {
     const bundleBuckets = new Map<string, { bundle: WorkBundle; works: WorkInfo[]; sub: number; firstIdx: number }>();
+    // 욕실 버킷 — 욕실명(공용/부부) 별로 분리
+    const bathBuckets = new Map<string, { room: string; works: WorkInfo[]; sub: number; firstIdx: number }>();
     const singles: WorkInfo[] = [];
 
     for (const w of workInfoList) {
+      // 욕실 공종은 욕실별 버킷으로 (bundle 그룹핑 우회)
+      if (w.room) {
+        let bucket = bathBuckets.get(w.room);
+        if (!bucket) {
+          bucket = { room: w.room, works: [], sub: 0, firstIdx: w.firstIdx };
+          bathBuckets.set(w.room, bucket);
+        }
+        bucket.works.push(w);
+        bucket.sub += w.sub;
+        if (w.firstIdx < bucket.firstIdx) bucket.firstIdx = w.firstIdx;
+        continue;
+      }
       const b = bundleForWorkType(w.wt);
       if (b) {
         let bucket = bundleBuckets.get(b.id);
@@ -189,17 +224,26 @@ export function MaterialOverrides({
           bucket = { bundle: etcBundle, works: [], sub: 0, firstIdx: 999999 };
           bundleBuckets.set('etc', bucket);
         }
-        bucket.works.push({ wt, sub: 0, totalQty: 0, firstIdx: 999999 });
+        bucket.works.push({ wt, key: wt, sub: 0, totalQty: 0, firstIdx: 999999 });
       }
     }
 
     const items: DisplayItem[] = [];
     for (const s of singles) items.push({ kind: 'single', work: s, label: labelOf(s.wt), firstIdx: s.firstIdx });
     for (const b of bundleBuckets.values()) items.push({ kind: 'bundle', bundle: b.bundle, works: b.works, sub: b.sub, firstIdx: b.firstIdx });
+    // 욕실 카드 — 공용욕실 먼저, 부부욕실 다음 (firstIdx 동률 시 이름 순)
+    for (const b of bathBuckets.values()) items.push({ kind: 'bath', room: b.room, works: b.works, sub: b.sub, firstIdx: b.firstIdx });
     // 정렬 키: bundle.displayOrder가 있으면 그 값, 없으면 firstIdx
     const sortKey = (it: DisplayItem) =>
       it.kind === 'bundle' && it.bundle.displayOrder !== undefined ? it.bundle.displayOrder : it.firstIdx;
-    items.sort((a, b) => sortKey(a) - sortKey(b));
+    items.sort((a, b) => {
+      const d = sortKey(a) - sortKey(b);
+      if (d !== 0) return d;
+      // 욕실 동률 — 공용 → 부부 순 고정
+      const an = a.kind === 'bath' ? a.room : '';
+      const bn = b.kind === 'bath' ? b.room : '';
+      return an.localeCompare(bn);
+    });
     return items;
   }, [workInfoList]);
 
@@ -236,6 +280,47 @@ export function MaterialOverrides({
   function setBulkGrade(g: GradeGroup) {
     onChange({ default: g, overrides: {}, material_overrides: {} });
     setBulkOpen(false);
+  }
+
+  // ===== 욕실(공용/부부) 분리 — 욕실별 네임스페이스 키 기반 setter =====
+
+  /** 욕실 세트 등급 일괄 — 해당 욕실 모든 컴포넌트 키에 등급 적용 + 자재 override 해제 */
+  function setBathGrade(works: WorkInfo[], g: GradeGroup) {
+    const overrides = { ...value.overrides };
+    const matOv = { ...value.material_overrides };
+    for (const w of works) {
+      overrides[w.key] = g;
+      delete matOv[w.key];
+    }
+    onChange({ ...value, overrides, material_overrides: matOv });
+  }
+
+  /** 욕실 개별 컴포넌트 자재 변경 (네임스페이스 키 사용) */
+  function setBathMaterial(key: string, material: Material) {
+    const group = gradeGroupOf(material.primary_grade as Grade);
+    onChange({
+      ...value,
+      overrides: { ...value.overrides, [key]: group },
+      material_overrides: { ...value.material_overrides, [key]: material.material_id },
+    });
+  }
+
+  /** 욕실 세트 초기화 — 해당 욕실 모든 키의 override 제거 */
+  function clearBath(works: WorkInfo[]) {
+    const overrides = { ...value.overrides };
+    const matOv = { ...value.material_overrides };
+    for (const w of works) {
+      delete overrides[w.key];
+      delete matOv[w.key];
+    }
+    onChange({ ...value, overrides, material_overrides: matOv });
+  }
+
+  /** 욕실 ON/OFF — room 에 맞는 scope _set 토글 (제외/복원) */
+  function setBathEnabled(room: string, enabled: boolean) {
+    if (!scope || !onScopeChange) return;
+    const key: keyof Scope['global'] = room === '공용욕실' ? 'common_bath_set' : 'master_bath_set';
+    onScopeChange({ ...scope, global: { ...scope.global, [key]: enabled } });
   }
 
   /**
@@ -766,6 +851,28 @@ export function MaterialOverrides({
               onShowDetail={() => setDetailWorkType(item.work.wt)}
               onGradeRadio={canEditScope ? (c) => handleGradeRadio(item.work.wt, c) : undefined}
             />
+          ) : item.kind === 'bath' ? (
+            <BathCard
+              key={`bath-${item.room}-${i}`}
+              room={item.room}
+              works={item.works}
+              totalSub={item.sub}
+              gradeSelection={value}
+              effectiveGrade={effectiveGrade}
+              isExcluded={
+                item.room === '공용욕실'
+                  ? !(scope?.global.common_bath_set ?? item.works.some((w) => w.sub > 0))
+                  : !(scope?.global.master_bath_set ?? item.works.some((w) => w.sub > 0))
+              }
+              onSelectGrade={(g) => {
+                if (canEditScope) setBathEnabled(item.room, true); // 제외 상태였으면 복원
+                setBathGrade(item.works, g);
+              }}
+              onClear={() => clearBath(item.works)}
+              onPickComponent={(w) => setBathPicker({ wt: w.wt, key: w.key, room: item.room })}
+              onExclude={canEditScope ? () => setBathEnabled(item.room, false) : undefined}
+              onRestore={canEditScope ? () => setBathEnabled(item.room, true) : undefined}
+            />
           ) : (
             <BundleCard
               key={`b-${item.bundle.id}-${i}`}
@@ -852,6 +959,26 @@ export function MaterialOverrides({
           workType={detailWorkType}
           currentGrade={effectiveGrade(detailWorkType)}
           onClose={() => setDetailWorkType(null)}
+        />
+      )}
+
+      {/* 욕실 개별 컴포넌트 자재 선택 모달 (공용/부부 독립) */}
+      {bathPicker && (
+        <BathMaterialPicker
+          workType={bathPicker.wt}
+          room={bathPicker.room}
+          selectedMaterialId={
+            value.material_overrides[bathPicker.key] ??
+            getPrimaryMaterial(bathPicker.wt, effectiveGrade(bathPicker.key))?.material_id ??
+            null
+          }
+          totalQty={
+            displayItems
+              .flatMap((d) => (d.kind === 'bath' ? d.works : []))
+              .find((w) => w.key === bathPicker.key)?.totalQty ?? 1
+          }
+          onSelect={(m) => { setBathMaterial(bathPicker.key, m); setBathPicker(null); }}
+          onClose={() => setBathPicker(null)}
         />
       )}
 
@@ -1604,6 +1731,224 @@ function BundleCard({
           </div>
         )
       )}
+    </div>
+  );
+}
+
+// =====================================================
+// BathCard — 공용/부부 욕실 1개를 독립 카드로 표시
+//   등급 행(가성비/표준/고급) + 제외 + 구성 컴포넌트 카드(타일 시공팀 제외).
+//   욕실별 네임스페이스 override 키 → 공용/부부 등급·자재 완전 분리.
+// =====================================================
+
+function BathCard({
+  room, works, totalSub, gradeSelection, effectiveGrade, isExcluded,
+  onSelectGrade, onClear, onPickComponent, onExclude, onRestore,
+}: {
+  room: string;
+  works: WorkInfo[];
+  totalSub: number;
+  gradeSelection: GradeSelection;
+  effectiveGrade: (key: string) => GradeGroup;
+  isExcluded: boolean;
+  onSelectGrade: (g: GradeGroup) => void;
+  onClear: () => void;
+  onPickComponent: (w: WorkInfo) => void;
+  onExclude?: () => void;
+  onRestore?: () => void;
+}) {
+  void onRestore; // 복원은 등급 행 클릭(onSelectGrade)에서 처리
+
+  const grades = works.map((w) => effectiveGrade(w.key));
+  const bundleGrade: GradeGroup | 'mixed' = new Set(grades).size === 1 ? grades[0] : 'mixed';
+  const hasAnyOverride = works.some(
+    (w) => gradeSelection.overrides[w.key] !== undefined || gradeSelection.material_overrides[w.key] !== undefined,
+  );
+
+  // 등급별 세트 합계 (plain wt 로 자재 조회)
+  const totalsByGrade = useMemo(() => {
+    const out: Record<GradeGroup, number> = { '가성비': 0, '표준': 0, '고급': 0, '단일등급': 0 };
+    for (const g of GRADES) {
+      let t = 0;
+      for (const w of works) {
+        const mat = getPrimaryMaterial(w.wt, g);
+        if (mat) t += w.totalQty * mat.total_unit_price;
+      }
+      out[g] = Math.round(t);
+    }
+    return out;
+  }, [works]);
+
+  // 실제 자재 있는 등급만 행 표시
+  const availableGrades = useMemo(() => {
+    const present = GRADES.filter((g) =>
+      works.some((w) => materialsFor(w.wt).some((m) => gradeGroupOf(m.primary_grade as Grade) === g)),
+    );
+    return present.length > 0 ? present : GRADES;
+  }, [works]);
+
+  return (
+    <div className={`rounded-lg border ${hasAnyOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
+      {/* 헤더 */}
+      <div className="px-3 py-2 bg-zinc-50/50 border-b border-zinc-200/70 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-sm font-semibold text-zinc-900">{room}</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold whitespace-nowrap">욕실</span>
+            {isExcluded && <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">제외됨</span>}
+            {hasAnyOverride && <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium whitespace-nowrap">개별 설정</span>}
+            {bundleGrade === 'mixed' && <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-medium whitespace-nowrap">커스텀 구성</span>}
+          </div>
+          <p className="text-[11px] text-zinc-500 mt-0.5 truncate">방수·타일·세면대·수전·양변기 일체 — {room} 단독 설정</p>
+        </div>
+        <div className="flex-shrink-0 flex items-center justify-between sm:justify-end gap-2 flex-wrap">
+          <span className="text-[11px] text-zinc-500 tabular-nums whitespace-nowrap">현재 {fmtKRWShortVat(totalSub)}</span>
+          {hasAnyOverride && (
+            <button onClick={onClear} className="text-[10px] text-zinc-500 hover:text-zinc-900 underline underline-offset-2 whitespace-nowrap" title="이 욕실을 기본값으로 되돌립니다">
+              초기화
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 등급 행 + 제외 */}
+      <div className="divide-y divide-zinc-100">
+        {onExclude && (
+          <button
+            type="button"
+            onClick={() => { if (!isExcluded) onExclude(); }}
+            disabled={isExcluded}
+            className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 text-left transition
+              ${isExcluded ? 'bg-zinc-100 ring-2 ring-inset ring-zinc-400 cursor-default' : 'bg-white hover:bg-zinc-50'}`}
+          >
+            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 flex-shrink-0 ${isExcluded ? 'border-current text-zinc-700' : 'border-zinc-300 text-zinc-300'}`}>
+              {isExcluded && <span className="w-2 h-2 rounded-full bg-current" />}
+            </span>
+            <div className="flex-shrink-0 sm:min-w-[80px]">
+              <div className={`text-xs font-bold ${isExcluded ? 'text-zinc-700' : 'text-zinc-500'}`}>제외</div>
+              <div className="text-[10px] text-zinc-500 leading-tight hidden sm:block">이 욕실 제외</div>
+            </div>
+            <div className="flex-1 min-w-0 hidden sm:block">
+              <div className="text-[11px] text-zinc-500 truncate">{room}을 견적에서 빼고 0원 처리</div>
+            </div>
+            <div className="flex-shrink-0 text-right ml-auto">
+              <div className={`text-sm font-bold tabular-nums ${isExcluded ? 'text-zinc-700' : 'text-zinc-400'}`}>₩0</div>
+              <div className="text-[10px] text-zinc-500">우리집 총공사비</div>
+            </div>
+          </button>
+        )}
+        {availableGrades.map((g) => {
+          const total = totalsByGrade[g];
+          const selected = !isExcluded && bundleGrade === g;
+          const meta = GRADE_META[g];
+          return (
+            <button
+              key={g}
+              type="button"
+              onClick={() => onSelectGrade(g)}
+              className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 text-left transition
+                ${selected ? `${meta.bg} ring-2 ring-inset ${meta.ring}` : 'bg-white hover:bg-zinc-50'}`}
+            >
+              <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 flex-shrink-0 ${selected ? `border-current ${meta.color}` : 'border-zinc-300'}`}>
+                {selected && <span className={`w-2 h-2 rounded-full bg-current ${meta.color}`} />}
+              </span>
+              <div className="flex-shrink-0 sm:min-w-[80px]">
+                <div className={`text-xs font-bold ${meta.color}`}>{g} 세트</div>
+                <div className="text-[10px] text-zinc-500 leading-tight hidden sm:block">{meta.label}</div>
+              </div>
+              <div className="flex-1 min-w-0 hidden sm:block">
+                <div className="text-[11px] text-zinc-500 truncate" title={bundleMaterialSummary(works, g)}>
+                  {bundleMaterialSummary(works, g) || `${works.length}개 자재 일괄 적용`}
+                </div>
+              </div>
+              <div className="flex-shrink-0 text-right ml-auto">
+                <div className={`text-sm font-bold tabular-nums ${selected ? meta.color : 'text-zinc-900'}`}>{fmtKRWShortVat(total)}</div>
+                <div className="text-[10px] text-zinc-500">우리집 총공사비</div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 구성 컴포넌트 카드 (타일 시공팀은 집계 단계에서 제외됨) */}
+      {!isExcluded && (
+        <div className="bg-zinc-50/40 px-3 py-3 border-t-2 border-zinc-200">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2">
+            {room} 구성 자재 — {bundleGrade === 'mixed' ? '항목별 등급' : `${bundleGrade} 등급`} 기준 · 카드 클릭 시 개별 변경
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            {works.map((w) => {
+              const mat = getPrimaryMaterial(w.wt, effectiveGrade(w.key));
+              if (!mat) return null;
+              return (
+                <MaterialCard
+                  key={w.key}
+                  material={mat}
+                  isPrimary={false}
+                  isSelected={false}
+                  totalQty={w.totalQty}
+                  componentLabel={labelOf(w.wt)}
+                  onSelect={() => onPickComponent(w)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =====================================================
+// BathMaterialPicker — 욕실 컴포넌트 1개의 자재 선택 모달 (공용/부부 독립)
+//   materialsFor(workType) 전체를 카드 그리드로 노출, 클릭 시 네임스페이스 키에 자재 적용.
+// =====================================================
+
+function BathMaterialPicker({
+  workType, room, selectedMaterialId, totalQty, onSelect, onClose,
+}: {
+  workType: string;
+  room: string;
+  selectedMaterialId: string | null;
+  totalQty: number;
+  onSelect: (m: Material) => void;
+  onClose: () => void;
+}) {
+  const label = labelOf(workType);
+  const mats = materialsFor(workType);
+  return (
+    <div className="fixed inset-0 z-50 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 z-10 bg-white border-b border-zinc-200 px-5 py-4 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-0.5">{room} 자재 선택</div>
+            <h2 className="text-lg font-bold text-zinc-900 truncate">{label}</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">카드를 클릭하면 {room}의 {label} 자재가 변경됩니다.</p>
+          </div>
+          <button onClick={onClose} className="flex-shrink-0 text-zinc-400 hover:text-zinc-900 text-2xl leading-none -mt-1" aria-label="닫기">×</button>
+        </div>
+        <div className="px-5 py-5">
+          {mats.length === 0 ? (
+            <div className="py-10 text-center text-sm text-zinc-400 italic">등록된 자재가 없습니다</div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+              {mats.map((m) => (
+                <MaterialCard
+                  key={m.material_id}
+                  material={m}
+                  isPrimary={false}
+                  isSelected={selectedMaterialId === m.material_id}
+                  totalQty={totalQty}
+                  onSelect={() => onSelect(m)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="sticky bottom-0 bg-white border-t border-zinc-200 px-5 py-3 flex justify-end">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 font-semibold text-sm transition">닫기</button>
+        </div>
+      </div>
     </div>
   );
 }
