@@ -654,6 +654,18 @@ export function MaterialOverrides({
   // 공사범위 프리셋·12 공종 그룹 ON/OFF UI는 scope/property 전달 시에만 활성
   const canEditScope = !!(scope && onScopeChange && property);
 
+  /**
+   * 시스템에어컨 실내기 설치 공간 — 활성 방 중 aircon=ON 인 곳.
+   * 기본 scope 에서 거실 + 모든 침실(방)에 ON → "방 개수 + 거실" 개소가 됨.
+   * quote.scope/property 기준 (현재 견적 상태) — 사용자 토글 즉시 반영.
+   */
+  const airconRooms = useMemo(() => {
+    const p = quote.property;
+    return activeRooms(p).filter(
+      (r) => quote.scope.rooms[r as keyof Scope['rooms']]?.aircon,
+    );
+  }, [quote.property, quote.scope]);
+
   return (
     <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
@@ -762,6 +774,8 @@ export function MaterialOverrides({
               bundle={item.bundle}
               works={item.works}
               bathCount={property ? (property.common_bath + property.master_bath) : undefined}
+              airconCount={item.bundle.id === 'aircon' ? airconRooms.length : undefined}
+              airconRoomsLabel={item.bundle.id === 'aircon' ? airconRooms.join('·') : undefined}
               totalSub={item.sub}
               gradeSelection={value}
               effectiveGrade={effectiveGrade}
@@ -1236,6 +1250,7 @@ function bundleMaterialSummary(works: WorkInfo[], grade: GradeGroup): string {
 
 function BundleCard({
   bundle, works, totalSub, gradeSelection, effectiveGrade, isExcluded = false, bathCount,
+  airconCount, airconRoomsLabel,
   onSelectBundleGrade, onSelectComponentGrade, onClearBundle,
   onShowDetail, onExclude, onRestoreBundle,
   scope, onScopeChange,
@@ -1250,6 +1265,10 @@ function BundleCard({
   isExcluded?: boolean;
   /** 욕실 풀세트(bundle.id='bath') 의 욕실 총 개수 (공용 + 부부) 표시용 */
   bathCount?: number;
+  /** 시스템에어컨(bundle.id='aircon') 실내기 설치 개소 (방+거실) */
+  airconCount?: number;
+  /** 시스템에어컨 설치 공간 라벨 (예: '거실·안방·작은방1·작은방2') */
+  airconRoomsLabel?: string;
   onSelectBundleGrade: (g: GradeGroup) => void;
   onSelectComponentGrade: (wt: string, g: GradeGroup) => void;
   onClearBundle: () => void;
@@ -1333,6 +1352,12 @@ function BundleCard({
                 {bathCount === 2 && ' (공용 + 부부)'}
               </span>
             )}
+            {/* 시스템에어컨은 실내기 설치 개소 칩 표시 (방 + 거실 기본) */}
+            {bundle.id === 'aircon' && airconCount !== undefined && airconCount > 0 && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold whitespace-nowrap">
+                실내기 {airconCount}대
+              </span>
+            )}
             {isExcluded && (
               <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">
                 제외됨
@@ -1355,8 +1380,15 @@ function BundleCard({
               )
             )}
           </div>
-          {bundle.desc && (
-            <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{bundle.desc}</p>
+          {/* 시스템에어컨은 설치 공간 목록을 desc 자리에 노출 */}
+          {bundle.id === 'aircon' && airconRoomsLabel ? (
+            <p className="text-[11px] text-zinc-500 mt-0.5 truncate" title={airconRoomsLabel}>
+              실내기 설치: {airconRoomsLabel}
+            </p>
+          ) : (
+            bundle.desc && (
+              <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{bundle.desc}</p>
+            )
           )}
         </div>
         <div className="flex-shrink-0 flex items-center justify-between sm:justify-end gap-2 flex-wrap">
