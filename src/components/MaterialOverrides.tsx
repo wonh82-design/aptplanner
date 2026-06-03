@@ -1072,7 +1072,7 @@ function ExcludeToggleButton({ isExcluded, onClick }: { isExcluded: boolean; onC
 // =====================================================
 
 const MaterialCard = memo(function MaterialCard({
-  material, isPrimary, isSelected, totalQty, homeTotalOverride, onSelect,
+  material, isPrimary, isSelected, totalQty, homeTotalOverride, componentLabel, onSelect,
 }: {
   material: Material;
   isPrimary: boolean;
@@ -1084,6 +1084,11 @@ const MaterialCard = memo(function MaterialCard({
    * undefined 면 기본 공식 `totalQty × material.total_unit_price` 사용.
    */
   homeTotalOverride?: number;
+  /**
+   * 세트 구성 카드용 컴포넌트 라벨 (예: '욕실 세면대').
+   * 지정 시 카드 최상단에 공종명 헤더를 노출 — 욕실 풀세트 구성 카드에서 사용.
+   */
+  componentLabel?: string;
   onSelect: () => void;
 }) {
   // 색상은 그룹 기준 (가성비/표준/고급/단일등급) — "표준 추천" 도 표준 색
@@ -1117,6 +1122,12 @@ const MaterialCard = memo(function MaterialCard({
           : 'border-zinc-200 hover:border-zinc-400 hover:shadow-sm'
       }`}
     >
+      {/* 세트 구성 카드 — 공종명 헤더 (componentLabel 지정 시) */}
+      {componentLabel && (
+        <div className="px-2 py-1 bg-zinc-800 text-white text-[10px] font-bold truncate" title={componentLabel}>
+          {componentLabel}
+        </div>
+      )}
       {/* 상단 등급 배지 — 자재의 primary_grade 그대로 표시 (예: "표준 추천", "고급") */}
       <div className={`${meta.bg} px-2 py-1 flex items-center gap-1 border-b ${
         isSelected ? meta.ring.replace('ring-', 'border-') : 'border-zinc-200'
@@ -1394,7 +1405,7 @@ function BundleCard({
             현재 {fmtKRWShortVat(totalSub)}
           </span>
           <div className="flex items-center gap-2 flex-wrap">
-            {!HIDE_COMPONENTS_BUNDLES.has(bundle.id) && bundle.id !== 'etc' && (
+            {!HIDE_COMPONENTS_BUNDLES.has(bundle.id) && bundle.id !== 'etc' && bundle.id !== 'bath' && (
               <button
                 onClick={() => setShowComponents(s => !s)}
                 className={`text-[10px] font-semibold px-2 py-1 rounded border transition whitespace-nowrap ${
@@ -1535,9 +1546,39 @@ function BundleCard({
       </div>
       )}
 
+      {/* 욕실 풀세트 — 선택 등급의 구성 컴포넌트를 카드로 표시 (타일 시공팀 제외).
+          항상 노출되며, 등급 행을 누르면 해당 등급 자재로 카드가 갱신된다.
+          카드 클릭 시 상세 모달에서 등급·자재 비교/변경 가능. */}
+      {bundle.id === 'bath' && !isExcluded && (
+        <div className="bg-zinc-50/40 px-3 py-3 border-t-2 border-zinc-200">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2">
+            구성 자재 — {bundleGrade === 'mixed' ? '항목별 등급' : `${bundleGrade} 등급`} 기준 · 카드 클릭 시 개별 변경
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            {works
+              .filter((w) => w.wt !== 'tile_labor')
+              .map((w) => {
+                const mat = getPrimaryMaterial(w.wt, effectiveGrade(w.wt));
+                if (!mat) return null;
+                return (
+                  <MaterialCard
+                    key={w.wt}
+                    material={mat}
+                    isPrimary={false}
+                    isSelected={false}
+                    totalQty={w.totalQty}
+                    componentLabel={labelOf(w.wt)}
+                    onSelect={() => onShowDetail(w.wt)}
+                  />
+                );
+              })}
+          </div>
+        </div>
+      )}
+
       {/* 구성 자재 영역 (펼침 시) — carpentry는 sub-work 토글, 그 외 bundle은 등급 토글.
-          HIDE_COMPONENTS_BUNDLES에 속한 번들은 펼침 자체 비활성. */}
-      {showComponents && !HIDE_COMPONENTS_BUNDLES.has(bundle.id) && (
+          HIDE_COMPONENTS_BUNDLES에 속한 번들은 펼침 자체 비활성. bath 는 위 카드 그리드로 대체. */}
+      {showComponents && !HIDE_COMPONENTS_BUNDLES.has(bundle.id) && bundle.id !== 'bath' && (
         bundle.id === 'carpentry' && scope && onScopeChange ? (
           <CarpentryScopePanel scope={scope} onScopeChange={onScopeChange} />
         ) : (
