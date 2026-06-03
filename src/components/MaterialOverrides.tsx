@@ -6,7 +6,7 @@ import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, Room
 import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort, fmtKRWShortVat } from '@/lib/calculator';
-import { activeRooms, clampPartitionLength } from '@/lib/areas';
+import { activeRooms, clampPartitionLength, airconInstallRooms } from '@/lib/areas';
 import { lookupWindowCost } from '@/lib/window-cost';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
 import { WORK_BUNDLES, bundleForWorkType, type WorkBundle } from '@/lib/material-bundles';
@@ -655,16 +655,14 @@ export function MaterialOverrides({
   const canEditScope = !!(scope && onScopeChange && property);
 
   /**
-   * 시스템에어컨 실내기 설치 공간 — 활성 방 중 aircon=ON 인 곳.
-   * 기본 scope 에서 거실 + 모든 침실(방)에 ON → "방 개수 + 거실" 개소가 됨.
+   * 시스템에어컨 실내기 설치 공간 — calculator 와 동일한 airconInstallRooms 사용.
+   * 기본 scope: 거실 + 모든 침실 → "방 개수 + 거실". 40평 이상은 주방도 기본 포함.
    * quote.scope/property 기준 (현재 견적 상태) — 사용자 토글 즉시 반영.
    */
-  const airconRooms = useMemo(() => {
-    const p = quote.property;
-    return activeRooms(p).filter(
-      (r) => quote.scope.rooms[r as keyof Scope['rooms']]?.aircon,
-    );
-  }, [quote.property, quote.scope]);
+  const airconRooms = useMemo(
+    () => airconInstallRooms(quote.property, quote.scope),
+    [quote.property, quote.scope],
+  );
 
   return (
     <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">

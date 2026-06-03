@@ -25,7 +25,7 @@ import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
   bayWidthForRoom, balconyAreaForRoom, doorCount, downlightCount,
-  bathroomArea, kitchenLength, adjustedRoomFlooringArea,
+  bathroomArea, kitchenLength, adjustedRoomFlooringArea, airconInstallRooms,
 } from './areas';
 import { getPrimaryMaterial, getMaterialById, labelOf } from './materials';
 import { lookupWindowCost } from './window-cost';
@@ -347,8 +347,8 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     push(lineItem('', roomId, 'closet', len, grade, 'per_m'));
   }
 
-  // 시스템에어컨 (공간 매트릭스 ON 공간 수)
-  const acRooms = activeRooms(p).filter(r => scope.rooms[r as keyof Scope['rooms']]?.aircon);
+  // 시스템에어컨 — 설치 공간은 airconInstallRooms 로 결정 (40평+ 주방 기본 포함)
+  const acRooms = airconInstallRooms(p, scope);
   if (acRooms.length > 0) {
     push(lineItem('', '전체', 'aircon', acRooms.length, grade));
     push(lineItem('', '전체', 'aircon_outdoor', 1, grade));  // 실외기 1대

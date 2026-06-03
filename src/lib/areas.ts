@@ -3,7 +3,7 @@
  * 데이터는 표준면적 시트(3베이 기준)에서 추출됨.
  */
 import areas from '@/data/standard_areas.json';
-import type { Property } from './types';
+import type { Property, Scope } from './types';
 
 const SA = areas as {
   pyeongs: number[];
@@ -166,6 +166,27 @@ export function activeRooms(p: Property): string[] {
   if (p.rooms >= 3) rooms.push('작은방2');
   if (p.rooms >= 4) rooms.push('작은방3');
   return rooms;
+}
+
+/**
+ * 시스템에어컨 실내기 설치 공간 목록 (activeRooms 순서 유지).
+ * calculator 의 실제 설치 라인과 UI 의 "실내기 N대" 칩이 공유하는 단일 기준.
+ *
+ *  · 기본: 활성 공간 중 scope.rooms[r].aircon === true 인 곳
+ *  · 40평 이상: 주방도 기본 설치 — 단 에어컨이 한 곳이라도 켜진 경우에만.
+ *    (에어컨 공종 전체 OFF 시엔 주방도 미설치 → 카드 제외 상태와 정합)
+ *
+ * 주의: defaults.ts 의 초기 scope 는 주방 aircon=false 이지만, 40평+ 에선
+ *       이 함수가 주방을 자동 포함시키므로 평형 입력 시점과 무관하게 반영된다.
+ */
+export function airconInstallRooms(p: Property, scope: Scope): string[] {
+  const active = activeRooms(p);
+  const anyOn = active.some((r) => !!scope.rooms[r as keyof Scope['rooms']]?.aircon);
+  return active.filter((r) => {
+    if (scope.rooms[r as keyof Scope['rooms']]?.aircon) return true;
+    if (r === '주방' && p.pyeong >= 40 && anyOn) return true;
+    return false;
+  });
 }
 
 /**
