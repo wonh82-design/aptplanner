@@ -1761,12 +1761,12 @@ function BathCard({
   void onRestore; // 복원은 등급 행 클릭(onSelectGrade)에서 처리
 
   // 현재 타입에 맞지 않는 상호배타 항목 제외:
-  //  booth → bath_bathtub·bath_bathtub_faucet 숨김 / tub → bath_partition·bath_shower-faucet 숨김.
+  //  booth → bath_bathtub·bath_bathtub_faucet 숨김 / tub → bath_partition·bath_shower_faucet 숨김.
   //  세면기 수전(bath_faucet)은 타입 무관 항상 표시.
   //  캐시 placeholder 로 비활성 항목이 남아도 카드/합계에서 빠지도록 필터.
   const works = allWorks.filter((w) =>
     bathType === 'tub'
-      ? w.wt !== 'bath_partition' && w.wt !== 'bath_shower-faucet'
+      ? w.wt !== 'bath_partition' && w.wt !== 'bath_shower_faucet'
       : w.wt !== 'bath_bathtub' && w.wt !== 'bath_bathtub_faucet',
   );
 

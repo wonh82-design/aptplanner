@@ -321,11 +321,11 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     }
     // 샤워부스 vs 욕조 — 욕실 타입에 따라 택1 (한 욕실에 동시 시공 불가)
     //  · 부스/욕조 본체: bath_partition ↔ bath_bathtub
-    //  · 전용 수전: bath_shower-faucet(샤워) ↔ bath_bathtub_faucet(욕조)
+    //  · 전용 수전: bath_shower_faucet(샤워) ↔ bath_bathtub_faucet(욕조)
     //  · 세면기 수전(bath_faucet)은 타입 무관 항상 시공 → bathComponentWorks 에 포함됨
     const bathType = (bath === '공용욕실' ? scope.global.common_bath_type : scope.global.master_bath_type) ?? 'booth';
     const typeWt = bathType === 'tub' ? 'bath_bathtub' : 'bath_partition';
-    const faucetWt = bathType === 'tub' ? 'bath_bathtub_faucet' : 'bath_shower-faucet';
+    const faucetWt = bathType === 'tub' ? 'bath_bathtub_faucet' : 'bath_shower_faucet';
     push(lineItem('', bath, typeWt, 1, grade, 'per_ea', bathOverrideKey(typeWt, bath)));
     push(lineItem('', bath, faucetWt, 1, grade, 'per_ea', bathOverrideKey(faucetWt, bath)));
     // 욕실 설치비 — 욕실별 1식 (공용/부부 각각)

@@ -51,7 +51,7 @@ export const WORK_BUNDLES: WorkBundle[] = [
       'bath_ceiling',
       'bath_basin',
       'bath_faucet',
-      'bath_shower-faucet',
+      'bath_shower_faucet',
       'bath_bathtub_faucet',
       'bath_toilet',
       'bath_accessory',

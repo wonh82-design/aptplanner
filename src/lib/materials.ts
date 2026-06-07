@@ -128,7 +128,7 @@ export const WORK_TYPE_LABEL: Record<string, string> = {
   general_furniture: '현관 일반가구',
   bath_basin: '욕실 세면대',
   bath_faucet: '세면기 수전',
-  'bath_shower-faucet': '샤워 수전',
+  'bath_shower_faucet': '샤워 수전',
   bath_bathtub_faucet: '욕조 수전',
   bath_toilet: '욕실 양변기',
   bath_accessory: '욕실 악세사리',

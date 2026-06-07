@@ -12,6 +12,7 @@
     "materials:sync": "node scripts/materials-from-xlsx.mjs",
     "materials:export": "node scripts/materials-to-xlsx.mjs",
     "materials:db:migrate": "node scripts/materials-to-db.mjs",
+    "materials:db:pull": "node scripts/materials-from-db.mjs",
     "images:migrate-to-blob": "node scripts/migrate-images-to-blob.mjs"
   },
   "dependencies": {
