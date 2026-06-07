@@ -296,8 +296,9 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   }
 
   // ===== 5. 욕실 컴포넌트 (per 욕실) =====
+  // 샤워부스(bath_partition) ↔ 욕조(bath_bathtub) 는 욕실 타입에 따라 택1 (상호배타) → 아래에서 별도 emit.
   const bathComponentWorks = [
-    'bath_jendai', 'bath_waterproof', 'bath_tile', 'bath_grout', 'bath_partition',
+    'bath_jendai', 'bath_waterproof', 'bath_tile', 'bath_grout',
     'bath_ceiling', 'bath_basin', 'bath_faucet', 'bath_toilet', 'bath_accessory',
   ];
   // 욕실 1실 면적은 평형별로 다름 (areas.bathroomArea). 공용/부부 동일 평균값 사용.
@@ -314,13 +315,19 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
         // 면적 기준 — 욕실 벽 + 천정 (간단화: 욕실 면적 × 4.65)
         const baseArea = bathAreas[bath as keyof typeof bathAreas];
         qty = wt === 'bath_ceiling' ? baseArea : baseArea * 4.65;
-      } else if (wt === 'bath_jendai' || wt === 'bath_partition' || wt === 'bath_basin'
-                 || wt === 'bath_faucet' || wt === 'bath_toilet' || wt === 'bath_accessory') {
-        qty = 1;
       }
       // 욕실별 네임스페이스 키 → 공용/부부 독립 등급·자재
       push(lineItem('', bath, wt, qty, grade, 'per_ea', bathOverrideKey(wt, bath)));
     }
+    // 샤워부스 vs 욕조 — 욕실 타입에 따라 택1 (한 욕실에 동시 시공 불가)
+    //  · 부스/욕조 본체: bath_partition ↔ bath_bathtub
+    //  · 전용 수전: bath_shower-faucet(샤워) ↔ bath_bathtub_faucet(욕조)
+    //  · 세면기 수전(bath_faucet)은 타입 무관 항상 시공 → bathComponentWorks 에 포함됨
+    const bathType = (bath === '공용욕실' ? scope.global.common_bath_type : scope.global.master_bath_type) ?? 'booth';
+    const typeWt = bathType === 'tub' ? 'bath_bathtub' : 'bath_partition';
+    const faucetWt = bathType === 'tub' ? 'bath_bathtub_faucet' : 'bath_shower-faucet';
+    push(lineItem('', bath, typeWt, 1, grade, 'per_ea', bathOverrideKey(typeWt, bath)));
+    push(lineItem('', bath, faucetWt, 1, grade, 'per_ea', bathOverrideKey(faucetWt, bath)));
     // 욕실 설치비 — 욕실별 1식 (공용/부부 각각)
     push(lineItem('', bath, 'bath_install', 1, grade, 'per_ea', bathOverrideKey('bath_install', bath)));
   }

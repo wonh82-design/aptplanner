@@ -67,6 +67,9 @@ export type YesNo = 'Y' | 'N' | '-';
 export type RoomId = '거실' | '주방' | '안방' | '작은방1' | '작은방2' | '작은방3';
 export type BathId = '공용욕실' | '부부욕실';
 
+/** 욕실 타입 — 샤워부스(파티션) ↔ 욕조. 한 욕실에 동시 시공 불가 (상호배타). */
+export type BathType = 'booth' | 'tub';
+
 /** 욕실 이름 집합 — line_item.room 이 욕실인지 판별용 */
 export const BATH_ROOM_NAMES: readonly string[] = ['공용욕실', '부부욕실'];
 
@@ -183,6 +186,11 @@ export type GlobalScope = {
   cleanup: boolean;           // 기타 — 준공 청소
   expansion_report: boolean;   // 구청 확장공사 신고
   act_permit: boolean;         // 구청 행위허가 신고 — 구조변경·평면수정 시 필수 (확장과 독립)
+  // ── 욕실 타입 (샤워부스 ↔ 욕조, 욕실별 상호배타) ──
+  //  'booth' → bath_partition(샤워부스) 시공 / 'tub' → bath_bathtub(욕조) 시공.
+  //  optional: 미지정(기존 저장값)은 'booth' 로 폴백 (기존 동작 = 파티션).
+  common_bath_type?: BathType; // 공용욕실 타입
+  master_bath_type?: BathType; // 부부욕실 타입
   // ── 목공사 (carpentry) — 6가지 sub-work ──
   carpentry_base: boolean;     // 기본 목공사 (문틀·문선·기본 보강)
   carpentry_ceiling: boolean;  // 천정 목공 (평천↔우물천, 매입조명 박스 등)

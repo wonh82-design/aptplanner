@@ -2,7 +2,7 @@
 
 import { memo, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope } from '@/lib/types';
+import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope, BathType } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort, fmtKRWShortVat } from '@/lib/calculator';
@@ -313,6 +313,13 @@ export function MaterialOverrides({
     if (!scope || !onScopeChange) return;
     const key: keyof Scope['global'] = room === '공용욕실' ? 'common_bath_set' : 'master_bath_set';
     onScopeChange({ ...scope, global: { ...scope.global, [key]: enabled } });
+  }
+
+  /** 욕실 타입 변경 — 샤워부스(booth) ↔ 욕조(tub). 욕실별 독립. */
+  function setBathType(room: string, t: BathType) {
+    if (!scope || !onScopeChange) return;
+    const key: keyof Scope['global'] = room === '공용욕실' ? 'common_bath_type' : 'master_bath_type';
+    onScopeChange({ ...scope, global: { ...scope.global, [key]: t } });
   }
 
   /**
@@ -856,6 +863,12 @@ export function MaterialOverrides({
                   ? !(scope?.global.common_bath_set ?? item.works.some((w) => w.sub > 0))
                   : !(scope?.global.master_bath_set ?? item.works.some((w) => w.sub > 0))
               }
+              bathType={
+                item.room === '공용욕실'
+                  ? (scope?.global.common_bath_type ?? 'booth')
+                  : (scope?.global.master_bath_type ?? 'booth')
+              }
+              onChangeBathType={canEditScope ? (t) => setBathType(item.room, t) : undefined}
               onSelectGrade={(g) => {
                 if (canEditScope) setBathEnabled(item.room, true); // 제외 상태였으면 복원
                 setBathGrade(item.works, g);
@@ -1727,7 +1740,8 @@ function BundleCard({
 // =====================================================
 
 function BathCard({
-  room, works, totalSub, gradeSelection, effectiveGrade, isExcluded,
+  room, works: allWorks, totalSub, gradeSelection, effectiveGrade, isExcluded,
+  bathType, onChangeBathType,
   onSelectGrade, onClear, onExclude, onRestore,
 }: {
   room: string;
@@ -1736,12 +1750,25 @@ function BathCard({
   gradeSelection: GradeSelection;
   effectiveGrade: (key: string) => GradeGroup;
   isExcluded: boolean;
+  /** 욕실 타입 — 'booth'(샤워부스) | 'tub'(욕조). 상호배타 */
+  bathType: BathType;
+  onChangeBathType?: (t: BathType) => void;
   onSelectGrade: (g: GradeGroup) => void;
   onClear: () => void;
   onExclude?: () => void;
   onRestore?: () => void;
 }) {
   void onRestore; // 복원은 등급 행 클릭(onSelectGrade)에서 처리
+
+  // 현재 타입에 맞지 않는 상호배타 항목 제외:
+  //  booth → bath_bathtub·bath_bathtub_faucet 숨김 / tub → bath_partition·bath_shower-faucet 숨김.
+  //  세면기 수전(bath_faucet)은 타입 무관 항상 표시.
+  //  캐시 placeholder 로 비활성 항목이 남아도 카드/합계에서 빠지도록 필터.
+  const works = allWorks.filter((w) =>
+    bathType === 'tub'
+      ? w.wt !== 'bath_partition' && w.wt !== 'bath_shower-faucet'
+      : w.wt !== 'bath_bathtub' && w.wt !== 'bath_bathtub_faucet',
+  );
 
   const grades = works.map((w) => effectiveGrade(w.key));
   const bundleGrade: GradeGroup | 'mixed' = new Set(grades).size === 1 ? grades[0] : 'mixed';
@@ -1794,6 +1821,32 @@ function BathCard({
           )}
         </div>
       </div>
+
+      {/* 욕실 타입 토글 — 샤워부스 ↔ 욕조 (상호배타) */}
+      {onChangeBathType && !isExcluded && (
+        <div className="px-3 py-2.5 border-b border-zinc-200/70 bg-white flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-semibold text-zinc-600">욕실 타입</span>
+          <div className="inline-flex rounded-md border border-zinc-300 overflow-hidden text-[11px]">
+            {([['booth', '샤워부스타입'], ['tub', '욕조타입']] as [BathType, string][]).map(([t, lbl]) => {
+              const active = bathType === t;
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => { if (!active) onChangeBathType(t); }}
+                  aria-pressed={active}
+                  className={`px-3 py-1.5 border-r last:border-r-0 border-r-zinc-300 font-semibold transition ${
+                    active ? 'bg-blue-600 text-white' : 'bg-white text-zinc-600 hover:bg-zinc-50'
+                  }`}
+                >
+                  {lbl}
+                </button>
+              );
+            })}
+          </div>
+          <span className="text-[10px] text-zinc-400">한 욕실에 샤워부스·욕조 동시 시공 불가 — 택1</span>
+        </div>
+      )}
 
       {/* 등급 행 + 제외 */}
       <div className="divide-y divide-zinc-100">

@@ -71,6 +71,8 @@ export function defaultScope(): Scope {
       heating_pipe: false,
       common_bath_set: true,
       master_bath_set: true,
+      common_bath_type: 'booth',   // 기본 샤워부스 (파티션)
+      master_bath_type: 'booth',
       kitchen_set: true,
       middoor: true,
       entry_furniture: true,
