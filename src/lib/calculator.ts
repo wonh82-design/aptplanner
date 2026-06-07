@@ -319,15 +319,22 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
       // 욕실별 네임스페이스 키 → 공용/부부 독립 등급·자재
       push(lineItem('', bath, wt, qty, grade, 'per_ea', bathOverrideKey(wt, bath)));
     }
-    // 샤워부스 vs 욕조 — 욕실 타입에 따라 택1 (한 욕실에 동시 시공 불가)
-    //  · 부스/욕조 본체: bath_partition ↔ bath_bathtub
-    //  · 전용 수전: bath_shower_faucet(샤워) ↔ bath_bathtub_faucet(욕조)
+    // 샤워부스 / 욕조 / 둘다 — 욕실 타입에 따라 본체·전용 수전 시공.
+    //  · 'booth' → 샤워부스(bath_partition) + 샤워수전(bath_shower_faucet)
+    //  · 'tub'   → 욕조(bath_bathtub) + 욕조수전(bath_bathtub_faucet)
+    //  · 'both'  → 위 둘 다 (40평대 이상에서만 UI 노출)
     //  · 세면기 수전(bath_faucet)은 타입 무관 항상 시공 → bathComponentWorks 에 포함됨
     const bathType = (bath === '공용욕실' ? scope.global.common_bath_type : scope.global.master_bath_type) ?? 'booth';
-    const typeWt = bathType === 'tub' ? 'bath_bathtub' : 'bath_partition';
-    const faucetWt = bathType === 'tub' ? 'bath_bathtub_faucet' : 'bath_shower_faucet';
-    push(lineItem('', bath, typeWt, 1, grade, 'per_ea', bathOverrideKey(typeWt, bath)));
-    push(lineItem('', bath, faucetWt, 1, grade, 'per_ea', bathOverrideKey(faucetWt, bath)));
+    const wantBooth = bathType === 'booth' || bathType === 'both';
+    const wantTub = bathType === 'tub' || bathType === 'both';
+    if (wantBooth) {
+      push(lineItem('', bath, 'bath_partition', 1, grade, 'per_ea', bathOverrideKey('bath_partition', bath)));
+      push(lineItem('', bath, 'bath_shower_faucet', 1, grade, 'per_ea', bathOverrideKey('bath_shower_faucet', bath)));
+    }
+    if (wantTub) {
+      push(lineItem('', bath, 'bath_bathtub', 1, grade, 'per_ea', bathOverrideKey('bath_bathtub', bath)));
+      push(lineItem('', bath, 'bath_bathtub_faucet', 1, grade, 'per_ea', bathOverrideKey('bath_bathtub_faucet', bath)));
+    }
     // 욕실 설치비 — 욕실별 1식 (공용/부부 각각)
     push(lineItem('', bath, 'bath_install', 1, grade, 'per_ea', bathOverrideKey('bath_install', bath)));
   }

@@ -868,6 +868,7 @@ export function MaterialOverrides({
                   ? (scope?.global.common_bath_type ?? 'booth')
                   : (scope?.global.master_bath_type ?? 'booth')
               }
+              allowBoth={quote.property.pyeong >= 40}
               onChangeBathType={canEditScope ? (t) => setBathType(item.room, t) : undefined}
               onSelectGrade={(g) => {
                 if (canEditScope) setBathEnabled(item.room, true); // 제외 상태였으면 복원
@@ -1741,7 +1742,7 @@ function BundleCard({
 
 function BathCard({
   room, works: allWorks, totalSub, gradeSelection, effectiveGrade, isExcluded,
-  bathType, onChangeBathType,
+  bathType, allowBoth = false, onChangeBathType,
   onSelectGrade, onClear, onExclude, onRestore,
 }: {
   room: string;
@@ -1750,8 +1751,10 @@ function BathCard({
   gradeSelection: GradeSelection;
   effectiveGrade: (key: string) => GradeGroup;
   isExcluded: boolean;
-  /** 욕실 타입 — 'booth'(샤워부스) | 'tub'(욕조). 상호배타 */
+  /** 욕실 타입 — 'booth'(샤워부스) | 'tub'(욕조) | 'both'(둘다) */
   bathType: BathType;
+  /** 'both'(샤워부스+욕조 둘다) 옵션 노출 여부 — 40평대 이상에서만 true */
+  allowBoth?: boolean;
   onChangeBathType?: (t: BathType) => void;
   onSelectGrade: (g: GradeGroup) => void;
   onClear: () => void;
@@ -1760,15 +1763,19 @@ function BathCard({
 }) {
   void onRestore; // 복원은 등급 행 클릭(onSelectGrade)에서 처리
 
-  // 현재 타입에 맞지 않는 상호배타 항목 제외:
-  //  booth → bath_bathtub·bath_bathtub_faucet 숨김 / tub → bath_partition·bath_shower_faucet 숨김.
+  // 현재 타입에 맞지 않는 항목 제외:
+  //  booth → 욕조계열(bath_bathtub·bath_bathtub_faucet) 숨김
+  //  tub   → 샤워부스계열(bath_partition·bath_shower_faucet) 숨김
+  //  both  → 전부 표시 (40평대 이상 샤워부스+욕조 동시 시공)
   //  세면기 수전(bath_faucet)은 타입 무관 항상 표시.
   //  캐시 placeholder 로 비활성 항목이 남아도 카드/합계에서 빠지도록 필터.
-  const works = allWorks.filter((w) =>
-    bathType === 'tub'
-      ? w.wt !== 'bath_partition' && w.wt !== 'bath_shower_faucet'
-      : w.wt !== 'bath_bathtub' && w.wt !== 'bath_bathtub_faucet',
-  );
+  const works = allWorks.filter((w) => {
+    const isTubItem = w.wt === 'bath_bathtub' || w.wt === 'bath_bathtub_faucet';
+    const isBoothItem = w.wt === 'bath_partition' || w.wt === 'bath_shower_faucet';
+    if (bathType === 'booth') return !isTubItem;
+    if (bathType === 'tub') return !isBoothItem;
+    return true; // 'both' — 전부 표시
+  });
 
   const grades = works.map((w) => effectiveGrade(w.key));
   const bundleGrade: GradeGroup | 'mixed' = new Set(grades).size === 1 ? grades[0] : 'mixed';
@@ -1822,31 +1829,38 @@ function BathCard({
         </div>
       </div>
 
-      {/* 욕실 타입 토글 — 샤워부스 ↔ 욕조 (상호배타) */}
-      {onChangeBathType && !isExcluded && (
-        <div className="px-3 py-2.5 border-b border-zinc-200/70 bg-white flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] font-semibold text-zinc-600">욕실 타입</span>
-          <div className="inline-flex rounded-md border border-zinc-300 overflow-hidden text-[11px]">
-            {([['booth', '샤워부스타입'], ['tub', '욕조타입']] as [BathType, string][]).map(([t, lbl]) => {
-              const active = bathType === t;
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => { if (!active) onChangeBathType(t); }}
-                  aria-pressed={active}
-                  className={`px-3 py-1.5 border-r last:border-r-0 border-r-zinc-300 font-semibold transition ${
-                    active ? 'bg-blue-600 text-white' : 'bg-white text-zinc-600 hover:bg-zinc-50'
-                  }`}
-                >
-                  {lbl}
-                </button>
-              );
-            })}
+      {/* 욕실 타입 토글 — 샤워부스 / 욕조 / (40평대 이상) 둘다 */}
+      {onChangeBathType && !isExcluded && (() => {
+        const typeOptions: [BathType, string][] = allowBoth
+          ? [['booth', '샤워부스타입'], ['tub', '욕조타입'], ['both', '샤워부스/욕조 둘다']]
+          : [['booth', '샤워부스타입'], ['tub', '욕조타입']];
+        return (
+          <div className="px-3 py-2.5 border-b border-zinc-200/70 bg-white flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-semibold text-zinc-600">욕실 타입</span>
+            <div className="inline-flex rounded-md border border-zinc-300 overflow-hidden text-[11px]">
+              {typeOptions.map(([t, lbl]) => {
+                const active = bathType === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => { if (!active) onChangeBathType(t); }}
+                    aria-pressed={active}
+                    className={`px-3 py-1.5 border-r last:border-r-0 border-r-zinc-300 font-semibold transition ${
+                      active ? 'bg-blue-600 text-white' : 'bg-white text-zinc-600 hover:bg-zinc-50'
+                    }`}
+                  >
+                    {lbl}
+                  </button>
+                );
+              })}
+            </div>
+            <span className="text-[10px] text-zinc-400">
+              {allowBoth ? '40평대 이상 — 샤워부스·욕조 동시 시공 선택 가능' : '샤워부스 ↔ 욕조 중 택1'}
+            </span>
           </div>
-          <span className="text-[10px] text-zinc-400">한 욕실에 샤워부스·욕조 동시 시공 불가 — 택1</span>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 등급 행 + 제외 */}
       <div className="divide-y divide-zinc-100">

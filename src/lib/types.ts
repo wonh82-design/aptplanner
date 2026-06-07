@@ -67,8 +67,13 @@ export type YesNo = 'Y' | 'N' | '-';
 export type RoomId = '거실' | '주방' | '안방' | '작은방1' | '작은방2' | '작은방3';
 export type BathId = '공용욕실' | '부부욕실';
 
-/** 욕실 타입 — 샤워부스(파티션) ↔ 욕조. 한 욕실에 동시 시공 불가 (상호배타). */
-export type BathType = 'booth' | 'tub';
+/**
+ * 욕실 타입 — 샤워부스(파티션) / 욕조 / 둘다.
+ *  · 'booth' : 샤워부스(bath_partition + bath_shower_faucet)
+ *  · 'tub'   : 욕조(bath_bathtub + bath_bathtub_faucet)
+ *  · 'both'  : 샤워부스 + 욕조 동시 시공 (40평대 이상에서만 선택 가능)
+ */
+export type BathType = 'booth' | 'tub' | 'both';
 
 /** 욕실 이름 집합 — line_item.room 이 욕실인지 판별용 */
 export const BATH_ROOM_NAMES: readonly string[] = ['공용욕실', '부부욕실'];
