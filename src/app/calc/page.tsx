@@ -10,10 +10,9 @@ import { LivePricePreview } from '@/components/LivePricePreview';
 import { WizardSidebar } from '@/components/WizardSidebar';
 import { SiteHeader } from '@/components/SiteHeader';
 import { PlanRequestModal } from '@/components/PlanRequestModal';
-import { EstimateRequestPdfTemplate } from '@/components/pdf/EstimateRequestPdfTemplate';
 import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
 import { buildQuote, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
-import { exportPagedPdfToBase64 } from '@/lib/pdf/export';
+import { buildPlanDoc } from '@/lib/plan-doc';
 import { track } from '@/lib/analytics';
 import type { GradeSelection, Property, Scope } from '@/lib/types';
 
@@ -112,8 +111,6 @@ export default function CalcPage() {
   // 견적이 비어 있는지 (모든 공사 OFF 또는 평형 0)
   const scopeEmpty = !pyeongValid || quote.line_items.length === 0 || quote.totals.grand_total === 0;
 
-  const estimateRootRef = useRef<HTMLDivElement>(null);
-
   const goTo = (s: Step) => {
     // 평형 미입력 상태에서 Step 2+ 진입 차단
     if (s > 1 && !pyeongValid) return;
@@ -146,32 +143,21 @@ export default function CalcPage() {
 
   /**
    * '우리집 인테리어 계획서' 신청 처리.
-   * 고객 산정 내역(견적요청서 PDF)을 base64 로 만들어 관리자에게 메일 발송 (PDF 첨부).
-   * 용량(서버 본문 한도)을 위해 scale·jpegQuality 를 낮춰 렌더.
+   * 결과 화면과 동일한 공종 분류(buildPlanDoc)로 섹션을 만들어 quote 와 함께 전송.
+   * 서버가 이를 받아 '공사계획서 PPTX'(공종별 공사범위·스펙·수량·공사비)를 생성해 관리자에게 메일 발송.
    */
   const handlePlanSubmit = async (name: string, email: string): Promise<{ ok: boolean; error?: string }> => {
     try {
-      let pdfBase64 = '';
-      if (estimateRootRef.current) {
-        pdfBase64 = await exportPagedPdfToBase64(estimateRootRef.current, {
-          filename: 'plan.pdf',
-          orientation: 'p',
-          scale: 1.5,
-          jpegQuality: 0.62,
-        });
-        // 서버리스 요청 본문 한도(~4.5MB) 보호 — 과대 시 첨부 생략 (본문 메타만 전송).
-        // 관리자는 quote_id 로 재생성 가능. (대형 평형·다항목 견적 방어)
-        if (pdfBase64.length > 3_500_000) pdfBase64 = '';
-      }
+      // 결과 화면과 100% 동일한 공종 분류 — 현재 로드된 자재 기준으로 클라이언트에서 생성해 전송.
+      const sections = buildPlanDoc(quote).sections;
       const res = await fetch('/api/plan-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
           email,
-          pdfBase64,
-          pdfFilename: `apt-planner_산정내역_${property.pyeong}평_${quote.quote_id}.pdf`,
-          quote, // 전체 산정 내역 — DB 보존 + 관리자 재생성용
+          quote,    // 전체 산정 내역 — DB 보존 + 서버 PPTX 재생성용
+          sections, // 공종별 섹션 — 결과 화면과 동일한 공종으로 PPTX 렌더
           meta: {
             pyeong: property.pyeong,
             bay: property.bay,
@@ -423,11 +409,6 @@ export default function CalcPage() {
           onCancel={() => setConfirmStep2Open(false)}
         />
       )}
-
-      {/* PDF 캡처용 hidden 영역 — 화면 밖에 렌더링 */}
-      <div style={{ position: 'fixed', left: '-99999px', top: 0, pointerEvents: 'none', zIndex: -1 }} aria-hidden>
-        <EstimateRequestPdfTemplate quote={quote} gradeLabel={grade.default} rootRef={estimateRootRef} />
-      </div>
     </div>
   );
 }

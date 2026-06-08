@@ -524,8 +524,10 @@ const CATEGORY_DISPLAY_ALIAS: Record<string, string> = {
  * LineItem을 어떤 CATEGORY로 묶을지 결정.
  * 우선순위: Material.category (자재마스터 등록 시) → 특수 매핑 → 기존 work_type 라벨 → '기타'.
  * 마지막에 CATEGORY_DISPLAY_ALIAS로 표시용 카테고리 통합.
+ *
+ * export — 결과 화면(by_category)·공사계획서 PPTX 가 동일한 공종 분류를 쓰도록 단일 소스로 공유.
  */
-function categoryOf(it: LineItem): string {
+export function categoryOf(it: LineItem): string {
   let cat: string;
   if (it.material_id) {
     const mat = getMaterialById(it.material_id);
