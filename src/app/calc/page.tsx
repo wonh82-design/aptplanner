@@ -6,18 +6,14 @@ import { PropertyForm } from '@/components/PropertyForm';
 import { MaterialOverrides } from '@/components/MaterialOverrides';
 import { QuotePanel } from '@/components/QuotePanel';
 import { StepIndicator } from '@/components/StepIndicator';
-import { ServicesPricing } from '@/components/ServicesPricing';
 import { LivePricePreview } from '@/components/LivePricePreview';
 import { WizardSidebar } from '@/components/WizardSidebar';
 import { SiteHeader } from '@/components/SiteHeader';
-import { ConsultRequestModal } from '@/components/ConsultRequestModal';
-import { SpecBookRequestModal } from '@/components/SpecBookRequestModal';
-import { QuotePdfTemplate } from '@/components/pdf/QuotePdfTemplate';
-import { PlanPdfTemplate } from '@/components/pdf/PlanPdfTemplate';
-import { TipsPdfTemplate } from '@/components/pdf/TipsPdfTemplate';
+import { PlanRequestModal } from '@/components/PlanRequestModal';
+import { EstimateRequestPdfTemplate } from '@/components/pdf/EstimateRequestPdfTemplate';
 import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
 import { buildQuote, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
-import { exportPagedPdf } from '@/lib/pdf/export';
+import { exportPagedPdfToBase64 } from '@/lib/pdf/export';
 import { track } from '@/lib/analytics';
 import type { GradeSelection, Property, Scope } from '@/lib/types';
 
@@ -52,9 +48,7 @@ export default function CalcPage() {
   const [property, setProperty] = useState(defaultProperty());
   const [scope, setScope] = useState(defaultScope());
   const [grade, setGrade] = useState(defaultGrade());
-  const [downloading, setDownloading] = useState<string | null>(null);
-  const [premiumOpen, setPremiumOpen] = useState(false);
-  const [consultOpen, setConsultOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
   // quote_id는 세션 단위로 freeze — 입력 변경 시 ID가 바뀌지 않는다.
   const [quoteId, setQuoteId] = useState<string>(() => generateQuoteId());
   // localStorage 복원 알림 배너
@@ -118,9 +112,7 @@ export default function CalcPage() {
   // 견적이 비어 있는지 (모든 공사 OFF 또는 평형 0)
   const scopeEmpty = !pyeongValid || quote.line_items.length === 0 || quote.totals.grand_total === 0;
 
-  const quoteRootRef = useRef<HTMLDivElement>(null);
-  const planRootRef = useRef<HTMLDivElement>(null);
-  const tipsRootRef = useRef<HTMLDivElement>(null);
+  const estimateRootRef = useRef<HTMLDivElement>(null);
 
   const goTo = (s: Step) => {
     // 평형 미입력 상태에서 Step 2+ 진입 차단
@@ -152,57 +144,61 @@ export default function CalcPage() {
 
   const dismissRestored = () => setRestored(false);
 
-  const downloadPdf = async (
-    which: 'quote' | 'plan' | 'tips',
-    ref: React.RefObject<HTMLDivElement | null>,
-    filename: string,
-  ) => {
-    if (!ref.current) return;
-    setDownloading(which);
+  /**
+   * '우리집 인테리어 계획서' 신청 처리.
+   * 고객 산정 내역(견적요청서 PDF)을 base64 로 만들어 관리자에게 메일 발송 (PDF 첨부).
+   * 용량(서버 본문 한도)을 위해 scale·jpegQuality 를 낮춰 렌더.
+   */
+  const handlePlanSubmit = async (name: string, email: string): Promise<{ ok: boolean; error?: string }> => {
     try {
-      await exportPagedPdf(ref.current, { filename, orientation: 'l' });
-      // 다운로드 성공 시에만 트래킹 — 실패/취소는 제외
-      if (which === 'quote') {
-        track('download_quote_pdf', {
-          pyeong: property.pyeong,
-          bay: property.bay,
-          rooms: property.rooms,
-          grade: grade.default,
-          region: property.region,
-          age: property.age,
-          grand_total: quote.totals.grand_total,
-          line_item_count: quote.line_items.length,
-          quote_id: quote.quote_id,
+      let pdfBase64 = '';
+      if (estimateRootRef.current) {
+        pdfBase64 = await exportPagedPdfToBase64(estimateRootRef.current, {
+          filename: 'plan.pdf',
+          orientation: 'p',
+          scale: 1.5,
+          jpegQuality: 0.62,
         });
+        // 서버리스 요청 본문 한도(~4.5MB) 보호 — 과대 시 첨부 생략 (본문 메타만 전송).
+        // 관리자는 quote_id 로 재생성 가능. (대형 평형·다항목 견적 방어)
+        if (pdfBase64.length > 3_500_000) pdfBase64 = '';
       }
-    } catch (e) {
-      console.error('PDF export failed', e);
-      alert('PDF 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setDownloading(null);
+      const res = await fetch('/api/plan-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          pdfBase64,
+          pdfFilename: `apt-planner_산정내역_${property.pyeong}평_${quote.quote_id}.pdf`,
+          quote, // 전체 산정 내역 — DB 보존 + 관리자 재생성용
+          meta: {
+            pyeong: property.pyeong,
+            bay: property.bay,
+            rooms: property.rooms,
+            grade: grade.default,
+            region: REGION_LABEL[property.region],
+            age: AGE_LABEL[property.age],
+            grand_total: quote.totals.grand_total,
+            line_item_count: quote.line_items.length,
+            quote_id: quote.quote_id,
+          },
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.ok) {
+        return { ok: false, error: data?.error || `status_${res.status}` };
+      }
+      track('submit_plan_request', {
+        pyeong: property.pyeong,
+        grade: grade.default,
+        grand_total: quote.totals.grand_total,
+        quote_id: quote.quote_id,
+      });
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'network' };
     }
-  };
-
-  /** 스펙북 신청 모달 오픈 + 트래킹 */
-  const openSpecModal = () => {
-    track('apply_spec_book_open', {
-      pyeong: property.pyeong,
-      grade: grade.default,
-      grand_total: quote.totals.grand_total,
-      quote_id: quote.quote_id,
-    });
-    setPremiumOpen(true);
-  };
-
-  /** 컨설팅 신청 모달 오픈 + 트래킹 */
-  const openConsultModal = () => {
-    track('apply_consult_open', {
-      pyeong: property.pyeong,
-      grade: grade.default,
-      grand_total: quote.totals.grand_total,
-      quote_id: quote.quote_id,
-    });
-    setConsultOpen(true);
   };
 
   return (
@@ -342,15 +338,43 @@ export default function CalcPage() {
                 {/* 견적 상세 내역 — 총공사비 바로 아래 항상 펼침 */}
                 <QuotePanel quote={quote} />
 
-                {/* 3종 서비스 가격 카드 */}
-                <ServicesPricing
-                  pyeong={property.pyeong}
-                  onDownloadFree={() => downloadPdf('quote', quoteRootRef, `apt-planner_예상공사비_${property.pyeong}평_${quote.quote_id}.pdf`)}
-                  downloadingFree={downloading === 'quote'}
-                  onApplySpec={openSpecModal}
-                  onApplyConsult={openConsultModal}
-                  recommended="spec"
-                />
+                {/* ===== 유료 — 우리집 인테리어 계획서 받기 (₩5,900) ===== */}
+                <div className="rounded-2xl border-2 border-blue-500 bg-white overflow-hidden shadow-lg">
+                  <div className="bg-blue-600 text-white text-xs font-bold text-center py-1.5 uppercase tracking-wider">
+                    우리집 맞춤 인테리어 계획서
+                  </div>
+                  <div className="p-5 sm:p-7">
+                    <h3 className="text-lg sm:text-xl font-bold text-zinc-900">우리집 인테리어 계획서 받기</h3>
+                    <div className="flex items-baseline gap-2 mt-1 mb-4">
+                      <span className="text-3xl font-extrabold text-blue-700">₩5,900</span>
+                      <span className="text-xs text-zinc-500">· 자료 수령 후 입금</span>
+                    </div>
+                    <p className="text-sm text-zinc-600 leading-relaxed mb-4">
+                      신청하시면 지금 산출한 공사 내역을 바탕으로 아래 <strong className="text-zinc-900">2부의 문서</strong>를
+                      <strong className="text-zinc-900"> PDF + 수정 가능한 파워포인트(PPT)</strong>로 보내드립니다.
+                      <strong className="text-zinc-900"> 자료를 먼저 받아보신 후</strong> 계좌로 입금하시면 됩니다.
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2 mb-5">
+                      <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3.5">
+                        <div className="text-sm font-bold text-zinc-900 mb-1">① 우리집 공사계획서</div>
+                        <div className="text-xs text-zinc-600 leading-relaxed">앱에서 산출한 <strong>공사범위·스펙·기준 공사비</strong>를 정리한 우리집 전용 계획서</div>
+                      </div>
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3.5">
+                        <div className="text-sm font-bold text-zinc-900 mb-1">② 업체 견적용 공사계획서</div>
+                        <div className="text-xs text-zinc-600 leading-relaxed"><strong>공사범위·스펙</strong> + 업체가 대안자재·견적가를 <strong>바로 기재</strong>할 수 있는 견적요청서</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setPlanOpen(true)}
+                      className="w-full py-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition active:scale-[0.98]"
+                    >
+                      신청하기
+                    </button>
+                    <p className="text-[11px] text-zinc-500 mt-3 text-center">
+                      신청 후 <strong>24시간 이내</strong>에 메일로 송부드립니다.
+                    </p>
+                  </div>
+                </div>
 
                 {/* 신뢰 nudge — 누가 만들었나 */}
                 <TrustNudge />
@@ -379,33 +403,11 @@ export default function CalcPage() {
         </div>
       </footer>
 
-      {/* 스펙북 신청 모달 — 이름·이메일 입력 → 입금 안내 */}
-      {premiumOpen && (
-        <SpecBookRequestModal
-          onClose={() => setPremiumOpen(false)}
-          meta={{
-            pyeong: property.pyeong,
-            bay: property.bay,
-            rooms: property.rooms,
-            grade: grade.default,
-            grand_total: quote.totals.grand_total,
-            quote_id: quote.quote_id,
-          }}
-        />
-      )}
-
-      {/* 전문가 컨설팅 신청 모달 */}
-      {consultOpen && (
-        <ConsultRequestModal
-          onClose={() => setConsultOpen(false)}
-          meta={{
-            pyeong: property.pyeong,
-            bay: property.bay,
-            rooms: property.rooms,
-            grade: grade.default,
-            grand_total: quote.totals.grand_total,
-            quote_id: quote.quote_id,
-          }}
+      {/* 우리집 인테리어 계획서 신청 모달 — 성명·이메일 입력 → 관리자 메일(PDF 첨부) */}
+      {planOpen && (
+        <PlanRequestModal
+          onClose={() => setPlanOpen(false)}
+          onSubmit={handlePlanSubmit}
         />
       )}
 
@@ -424,9 +426,7 @@ export default function CalcPage() {
 
       {/* PDF 캡처용 hidden 영역 — 화면 밖에 렌더링 */}
       <div style={{ position: 'fixed', left: '-99999px', top: 0, pointerEvents: 'none', zIndex: -1 }} aria-hidden>
-        <QuotePdfTemplate quote={quote} gradeLabel={grade.default} rootRef={quoteRootRef} />
-        <PlanPdfTemplate quote={quote} gradeLabel={grade.default} rootRef={planRootRef} />
-        <TipsPdfTemplate rootRef={tipsRootRef} />
+        <EstimateRequestPdfTemplate quote={quote} gradeLabel={grade.default} rootRef={estimateRootRef} />
       </div>
     </div>
   );

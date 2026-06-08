@@ -34,7 +34,9 @@ export type AnalyticsEvent =
   // 컨설팅 신청 모달 오픈
   | 'apply_consult_open'
   // 컨설팅 신청 폼 제출 성공
-  | 'submit_consult_request';
+  | 'submit_consult_request'
+  // 우리집 인테리어 계획서(₩5,900) 신청 제출 성공
+  | 'submit_plan_request';
 
 type GtagParams = Record<string, string | number | boolean | undefined>;
 

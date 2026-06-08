@@ -86,6 +86,60 @@ export async function getMaterials(): Promise<Material[]> {
   return bundledMaterials as Material[];
 }
 
+// ===== '우리집 인테리어 계획서' 신청 영속화 =====
+// 이메일(Resend)이 유일 채널일 때의 무음 유실을 방지하는 내구 저장소.
+// 이메일 발송 성공/실패와 무관하게 신청을 보존 → 관리자가 후속 처리 가능.
+
+/** plan_requests 테이블 생성 (idempotent) */
+export async function ensurePlanRequestsTable(): Promise<void> {
+  if (!sql) throw new Error('DATABASE_URL not configured');
+  await sql`
+    CREATE TABLE IF NOT EXISTS plan_requests (
+      id BIGSERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      meta JSONB,
+      quote JSONB,
+      has_pdf BOOLEAN NOT NULL DEFAULT FALSE,
+      emailed BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+}
+
+/**
+ * 신청 1건 저장. 성공 시 true (주문 보존됨), DB 미설정/실패 시 false.
+ * quote 전체를 저장해 관리자가 산정 내역을 재생성할 수 있게 한다.
+ */
+export async function savePlanRequest(rec: {
+  name: string;
+  email: string;
+  meta?: unknown;
+  quote?: unknown;
+  hasPdf?: boolean;
+  emailed?: boolean;
+}): Promise<boolean> {
+  if (!sql) return false;
+  try {
+    await ensurePlanRequestsTable();
+    await sql`
+      INSERT INTO plan_requests (name, email, meta, quote, has_pdf, emailed)
+      VALUES (
+        ${rec.name},
+        ${rec.email},
+        ${JSON.stringify(rec.meta ?? null)}::jsonb,
+        ${JSON.stringify(rec.quote ?? null)}::jsonb,
+        ${!!rec.hasPdf},
+        ${!!rec.emailed}
+      )
+    `;
+    return true;
+  } catch (e) {
+    console.error('[db] savePlanRequest error:', e);
+    return false;
+  }
+}
+
 /** DB가 마지막으로 업데이트된 시각 (캐시 무효화용). 없으면 null. */
 export async function fetchMaterialsUpdatedAt(): Promise<string | null> {
   if (!sql) return null;

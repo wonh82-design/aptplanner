@@ -22,6 +22,8 @@ export type PdfOptions = {
   scale?: number;
   /** 페이지 여백 (mm) */
   margin?: number;
+  /** JPEG 품질 (0~1). 미지정 시 0.95. 메일 첨부 등 용량 절감 시 낮춤. */
+  jpegQuality?: number;
 };
 
 function defaultFormat(orientation: Orientation): [number, number] {
@@ -147,4 +149,48 @@ export async function exportPagedPdf(
     return;
   }
   await exportPagesToPdf(pages, opts);
+}
+
+/**
+ * root 안의 [data-pdf-page] 요소들을 PDF로 만들어 **base64 문자열**로 반환 (저장하지 않음).
+ * 메일 첨부 등 서버 전송용. data URI 접두(`data:application/pdf;...base64,`)는 제거.
+ * 용량이 중요하면 scale↓·jpegQuality↓ 로 호출 (예: scale 1.5, jpegQuality 0.6).
+ */
+export async function exportPagedPdfToBase64(
+  root: HTMLElement,
+  opts: PdfOptions,
+): Promise<string> {
+  const orientation = opts.orientation ?? 'p';
+  const { format = defaultFormat(orientation), scale = 2, margin = 8, jpegQuality = 0.95 } = opts;
+  const [pageW, pageH] = format;
+  const contentW = pageW - margin * 2;
+  const contentH = pageH - margin * 2;
+
+  const pages = Array.from(root.querySelectorAll<HTMLElement>('[data-pdf-page]'));
+  const els = pages.length > 0 ? pages : [root];
+
+  const pdf = new jsPDF(orientation, 'mm', 'a4');
+  let isFirst = true;
+  for (const el of els) {
+    const canvas = await renderToCanvas(el, scale);
+    const imgData = canvas.toDataURL('image/jpeg', jpegQuality);
+    const imgW = contentW;
+    const imgH = (canvas.height * contentW) / canvas.width;
+    if (!isFirst) pdf.addPage();
+    isFirst = false;
+    let yLeft = imgH;
+    let yOffset = 0;
+    pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
+    yLeft -= contentH;
+    while (yLeft > 0) {
+      yOffset -= contentH;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', margin, margin + yOffset, imgW, imgH);
+      yLeft -= contentH;
+    }
+  }
+
+  const uri = pdf.output('datauristring'); // data:application/pdf;filename=...;base64,XXXX
+  const i = uri.indexOf('base64,');
+  return i >= 0 ? uri.slice(i + 7) : uri;
 }
