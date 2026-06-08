@@ -15,7 +15,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <span className="text-zinc-600">·</span>
             <Link href="/admin/materials" className="text-sm font-bold">apt-planner 관리자</Link>
           </div>
-          <span className="text-[10px] text-zinc-500 uppercase tracking-wider">internal</span>
+          <nav className="flex items-center gap-3 text-xs">
+            <Link href="/admin/materials" className="text-zinc-300 hover:text-white">자재마스터</Link>
+            <span className="text-zinc-600">·</span>
+            <Link href="/admin/plan-requests" className="text-zinc-300 hover:text-white">신청 내역</Link>
+            <span className="text-zinc-600">·</span>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">internal</span>
+          </nav>
         </div>
       </header>
       <main>{children}</main>

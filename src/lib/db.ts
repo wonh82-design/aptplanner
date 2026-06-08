@@ -140,6 +140,57 @@ export async function savePlanRequest(rec: {
   }
 }
 
+/** 신청 1건 조회 결과 (관리자 목록용) */
+export type PlanRequestRow = {
+  id: number;
+  name: string;
+  email: string;
+  meta: Record<string, unknown> | null;
+  quote: unknown | null;
+  has_pdf: boolean;
+  emailed: boolean;
+  created_at: string;
+};
+
+/**
+ * 신청 목록 조회 (최신순). DB 미설정/실패 시 null.
+ * 관리자 페이지에서 메일/SQL 없이도 신청 내역을 확인할 수 있게 한다.
+ * quote 는 용량이 크므로 목록에서는 제외하고, 필요 시 상세 조회로 가져온다.
+ */
+export async function fetchPlanRequests(limit = 200): Promise<PlanRequestRow[] | null> {
+  if (!sql) return null;
+  try {
+    await ensurePlanRequestsTable();
+    const safeLimit = Math.min(Math.max(1, Math.floor(limit)), 1000);
+    const rows = (await sql`
+      SELECT id, name, email, meta, has_pdf, emailed, created_at
+      FROM plan_requests
+      ORDER BY created_at DESC
+      LIMIT ${safeLimit}
+    `) as Array<Omit<PlanRequestRow, 'quote'>>;
+    return rows.map((r) => ({ ...r, quote: null }));
+  } catch (e) {
+    console.error('[db] fetchPlanRequests error:', e);
+    return null;
+  }
+}
+
+/** 신청 1건 상세 조회 (quote 포함). 없으면 null. */
+export async function fetchPlanRequestById(id: number): Promise<PlanRequestRow | null> {
+  if (!sql) return null;
+  try {
+    const rows = (await sql`
+      SELECT id, name, email, meta, quote, has_pdf, emailed, created_at
+      FROM plan_requests
+      WHERE id = ${id}
+    `) as PlanRequestRow[];
+    return rows[0] ?? null;
+  } catch (e) {
+    console.error('[db] fetchPlanRequestById error:', e);
+    return null;
+  }
+}
+
 /** DB가 마지막으로 업데이트된 시각 (캐시 무효화용). 없으면 null. */
 export async function fetchMaterialsUpdatedAt(): Promise<string | null> {
   if (!sql) return null;
