@@ -26,6 +26,7 @@ import {
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
   bayWidthForRoom, balconyAreaForRoom, doorCount, downlightCount,
   bathroomArea, kitchenLength, adjustedRoomFlooringArea, airconInstallRooms,
+  entryClosetLength,
 } from './areas';
 import { getPrimaryMaterial, getMaterialById, labelOf } from './materials';
 import { lookupWindowCost } from './window-cost';
@@ -33,6 +34,15 @@ import { lookupWindowCost } from './window-cost';
 const WALL_RATIO = 2.8;             // 도배 면적 = 바닥 × 2.8 (벽면 환산)
 const BASEBOARD_HEIGHT = 0.343;     // 걸레받이 ㎡ 환산 계수 (시트 v4 기준)
 const VAT_RATE = 0.10;
+
+/**
+ * 욕실 면적 → 시공 면적 환산 계수.
+ *  · 타일·줄눈: 바닥 + 전체 벽면 = 욕실면적 × 4.65 (천장 제외)
+ *  · 방수: 바닥 전체 + 벽 하부(약 300mm) + 습식벽 일부 = 욕실면적 × 1.8
+ *    (전체 벽면에 방수하지 않으므로 타일 면적보다 작음 — 과대 산정 방지)
+ */
+const BATH_TILE_AREA_FACTOR = 4.65;
+const BATH_WATERPROOF_AREA_FACTOR = 1.8;
 
 /** 지역별 공사비 보정 계수 */
 export const REGION_MULTIPLIER: Record<RegionId, number> = {
@@ -311,10 +321,16 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     if (!enabled) continue;
     for (const wt of bathComponentWorks) {
       let qty = 1;
-      if (wt === 'bath_waterproof' || wt === 'bath_tile' || wt === 'bath_grout' || wt === 'bath_ceiling') {
-        // 면적 기준 — 욕실 벽 + 천정 (간단화: 욕실 면적 × 4.65)
-        const baseArea = bathAreas[bath as keyof typeof bathAreas];
-        qty = wt === 'bath_ceiling' ? baseArea : baseArea * 4.65;
+      const baseArea = bathAreas[bath as keyof typeof bathAreas];
+      if (wt === 'bath_tile' || wt === 'bath_grout') {
+        // 타일·줄눈 — 바닥 + 전체 벽면
+        qty = baseArea * BATH_TILE_AREA_FACTOR;
+      } else if (wt === 'bath_waterproof') {
+        // 방수 — 바닥 + 벽 하부(전체 벽면 아님) → 더 작은 계수
+        qty = baseArea * BATH_WATERPROOF_AREA_FACTOR;
+      } else if (wt === 'bath_ceiling') {
+        // 천장 — 바닥 면적과 동일
+        qty = baseArea;
       }
       // 욕실별 네임스페이스 키 → 공용/부부 독립 등급·자재
       push(lineItem('', bath, wt, qty, grade, 'per_ea', bathOverrideKey(wt, bath)));
@@ -362,7 +378,8 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
 
   // ===== 7. 가구·도어 =====
   if (scope.global.middoor) push(lineItem('', '거실', 'sliding_door', 1, grade));
-  if (scope.global.entry_furniture) push(lineItem('', '현관', 'general_furniture', 1, grade));
+  // 현관 신발장 — 평형대별 기준 길이 × 1m당 단가 (per_m)
+  if (scope.global.entry_furniture) push(lineItem('', '현관', 'general_furniture', entryClosetLength(p.pyeong), grade, 'per_m'));
 
   // 붙박이장: 안방 2.4m, 작방 2m (기본)
   for (const roomId of activeRooms(p)) {

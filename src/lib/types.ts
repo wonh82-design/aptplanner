@@ -174,7 +174,7 @@ export type GlobalScope = {
   master_bath_set: boolean;   // 부부욕실 세트
   kitchen_set: boolean;       // 주방가구
   middoor: boolean;           // 중문
-  entry_furniture: boolean;   // 현관 일반가구
+  entry_furniture: boolean;   // 현관 신발장 (per_m, 평형대별 기준 길이)
   lighting: boolean;          // 조명 풀세트
   balcony_floor_tile: boolean;
   balcony_paint: boolean;

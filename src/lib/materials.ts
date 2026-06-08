@@ -125,7 +125,7 @@ export const WORK_TYPE_LABEL: Record<string, string> = {
   kitchen_hardware: '주방 하드웨어',
   kitchen_midway: '주방 미드웨이',
   closet: '붙박이장',
-  general_furniture: '현관 일반가구',
+  general_furniture: '현관 신발장',
   bath_basin: '욕실 세면대',
   bath_faucet: '세면기 수전',
   'bath_shower_faucet': '샤워 수전',

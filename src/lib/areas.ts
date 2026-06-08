@@ -133,6 +133,18 @@ export function kitchenLength(pyeong: number): number {
 }
 
 /**
+ * 평형대별 현관 신발장 기준 길이 (m). 평형대 밴드(보간 아님).
+ *  10평대 1.2m · 20평대 1.5m · 30평대 2m · 40평대 이상 3m
+ *  현관 신발장 단가는 1m당(per_m) — 공사비 = 길이 × ㎡당 단가.
+ */
+export function entryClosetLength(pyeong: number): number {
+  if (pyeong < 20) return 1.2;  // 10평대 (및 미만)
+  if (pyeong < 30) return 1.5;  // 20평대
+  if (pyeong < 40) return 2.0;  // 30평대
+  return 3.0;                   // 40평대 이상
+}
+
+/**
  * 평형 입력값 clamp — [6, 100] 평. 키보드로 우회된 비현실적 값 방어.
  */
 export function clampPyeong(n: number): number {
