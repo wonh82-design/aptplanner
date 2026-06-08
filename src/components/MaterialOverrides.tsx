@@ -1736,7 +1736,8 @@ function BundleCard({
 
 // =====================================================
 // BathCard — 공용/부부 욕실 1개를 독립 카드로 표시
-//   등급 행(가성비/표준/고급) + 제외 + 구성 컴포넌트 카드(타일 시공팀 제외).
+//   등급 행(가성비/표준/고급) + 제외 + 구성 컴포넌트 카드.
+//   카드 비표시: 타일 시공팀(집계 단계 제외) · 욕실 설치비(카드만 숨김, 공사비엔 반영).
 //   욕실별 네임스페이스 override 키 → 공용/부부 등급·자재 완전 분리.
 // =====================================================
 
@@ -1921,14 +1922,16 @@ function BathCard({
         })}
       </div>
 
-      {/* 구성 컴포넌트 카드 (타일 시공팀은 집계 단계에서 제외됨) — 표시 전용 (클릭 시 추가 화면 없음) */}
+      {/* 구성 컴포넌트 카드 — 표시 전용 (클릭 시 추가 화면 없음).
+          · 타일 시공팀(tile_labor)은 집계 단계(workInfoList)에서 제외됨.
+          · 욕실 설치비(bath_install)는 카드만 숨기고 공사비(totalSub·등급 행·견적)에는 그대로 반영. */}
       {!isExcluded && (
         <div className="bg-zinc-50/40 px-3 py-3 border-t-2 border-zinc-200">
           <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2">
             {room} 구성 자재 — {bundleGrade === 'mixed' ? '항목별 등급' : `${bundleGrade} 등급`} 기준
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {works.map((w) => {
+            {works.filter((w) => w.wt !== 'bath_install').map((w) => {
               const mat = getPrimaryMaterial(w.wt, effectiveGrade(w.key));
               if (!mat) return null;
               return (
