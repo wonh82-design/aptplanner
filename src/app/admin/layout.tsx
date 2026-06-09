@@ -18,6 +18,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <nav className="flex items-center gap-3 text-xs">
             <Link href="/admin/materials" className="text-zinc-300 hover:text-white">자재마스터</Link>
             <span className="text-zinc-600">·</span>
+            <Link href="/admin/calc-logic" className="text-zinc-300 hover:text-white">계산 로직</Link>
+            <span className="text-zinc-600">·</span>
             <Link href="/admin/plan-requests" className="text-zinc-300 hover:text-white">신청 내역</Link>
             <span className="text-zinc-600">·</span>
             <span className="text-[10px] text-zinc-500 uppercase tracking-wider">internal</span>
