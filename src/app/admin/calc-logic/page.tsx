@@ -23,7 +23,7 @@ import {
   REGION_MULTIPLIER, AGE_MULTIPLIER, adjustmentMultiplier,
   WALL_RATIO, BASEBOARD_HEIGHT, BATH_TILE_AREA_FACTOR, BATH_WATERPROOF_AREA_FACTOR,
 } from '@/lib/calculator';
-import { setMaterials, labelOf, getPrimaryMaterial } from '@/lib/materials';
+import { setMaterials, labelOf, getPrimaryMaterial, gradeOptionsFor } from '@/lib/materials';
 import {
   recommendedRoomCount, supplyAreaM2, exclusiveAreaM2, bathroomArea, kitchenLength,
   downlightCount, switchOutletCount, entryClosetLength, doorCount, outsideWindowArea,
@@ -270,26 +270,48 @@ function CalcLogicViewer() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-50">
-              {workTypes.map((wt) => (
-                <tr key={wt} className="hover:bg-blue-50/30">
-                  <td className="px-3 py-1.5 font-medium text-zinc-900 whitespace-nowrap">
-                    {labelOf(wt)} <span className="font-mono text-[9px] text-zinc-400">{wt}</span>
-                  </td>
-                  {GRADE_GROUPS.map((g) => {
-                    const m = getPrimaryMaterial(wt, g);
-                    return (
-                      <td key={g} className="px-2 py-1.5 align-top">
-                        {m ? (
-                          <>
-                            <Link href={`/admin/materials/${encodeURIComponent(m.material_id)}`} className="text-blue-700 hover:underline font-mono text-[10px]">{m.material_id}</Link>
-                            <div className="text-[10px] text-zinc-500 leading-snug">{[m.brand, m.product_line].filter(Boolean).join(' ') || '—'}</div>
-                          </>
-                        ) : <span className="text-[10px] text-zinc-300">—</span>}
+              {workTypes.map((wt) => {
+                // 단일등급 공종 — 가성비/표준/고급이 모두 같은 자재로 폴백되므로
+                // 등급별로 코드를 반복하지 않고 '단일등급 적용' 한 칸으로 표시.
+                const opts = gradeOptionsFor(wt);
+                const isSingleGrade = opts.length === 1 && opts[0] === '단일등급';
+                return (
+                  <tr key={wt} className="hover:bg-blue-50/30">
+                    <td className="px-3 py-1.5 font-medium text-zinc-900 whitespace-nowrap">
+                      {labelOf(wt)} <span className="font-mono text-[9px] text-zinc-400">{wt}</span>
+                    </td>
+                    {isSingleGrade ? (
+                      <td colSpan={GRADE_GROUPS.length} className="px-2 py-1.5 align-top">
+                        <span className="inline-block px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 text-[10px] font-medium">단일등급 적용</span>
+                        {(() => {
+                          const m = getPrimaryMaterial(wt, '단일등급');
+                          if (!m) return null;
+                          return (
+                            <>
+                              <Link href={`/admin/materials/${encodeURIComponent(m.material_id)}`} className="ml-2 text-blue-700 hover:underline font-mono text-[10px]">{m.material_id}</Link>
+                              <span className="ml-1.5 text-[10px] text-zinc-500">{[m.brand, m.product_line].filter(Boolean).join(' ')}</span>
+                            </>
+                          );
+                        })()}
                       </td>
-                    );
-                  })}
-                </tr>
-              ))}
+                    ) : (
+                      GRADE_GROUPS.map((g) => {
+                        const m = getPrimaryMaterial(wt, g);
+                        return (
+                          <td key={g} className="px-2 py-1.5 align-top">
+                            {m ? (
+                              <>
+                                <Link href={`/admin/materials/${encodeURIComponent(m.material_id)}`} className="text-blue-700 hover:underline font-mono text-[10px]">{m.material_id}</Link>
+                                <div className="text-[10px] text-zinc-500 leading-snug">{[m.brand, m.product_line].filter(Boolean).join(' ') || '—'}</div>
+                              </>
+                            ) : <span className="text-[10px] text-zinc-300">—</span>}
+                          </td>
+                        );
+                      })
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
