@@ -19,8 +19,8 @@
 import { useEffect, useState } from 'react';
 import { fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { activeRooms } from '@/lib/areas';
-import { BIG_WORK_GROUPS } from '@/lib/scope-meta';
-import type { Property, Scope, Quote, RoomId } from '@/lib/types';
+import { ROOM_WORK_META, GLOBAL_GROUPS } from '@/lib/scope-meta';
+import type { Property, Scope, Quote, RoomId, RoomScope } from '@/lib/types';
 
 type Step = 1 | 2 | 3;
 
@@ -264,24 +264,31 @@ function KvRow({ k, v }: { k: string; v: string }) {
 
 function ScopeSummary({ scope, property }: { scope: Scope; property: Property }) {
   const visibleRooms = activeRooms(property) as RoomId[];
+  const roomOn = (key: keyof RoomScope) => visibleRooms.some(r => Boolean(scope.rooms[r]?.[key]));
 
-  const isActive = (groupId: string): boolean => {
-    const group = BIG_WORK_GROUPS.find(g => g.id === groupId);
-    if (!group) return false;
-    // 확장공사 특수 규칙: 신규 확장 시공이 계획된 방이 있을 때만 활성
-    if (group.id === 'expansion') {
-      return visibleRooms.some(r => {
-        const rs = scope.rooms[r];
-        return !!rs && rs.expansion_after && !rs.expansion_current;
-      });
-    }
-    if (group.globalKeys?.some(k => scope.global[k])) return true;
-    if (group.roomKeys?.some(k => visibleRooms.some(r => Boolean(scope.rooms[r]?.[k])))) return true;
-    return false;
-  };
+  // 세부 공사범위 항목 — 큰 그룹이 아니라 개별 공종 단위로 시공/안 함을 보여준다.
+  // (프리셋 간 단열·몰딩·에어컨·중문 등 차이가 그룹 안에 묻히지 않고 그대로 드러나도록)
+  const items: { label: string; on: boolean }[] = [];
+  // 1) 공간 마감·설비 (바닥재/도배/몰딩/외창/에어컨/붙박이장/실링팬)
+  for (const w of ROOM_WORK_META) items.push({ label: w.label, on: roomOn(w.key) });
+  // 2) 확장공사 (신규 확장 계획 공간이 있을 때만)
+  items.push({
+    label: '확장공사',
+    on: visibleRooms.some(r => {
+      const rs = scope.rooms[r];
+      return !!rs && rs.expansion_after && !rs.expansion_current;
+    }),
+  });
+  // 3) 글로벌 공종 전체 (GLOBAL_GROUPS — 철거/단열/전기/설비/욕실/주방/조명/문/발코니/기타)
+  for (const g of GLOBAL_GROUPS) {
+    for (const it of g.items) items.push({ label: it.label, on: !!scope.global[it.key] });
+  }
+  // 4) 목공사 (GLOBAL_GROUPS 미포함분)
+  items.push({ label: '목공 기본', on: !!scope.global.carpentry_base });
+  items.push({ label: '천정 목공', on: !!scope.global.carpentry_ceiling });
 
-  const active = BIG_WORK_GROUPS.filter(g => isActive(g.id));
-  const inactive = BIG_WORK_GROUPS.filter(g => !isActive(g.id));
+  const active = items.filter(i => i.on);
+  const inactive = items.filter(i => !i.on);
 
   return (
     <div className="space-y-2 pt-1">
@@ -293,9 +300,9 @@ function ScopeSummary({ scope, property }: { scope: Scope; property: Property })
           {active.length === 0 ? (
             <span className="text-[11px] text-zinc-400">선택된 공종 없음</span>
           ) : (
-            active.map(g => (
-              <span key={g.id} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-medium whitespace-nowrap">
-                {g.title}
+            active.map(i => (
+              <span key={i.label} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-medium whitespace-nowrap">
+                {i.label}
               </span>
             ))
           )}
@@ -307,9 +314,9 @@ function ScopeSummary({ scope, property }: { scope: Scope; property: Property })
             안 함 ({inactive.length})
           </div>
           <div className="flex flex-wrap gap-1">
-            {inactive.map(g => (
-              <span key={g.id} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 text-[10px] whitespace-nowrap">
-                {g.title}
+            {inactive.map(i => (
+              <span key={i.label} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 text-[10px] whitespace-nowrap">
+                {i.label}
               </span>
             ))}
           </div>
