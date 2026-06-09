@@ -68,8 +68,9 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
     const rawPy = inputMode === 'pyeong' ? n : n / PYEONG_TO_EX_M2;
-    // 상한만 적용
-    const py = Math.min(100, rawPy);
+    // 상한(100평)만 적용. 공급평 입력 모드는 정수로 반올림 → 화면 표시값 = 내부 계산값 일치
+    // (전용㎡ 모드는 정밀 평형 유지: 표시는 사용자가 입력한 ㎡ 기준이라 어긋나지 않음)
+    const py = inputMode === 'pyeong' ? Math.min(100, Math.round(rawPy)) : Math.min(100, rawPy);
     onChange({
       ...value,
       pyeong: py,
@@ -154,7 +155,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             <input
               type="number"
               min={inputMode === 'pyeong' ? 10 : 25}
-              max={inputMode === 'pyeong' ? 80 : 200}
+              max={inputMode === 'pyeong' ? 100 : 248}
               value={displayValue}
               placeholder={inputMode === 'pyeong' ? '예: 24평' : '예: 59㎡'}
               onChange={(e) => handleInput(e.target.value)}
