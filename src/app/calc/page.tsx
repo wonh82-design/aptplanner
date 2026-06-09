@@ -344,7 +344,7 @@ export default function CalcPage() {
                     </div>
                     <p className="text-sm text-zinc-600 leading-relaxed mb-4">
                       신청하시면 지금 산출한 공사 내역을 바탕으로 아래 <strong className="text-zinc-900">2부의 문서</strong>를
-                      <strong className="text-zinc-900"> PDF + 수정 가능한 파워포인트(PPT)</strong>로 보내드립니다.
+                      <strong className="text-zinc-900"> 수정 가능한 파워포인트(PPT)와 엑셀</strong>로 보내드립니다.
                       <strong className="text-zinc-900"> 자료를 먼저 받아보신 후</strong> 계좌로 입금하시면 됩니다.
                     </p>
                     <div className="grid gap-3 sm:grid-cols-2 mb-5">

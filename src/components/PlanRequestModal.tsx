@@ -88,7 +88,7 @@ export function PlanRequestModal({ onClose, onSubmit }: Props) {
               <p className="text-sm text-zinc-600 leading-relaxed mb-3">
                 성명과 이메일을 남겨주시면, 지금 산출한 공사 내역을 바탕으로
                 아래 <strong className="text-zinc-900">2부의 문서</strong>를
-                <strong className="text-zinc-900"> PDF + 수정 가능한 PPT</strong>로 보내드립니다.
+                <strong className="text-zinc-900"> 수정 가능한 파워포인트(PPT)와 엑셀</strong>로 보내드립니다.
               </p>
               <ul className="text-xs text-zinc-700 leading-relaxed mb-4 space-y-1.5">
                 <li>① <strong>우리집 공사계획서</strong> — 공사범위·스펙·기준 공사비</li>
@@ -140,7 +140,7 @@ export function PlanRequestModal({ onClose, onSubmit }: Props) {
                 <div className="text-sm font-bold text-emerald-900 mb-1">신청이 접수되었습니다 ✓</div>
                 <p className="text-xs text-emerald-800 leading-relaxed">
                   <strong>{name}</strong>님, <strong>{email}</strong>로
-                  <strong> 24시간 이내</strong>에 2부의 문서(PDF + PPT)를 보내드립니다.
+                  <strong> 24시간 이내</strong>에 2부의 문서(PPT·엑셀)를 보내드립니다.
                 </p>
               </div>
 
