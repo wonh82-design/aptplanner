@@ -332,9 +332,15 @@ export default function CalcPage() {
                   </div>
                   <div className="p-5 sm:p-7">
                     <h3 className="text-lg sm:text-xl font-bold text-zinc-900">우리집 인테리어 계획서 받기</h3>
-                    <div className="flex items-baseline gap-2 mt-1 mb-4">
-                      <span className="text-3xl font-extrabold text-blue-700">₩5,900</span>
-                      <span className="text-xs text-zinc-500">· 자료 수령 후 입금</span>
+                    <div className="mt-1.5 mb-4">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-bold mb-1.5">
+                        🎉 출시 기념 70% 할인
+                      </span>
+                      <div className="flex items-baseline gap-2 flex-wrap">
+                        <span className="text-base text-zinc-400 line-through tabular-nums">₩19,800</span>
+                        <span className="text-3xl font-extrabold text-blue-700 tabular-nums">₩5,900</span>
+                        <span className="text-xs text-zinc-500">· 자료 수령 후 입금</span>
+                      </div>
                     </div>
                     <p className="text-sm text-zinc-600 leading-relaxed mb-4">
                       신청하시면 지금 산출한 공사 내역을 바탕으로 아래 <strong className="text-zinc-900">2부의 문서</strong>를

@@ -14,6 +14,7 @@ import { PAYMENT_ACCOUNT, PAYMENT_ACCOUNT_READY } from '@/lib/payment';
 
 const EMPTY = '—';
 const PRICE = '5,900원';
+const ORIGINAL_PRICE = '19,800원'; // 정가 — 출시 기념 70% 할인 전
 
 type Props = {
   onClose: () => void;
@@ -67,7 +68,7 @@ export function PlanRequestModal({ onClose, onSubmit }: Props) {
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="text-[10px] font-semibold uppercase tracking-widest text-blue-700 mb-1">
-                ₩{PRICE} · 자료 수령 후 입금
+                🎉 출시 기념 70% 할인 · <span className="line-through text-blue-300">₩{ORIGINAL_PRICE}</span> ₩{PRICE} · 자료 수령 후 입금
               </div>
               <h2 className="text-lg sm:text-xl font-bold text-zinc-900">
                 {status === 'ok' ? '신청이 접수되었습니다' : '우리집 인테리어 계획서 신청'}
