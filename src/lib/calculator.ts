@@ -20,7 +20,8 @@ import type {
   Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade, GradeGroup,
   RegionId, AgeId,
 } from './types';
-import { gradeGroupOf, bathOverrideKey, applyGradeFloor } from './types';
+import type { Material } from './types';
+import { gradeGroupOf, bathOverrideKey, applyGradeFloor, pyeongBandOf } from './types';
 import {
   roomAreaForId, roomPerimeterForId, balconyArea, outsideWindowArea,
   exclusiveAreaM2, supplyAreaM2, switchOutletCount, activeRooms, activeBathrooms,
@@ -31,8 +32,8 @@ import {
 import { getPrimaryMaterial, getMaterialById, labelOf } from './materials';
 import { lookupWindowCost } from './window-cost';
 
-const WALL_RATIO = 2.8;             // 도배 면적 = 바닥 × 2.8 (벽면 환산)
-const BASEBOARD_HEIGHT = 0.343;     // 걸레받이 ㎡ 환산 계수 (시트 v4 기준)
+export const WALL_RATIO = 2.8;             // 도배 면적 = 바닥 × 2.8 (벽면 환산)
+export const BASEBOARD_HEIGHT = 0.343;     // 걸레받이 ㎡ 환산 계수 (시트 v4 기준)
 const VAT_RATE = 0.10;
 
 /**
@@ -41,8 +42,8 @@ const VAT_RATE = 0.10;
  *  · 방수: 바닥 전체 + 벽 하부(약 300mm) + 습식벽 일부 = 욕실면적 × 1.8
  *    (전체 벽면에 방수하지 않으므로 타일 면적보다 작음 — 과대 산정 방지)
  */
-const BATH_TILE_AREA_FACTOR = 4.65;
-const BATH_WATERPROOF_AREA_FACTOR = 1.8;
+export const BATH_TILE_AREA_FACTOR = 4.65;
+export const BATH_WATERPROOF_AREA_FACTOR = 1.8;
 
 /** 지역별 공사비 보정 계수 */
 export const REGION_MULTIPLIER: Record<RegionId, number> = {
@@ -89,6 +90,18 @@ function roundToHundredK(n: number): number {
 /** 그레이드 그룹 결정: override > default (사용자 선택값) */
 function effectiveGrade(work: string, sel: GradeSelection): GradeGroup {
   return sel.overrides[work] ?? sel.default;
+}
+
+/**
+ * 평형별 고정가(per_pyeong_band) 자재의 해당 평형 1식 합계.
+ *  - per_pyeong_band 가 아니면 일반 total_unit_price 를 그대로 반환.
+ *  - 밴드 미설정 시 0.
+ * 결과화면 카드(MaterialCard homeTotalOverride)·상세 모달도 이 함수를 공유해
+ * 계산 엔진과 표시가 동일한 값을 쓰도록 한다.
+ */
+export function pyeongBandTotal(mat: Material, pyeong: number): number {
+  if (mat.unit_type !== 'per_pyeong_band') return mat.total_unit_price;
+  return mat.pyeong_band_prices?.[pyeongBandOf(pyeong)]?.total_unit_price ?? 0;
 }
 
 /**
@@ -181,7 +194,19 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   const items: LineItem[] = [];
   let seq = 1;
   const push = (li: LineItem | null) => {
-    if (li) { li.id = String(seq++); items.push(li); }
+    if (!li) return;
+    // 평형별 고정가(per_pyeong_band): 면적/수량 무시하고 우리집 평형대 합계를 1식으로 덮어쓴다.
+    // (lineItem 은 평소대로 자재를 고르고 LineItem 을 만들지만 top-level 단가가 0이라 여기서 보정)
+    const mat = li.material_id ? getMaterialById(li.material_id) : null;
+    if (mat && mat.unit_type === 'per_pyeong_band') {
+      const total = pyeongBandTotal(mat, p.pyeong);
+      li.unit_type = 'per_pyeong_band';
+      li.qty = 1;
+      li.unit_price = total;
+      li.subtotal = Math.round(total);
+    }
+    li.id = String(seq++);
+    items.push(li);
   };
 
   const excArea = exclusiveAreaM2(p.pyeong);

@@ -15,7 +15,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { Grade, Material } from '@/lib/types';
+import type { Grade, Material, PyeongBandKey, PyeongBandPrice } from '@/lib/types';
+import { PYEONG_BANDS } from '@/lib/types';
 import { normalizeImageUrl } from '@/lib/image-utils';
 import { AdminGate } from '../../AdminGate';
 import { useAdminToken } from '../../useAdminToken';
@@ -112,6 +113,44 @@ function NewMaterialForm() {
         next.total_unit_price = (Number(next.material_price) || 0) + (Number(next.labor_price) || 0);
       }
       return next;
+    });
+    setSaveResult(null);
+  };
+
+  /** 5구간 0원 초기 밴드 */
+  const emptyBands = (): Partial<Record<PyeongBandKey, PyeongBandPrice>> => {
+    const out: Partial<Record<PyeongBandKey, PyeongBandPrice>> = {};
+    for (const b of PYEONG_BANDS) out[b.key] = { material_price: 0, labor_price: 0, total_unit_price: 0 };
+    return out;
+  };
+
+  /** 단위 변경. '평형별 고정가'로 바꾸면 top-level 단가를 0으로 비우고 5구간 초기화. */
+  const setUnitType = (next: string) => {
+    setDraft((prev) => {
+      if (next === 'per_pyeong_band') {
+        return {
+          ...prev,
+          unit_type: next,
+          material_price: 0,
+          labor_price: 0,
+          total_unit_price: 0,
+          pyeong_band_prices: prev.pyeong_band_prices ?? emptyBands(),
+        };
+      }
+      return { ...prev, unit_type: next };
+    });
+    setSaveResult(null);
+  };
+
+  /** 평형별 고정가 한 구간의 자재비/인건비 변경 — 해당 구간 합계 자동 재계산 */
+  const updateBand = (key: PyeongBandKey, field: 'material_price' | 'labor_price', value: number) => {
+    setDraft((prev) => {
+      const bands = { ...(prev.pyeong_band_prices ?? emptyBands()) };
+      const cur = bands[key] ?? { material_price: 0, labor_price: 0, total_unit_price: 0 };
+      const nextBand = { ...cur, [field]: value };
+      nextBand.total_unit_price = (Number(nextBand.material_price) || 0) + (Number(nextBand.labor_price) || 0);
+      bands[key] = nextBand;
+      return { ...prev, pyeong_band_prices: bands };
     });
     setSaveResult(null);
   };
@@ -301,38 +340,96 @@ function NewMaterialForm() {
           </FieldGroup>
         ) : (
           <FieldGroup title="단가">
-            <Field label="단위">
-              <select value={draft.unit_type} onChange={(e) => updateField('unit_type', e.target.value)} className="input">
+            <Field label="단가 구분 (단위)" full>
+              <select value={draft.unit_type} onChange={(e) => setUnitType(e.target.value)} className="input">
                 <option value="per_m2">per_m2 (㎡)</option>
                 <option value="per_pyeong">per_pyeong (평) — 1평=3.3㎡</option>
                 <option value="per_m">per_m (m)</option>
                 <option value="per_ea">per_ea (개)</option>
                 <option value="per_set">per_set (세트)</option>
+                <option value="per_pyeong_band">평형별 고정가 (평형대별 1식)</option>
               </select>
             </Field>
-            <Field label="자재가 (₩)">
-              <input
-                type="number"
-                inputMode="numeric"
-                value={draft.material_price === 0 ? '' : draft.material_price}
-                onChange={(e) => updateField('material_price', e.target.value === '' ? 0 : Number(e.target.value))}
-                placeholder="0"
-                className="input text-right tabular-nums"
-              />
-            </Field>
-            <Field label="시공비 (₩)">
-              <input
-                type="number"
-                inputMode="numeric"
-                value={draft.labor_price === 0 ? '' : draft.labor_price}
-                onChange={(e) => updateField('labor_price', e.target.value === '' ? 0 : Number(e.target.value))}
-                placeholder="0"
-                className="input text-right tabular-nums"
-              />
-            </Field>
-            <Field label="합계 (자동 계산)" full>
-              <input value={draft.total_unit_price.toLocaleString('ko-KR') + ' 원'} readOnly className="input bg-zinc-50 text-right tabular-nums font-bold" />
-            </Field>
+
+            {draft.unit_type === 'per_pyeong_band' ? (
+              <div className="sm:col-span-2">
+                <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 mb-3 text-[11px] text-blue-900 leading-relaxed">
+                  ⓘ <strong>평형별 고정가</strong> — 우리집 공급평형이 속한 구간의 <strong>합계</strong>가 면적·수량과 무관하게
+                  그 공종 공사비로 <strong>1식</strong> 반영됩니다. (10평 미만은 10평대, 50평 이상은 50평대 이상 구간)
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm border-collapse">
+                    <thead>
+                      <tr className="text-[10px] uppercase tracking-wide text-zinc-500">
+                        <th className="text-left font-bold pb-1 pr-2">평형대</th>
+                        <th className="text-right font-bold pb-1 px-2">자재비 (₩)</th>
+                        <th className="text-right font-bold pb-1 px-2">인건비 (₩)</th>
+                        <th className="text-right font-bold pb-1 pl-2">합계 (자동)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {PYEONG_BANDS.map((b) => {
+                        const band = draft.pyeong_band_prices?.[b.key];
+                        return (
+                          <tr key={b.key} className="border-t border-zinc-100">
+                            <td className="py-1.5 pr-2 font-medium text-zinc-800 whitespace-nowrap">{b.label}</td>
+                            <td className="py-1.5 px-2">
+                              <input
+                                type="number"
+                                inputMode="numeric"
+                                value={!band || band.material_price === 0 ? '' : band.material_price}
+                                onChange={(e) => updateBand(b.key, 'material_price', e.target.value === '' ? 0 : Number(e.target.value))}
+                                placeholder="0"
+                                className="input text-right tabular-nums"
+                              />
+                            </td>
+                            <td className="py-1.5 px-2">
+                              <input
+                                type="number"
+                                inputMode="numeric"
+                                value={!band || band.labor_price === 0 ? '' : band.labor_price}
+                                onChange={(e) => updateBand(b.key, 'labor_price', e.target.value === '' ? 0 : Number(e.target.value))}
+                                placeholder="0"
+                                className="input text-right tabular-nums"
+                              />
+                            </td>
+                            <td className="py-1.5 pl-2 text-right tabular-nums font-bold text-zinc-900 whitespace-nowrap">
+                              {(band?.total_unit_price ?? 0).toLocaleString('ko-KR')} 원
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Field label="자재가 (₩)">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={draft.material_price === 0 ? '' : draft.material_price}
+                    onChange={(e) => updateField('material_price', e.target.value === '' ? 0 : Number(e.target.value))}
+                    placeholder="0"
+                    className="input text-right tabular-nums"
+                  />
+                </Field>
+                <Field label="시공비 (₩)">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={draft.labor_price === 0 ? '' : draft.labor_price}
+                    onChange={(e) => updateField('labor_price', e.target.value === '' ? 0 : Number(e.target.value))}
+                    placeholder="0"
+                    className="input text-right tabular-nums"
+                  />
+                </Field>
+                <Field label="합계 (자동 계산)" full>
+                  <input value={draft.total_unit_price.toLocaleString('ko-KR') + ' 원'} readOnly className="input bg-zinc-50 text-right tabular-nums font-bold" />
+                </Field>
+              </>
+            )}
           </FieldGroup>
         )}
 

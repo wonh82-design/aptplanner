@@ -5,7 +5,7 @@ import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope, BathType } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
-import { fmtKRWShort, fmtKRWShortVat } from '@/lib/calculator';
+import { fmtKRWShort, fmtKRWShortVat, pyeongBandTotal } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength, airconInstallRooms } from '@/lib/areas';
 import { lookupWindowCost } from '@/lib/window-cost';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
@@ -963,6 +963,7 @@ export function MaterialOverrides({
         <MaterialDetailModal
           workType={detailWorkType}
           currentGrade={effectiveGrade(detailWorkType)}
+          pyeong={quote.property.pyeong}
           onClose={() => setDetailWorkType(null)}
         />
       )}
@@ -1104,6 +1105,7 @@ function SingleCard({
                 // 샷시: 자재 단가 대신 평형/베이/등급 룩업 단가를 사용 (window-cost.ts).
                 //  - 각 카드는 그 자재의 grade group 에 해당하는 룩업가를 보여준다.
                 //  - 같은 등급군 안의 여러 자재(예: '표준 추천', '표준')는 모두 같은 룩업가 표시.
+                // 평형별 고정가: top-level 단가가 0이라 우리집 평형대 합계를 직접 주입.
                 const homeTotalOverride =
                   material.sub_category === 'window'
                     ? lookupWindowCost(
@@ -1111,6 +1113,8 @@ function SingleCard({
                         property.bay,
                         gradeGroupOf(material.primary_grade as Grade),
                       )
+                    : material.unit_type === 'per_pyeong_band'
+                    ? pyeongBandTotal(material, property.pyeong)
                     : undefined;
                 return (
                   <div

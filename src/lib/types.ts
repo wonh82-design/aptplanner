@@ -88,6 +88,34 @@ export function bathOverrideKey(workType: string, bath: string): string {
   return `${workType}@@${bath}`;
 }
 
+/**
+ * 평형별 고정가 (unit_type === 'per_pyeong_band').
+ * 면적·수량에 비례하지 않고 우리집 공급평형이 속한 구간의 합계가 1식으로 잡히는 단가체계.
+ */
+export type PyeongBandPrice = {
+  material_price: number;
+  labor_price: number;
+  total_unit_price: number;
+};
+/** 구간 키 — 공급평형 10단위 하한. '50' = 50평 이상 */
+export type PyeongBandKey = '10' | '20' | '30' | '40' | '50';
+/** 구간 키 ↔ 라벨 (admin 입력표·UI 표시 순서) */
+export const PYEONG_BANDS: { key: PyeongBandKey; label: string }[] = [
+  { key: '10', label: '10평대' },
+  { key: '20', label: '20평대' },
+  { key: '30', label: '30평대' },
+  { key: '40', label: '40평대' },
+  { key: '50', label: '50평대 이상' },
+];
+/** 공급평형 → 구간 키. 10평 미만은 '10', 50평 이상은 '50'. */
+export function pyeongBandOf(pyeong: number): PyeongBandKey {
+  if (pyeong < 20) return '10';
+  if (pyeong < 30) return '20';
+  if (pyeong < 40) return '30';
+  if (pyeong < 50) return '40';
+  return '50';
+}
+
 /** 자재마스터 1행 */
 export type Material = {
   material_id: string;
@@ -106,10 +134,16 @@ export type Material = {
   brand: string | null;
   product_line: string | null;
   installer_spec: string | null;     // 시공자용 풀스펙
-  unit_type: string;                  // per_m2 / per_m / per_ea / per_set
+  unit_type: string;                  // per_m2 / per_m / per_ea / per_set / per_pyeong_band
   material_price: number;
   labor_price: number;
   total_unit_price: number;
+  /**
+   * 평형별 고정가 (unit_type === 'per_pyeong_band' 일 때만 사용).
+   * 우리집 공급평형이 속한 구간의 total_unit_price 가 1식 공사비로 잡힌다.
+   * 이 단가체계 자재는 top-level material/labor/total_unit_price 를 0 으로 둔다 (밴드가 진실의 원천).
+   */
+  pyeong_band_prices?: Partial<Record<PyeongBandKey, PyeongBandPrice>>;
   primary_grade: Grade;
   /**
    * 자재 이미지 URL (옵셔널).

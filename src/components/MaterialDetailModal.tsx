@@ -19,7 +19,8 @@ import type { Grade, GradeGroup, Material } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade } from '@/lib/types';
 import { getPrimaryMaterial, labelOf } from '@/lib/materials';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
-import { fmtKRWShort } from '@/lib/calculator';
+import { fmtKRWShort, pyeongBandTotal } from '@/lib/calculator';
+import { pyeongBandOf, PYEONG_BANDS } from '@/lib/types';
 
 const GRADES: GradeGroup[] = ['가성비', '표준', '고급'];
 
@@ -50,10 +51,12 @@ type Props = {
   workType: string;
   /** 현재 견적에 적용된 등급 그룹 — 카드 강조용 */
   currentGrade: GradeGroup;
+  /** 우리집 공급평형 — 평형별 고정가 자재의 해당 구간 합계 표시용 */
+  pyeong: number;
   onClose: () => void;
 };
 
-export function MaterialDetailModal({ workType, currentGrade, onClose }: Props) {
+export function MaterialDetailModal({ workType, currentGrade, pyeong, onClose }: Props) {
   const label = labelOf(workType);
 
   return (
@@ -100,6 +103,7 @@ export function MaterialDetailModal({ workType, currentGrade, onClose }: Props) 
                 workType={workType}
                 material={getPrimaryMaterial(workType, g)}
                 isCurrent={currentGrade === g}
+                pyeong={pyeong}
               />
             ))}
           </div>
@@ -149,12 +153,13 @@ export function MaterialDetailModal({ workType, currentGrade, onClose }: Props) 
 // =====================================================
 
 function GradeCard({
-  grade, workType, material, isCurrent,
+  grade, workType, material, isCurrent, pyeong,
 }: {
   grade: GradeGroup;
   workType: string;
   material: Material | null;
   isCurrent: boolean;
+  pyeong: number;
 }) {
   const meta = GRADE_META[grade];
   const realUrl = normalizeImageUrl(material?.image_url ?? null, 800);
@@ -207,12 +212,25 @@ function GradeCard({
               )}
             </div>
 
-            {/* 가격 정보 */}
-            <div className="pt-2 border-t border-zinc-100 space-y-0.5">
-              <PriceRow label="자재가" value={material.material_price} unit={material.unit_type} />
-              <PriceRow label="시공비" value={material.labor_price} unit={material.unit_type} />
-              <PriceRow label="합계" value={material.total_unit_price} unit={material.unit_type} highlight />
-            </div>
+            {/* 가격 정보 — 평형별 고정가는 우리집 평형대 합계(1식)를 표시 */}
+            {material.unit_type === 'per_pyeong_band' ? (
+              <div className="pt-2 border-t border-zinc-100 space-y-0.5">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-[11px] text-zinc-500">
+                    평형별 고정가 · {PYEONG_BANDS.find((b) => b.key === pyeongBandOf(pyeong))?.label ?? '—'}
+                  </span>
+                  <span className="text-sm font-bold text-zinc-900 tabular-nums">
+                    {fmtKRWShort(pyeongBandTotal(material, pyeong))} <span className="text-[10px] font-normal text-zinc-400">/ 1식</span>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="pt-2 border-t border-zinc-100 space-y-0.5">
+                <PriceRow label="자재가" value={material.material_price} unit={material.unit_type} />
+                <PriceRow label="시공비" value={material.labor_price} unit={material.unit_type} />
+                <PriceRow label="합계" value={material.total_unit_price} unit={material.unit_type} highlight />
+              </div>
+            )}
           </>
         ) : (
           <div className="py-6 text-center text-xs text-zinc-400 italic">

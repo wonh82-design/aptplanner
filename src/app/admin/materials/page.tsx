@@ -502,6 +502,9 @@ function MaterialsList() {
                 const vTotal = (typeof vMat === 'number' && typeof vLab === 'number') ? vMat + vLab : m.total_unit_price;
                 // 샷시(window) 는 평형/베이/등급 룩업 기반 — 단가 셀 입력 차단 + '룩업' 배지로 대체
                 const isLookupPricing = m.sub_category === 'window';
+                // 평형별 고정가 — 단가가 평형대별 표에 있어 리스트의 단일 단가 셀로 표현 불가 (편집 화면에서 입력)
+                const isBandPricing = m.unit_type === 'per_pyeong_band';
+                const isSpecialPricing = isLookupPricing || isBandPricing;
                 return (
                 <tr key={m.material_id} className={isDirty ? 'bg-amber-50/60' : 'hover:bg-blue-50/30'}>
                   <td className="px-3 py-2 font-mono text-[10px] text-zinc-500">
@@ -548,18 +551,18 @@ function MaterialsList() {
                       </>
                     )}
                   </td>
-                  {isLookupPricing ? (
-                    // 샷시 — 단가 3셀(자재비/인건비/합계+24평)을 '룩업' 배지로 통합
+                  {isSpecialPricing ? (
+                    // 샷시(룩업)·평형별 고정가 — 단가 3셀(자재비/인건비/합계+24평)을 배지로 통합
                     <>
                       <td className="px-3 py-2 text-right text-zinc-300">—</td>
                       <td className="px-3 py-2 text-right text-zinc-300">—</td>
                       <td className="px-3 py-2 text-center border-l border-zinc-100" colSpan={2}>
                         <span
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold"
-                          title="평형/베이/등급 룩업 표 기반 (src/lib/window-cost.ts)"
+                          title={isBandPricing ? '평형대별 고정가 표 기반 — 편집 화면에서 구간별 단가 입력' : '평형/베이/등급 룩업 표 기반 (src/lib/window-cost.ts)'}
                         >
                           <span aria-hidden>ⓘ</span>
-                          평형/베이/등급 룩업
+                          {isBandPricing ? '평형별 고정가' : '평형/베이/등급 룩업'}
                         </span>
                       </td>
                     </>

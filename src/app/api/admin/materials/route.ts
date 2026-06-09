@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Material } from '@/lib/types';
+import type { Material, PyeongBandKey, PyeongBandPrice } from '@/lib/types';
+import { PYEONG_BANDS } from '@/lib/types';
 import { isValidAdminToken, unauthorized } from '@/lib/admin-auth';
 import { isDbConfigured, getMaterials, saveMaterialsToDb } from '@/lib/db';
 
@@ -88,6 +89,23 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       vendorUrl = m.vendor_url.trim();
     }
 
+    // 평형별 고정가(per_pyeong_band) 밴드 가격 정규화 — 게이트키퍼가 알려진 필드만 남기므로 명시 보존.
+    // 5구간 각각 자재비/인건비 정수화 + 합계 = 자재+인건 재계산.
+    let bandPrices: Partial<Record<PyeongBandKey, PyeongBandPrice>> | undefined;
+    if (String(m.unit_type ?? '').trim() === 'per_pyeong_band' && m.pyeong_band_prices && typeof m.pyeong_band_prices === 'object') {
+      const src = m.pyeong_band_prices as Record<string, unknown>;
+      const out: Partial<Record<PyeongBandKey, PyeongBandPrice>> = {};
+      for (const { key } of PYEONG_BANDS) {
+        const raw = src[key] as Record<string, unknown> | undefined;
+        const mp = Number(raw?.material_price);
+        const lp = Number(raw?.labor_price);
+        const matP = Number.isFinite(mp) ? mp : 0;
+        const labP = Number.isFinite(lp) ? lp : 0;
+        out[key] = { material_price: matP, labor_price: labP, total_unit_price: matP + labP };
+      }
+      bandPrices = out;
+    }
+
     const cleaned_row: Material = {
       material_id: id,
       // sub_category 는 세부공종 (시스템 내부 ID, 구 work_type)
@@ -101,6 +119,7 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       labor_price: Number.isFinite(labPrice) ? labPrice : 0,
       total_unit_price: Number.isFinite(total) ? total : 0,
       primary_grade: VALID_GRADES.has(grade) ? grade as Material['primary_grade'] : '표준',
+      ...(bandPrices ? { pyeong_band_prices: bandPrices } : {}),
       ...(imageUrl ? { image_url: imageUrl } : {}),
       ...(vendorUrl ? { vendor_url: vendorUrl } : {}),
     };
