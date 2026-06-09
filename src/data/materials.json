@@ -174,19 +174,6 @@
     "total_unit_price": 8600.0
   },
   {
-    "brand": "영림",
-    "category": "몰딩",
-    "unit_type": "per_m",
-    "labor_price": 5500.0,
-    "material_id": "MAT-MD-003",
-    "product_line": "각몰딩",
-    "sub_category": "molding",
-    "primary_grade": "가성비",
-    "installer_spec": "영림 PVC 각몰딩",
-    "material_price": 5500.0,
-    "total_unit_price": 11000.0
-  },
-  {
     "brand": "대성",
     "category": "몰딩",
     "unit_type": "per_m",
@@ -423,45 +410,49 @@
   {
     "brand": "사제",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BJ-001-7kk2h52ctfhly8BOUTbv22UJwddZ4u.png",
     "unit_type": "per_ea",
     "labor_price": 80000.0,
     "material_id": "MAT-BJ-001",
-    "product_line": "인조일반",
+    "product_line": "인조대리석",
     "sub_category": "bath_jendai",
     "primary_grade": "가성비 추천",
-    "installer_spec": "인조대리석 일반 (욕실 젠다이)",
+    "installer_spec": "인조대리석 젠다이",
     "material_price": 180000.0,
     "total_unit_price": 260000.0
   },
   {
     "brand": "사제",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BJ-002-cUzwHgVPFucvLYawiZdAouMgdL7pvE.png",
     "unit_type": "per_ea",
     "labor_price": 100000.0,
     "material_id": "MAT-BJ-002",
-    "product_line": "인조광택",
+    "product_line": "타일 젠다이",
     "sub_category": "bath_jendai",
     "primary_grade": "표준 추천",
-    "installer_spec": "인조대리석 광택 (욕실 젠다이)",
+    "installer_spec": "졸리컷 타일 젠다이",
     "material_price": 280000.0,
     "total_unit_price": 380000.0
   },
   {
     "brand": "사제",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BJ-003-KSZWLb5P3JsUTK9ED4lGhXRh4iSnGW.png",
     "unit_type": "per_ea",
     "labor_price": 150000.0,
     "material_id": "MAT-BJ-003",
-    "product_line": "천연석",
+    "product_line": "타일 젠다이",
     "sub_category": "bath_jendai",
     "primary_grade": "고급 추천",
-    "installer_spec": "천연석 카운터 (욕실 젠다이)",
-    "material_price": 580000.0,
-    "total_unit_price": 730000.0
+    "installer_spec": "졸리컷 타일 젠다이",
+    "material_price": 280000.0,
+    "total_unit_price": 430000.0
   },
   {
     "brand": "현장시공",
     "category": "조적/방수",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BW-001-x6yR0YIXkZoNGxCRjrPIa0zGOHfOFJ.jpg",
     "unit_type": "per_m2",
     "labor_price": 12000.0,
     "material_id": "MAT-BW-001",
@@ -475,6 +466,7 @@
   {
     "brand": "아덱스",
     "category": "조적/방수",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BW-002-XUolXUvEzNpeHDdp4vVRXypUYs1tIc.jpg",
     "unit_type": "per_m2",
     "labor_price": 17000.0,
     "material_id": "MAT-BW-002",
@@ -488,6 +480,7 @@
   {
     "brand": "아덱스",
     "category": "조적/방수",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BW-003-esz9OwjanGLVyXXKkOF21hlOrUaKY1.jpg",
     "unit_type": "per_m2",
     "labor_price": 20000.0,
     "material_id": "MAT-BW-003",
@@ -499,17 +492,18 @@
     "total_unit_price": 45000.0
   },
   {
-    "brand": "포스코타일",
+    "brand": "중국산",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BT-001-w8P5nt0eVl69gVlGWVFPXSKKTEbjB8.png",
     "unit_type": "per_m2",
     "labor_price": 0.0,
     "material_id": "MAT-BT-001",
     "product_line": "300x600",
     "sub_category": "bath_tile",
     "primary_grade": "가성비 추천",
-    "installer_spec": "300×600각 욕실 타일 (자재만, 인건비는 통합 타일팀)",
-    "material_price": 12000.0,
-    "total_unit_price": 12000.0
+    "installer_spec": "300×600각 욕실 타일  (본드 등 부자재 포함)",
+    "material_price": 15000.0,
+    "total_unit_price": 15000.0
   },
   {
     "brand": "포세린",
@@ -659,6 +653,7 @@
   {
     "brand": "사제",
     "category": "욕실",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BG-001-0MWMenSgvwwhfWu2dyQkWeXY6TR2VZ.png",
     "unit_type": "per_m2",
     "labor_price": 0.0,
     "material_id": "MAT-BG-001",
@@ -672,15 +667,16 @@
   {
     "brand": "사제",
     "category": "욕실",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BG-002-2hd9mF4J0nw9YJvch8dKxcJc6tFFY7.png",
     "unit_type": "per_m2",
-    "labor_price": 0.0,
+    "labor_price": 40000.0,
     "material_id": "MAT-BG-002",
     "product_line": "이노솔",
     "sub_category": "bath_ceiling",
     "primary_grade": "고급 추천",
     "installer_spec": "이노솔 욕실 천정 마감",
-    "material_price": 74999.0,
-    "total_unit_price": 74999.0
+    "material_price": 80000.0,
+    "total_unit_price": 120000.0
   },
   {
     "brand": "라우체",
@@ -967,17 +963,18 @@
     "total_unit_price": 60000.0
   },
   {
-    "brand": "이태리수입",
+    "brand": "이태리",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-KM-003-CePj0MM33rSH6c3DZFqJzpvJIcirjp.png",
     "unit_type": "per_m",
     "labor_price": 0.0,
     "material_id": "MAT-KM-003",
-    "product_line": "800이태리",
+    "product_line": "800각",
     "sub_category": "kitchen_midway",
     "primary_grade": "고급 추천",
-    "installer_spec": "800각 이태리 수입 타일 백패널 (자재만, 인건비는 통합 타일팀)",
-    "material_price": 120000.0,
-    "total_unit_price": 120000.0
+    "installer_spec": "800각 이태리 수입 타일 백패널 (부자재 포함)",
+    "material_price": 90000.0,
+    "total_unit_price": 90000.0
   },
   {
     "brand": "LX하이막스",
@@ -1733,15 +1730,16 @@
     "total_unit_price": 8000.0
   },
   {
-    "brand": "중국수입",
+    "brand": "중국",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-VT-002-SerUBTCgCl28M535urHKbTxbuSZ1PZ.png",
     "unit_type": "per_m2",
     "labor_price": 0.0,
     "material_id": "MAT-VT-002",
-    "product_line": "600각중국",
+    "product_line": "600각",
     "sub_category": "balcony_floor_tile",
     "primary_grade": "표준 추천",
-    "installer_spec": "600×600각 중국산 포세린 (자재만, 시공은 통합 타일팀)",
+    "installer_spec": "600×600각 중국산 포세린 (부자재 포함)",
     "material_price": 15000.0,
     "total_unit_price": 15000.0
   },
@@ -2559,17 +2557,18 @@
     "total_unit_price": 56000.0
   },
   {
-    "brand": "사제 SMC",
+    "brand": "사제",
     "category": "욕실",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-NEW-002-aV4lF5rXkCt7EzUdknQqQGwxZByS4E.png",
     "unit_type": "per_m2",
-    "labor_price": 0.0,
+    "labor_price": 30000.0,
     "material_id": "MAT-NEW-002",
     "product_line": "SMC",
     "sub_category": "bath_ceiling",
     "primary_grade": "가성비 추천",
     "installer_spec": "SMC 천정 무광",
-    "material_price": 40000.0,
-    "total_unit_price": 40000.0
+    "material_price": 20000.0,
+    "total_unit_price": 50000.0
   },
   {
     "brand": "라우체",
