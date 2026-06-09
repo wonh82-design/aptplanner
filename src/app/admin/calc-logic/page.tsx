@@ -20,7 +20,7 @@ import standardAreas from '@/data/standard_areas.json';
 import type { GradeGroup, GradeSelection, LineItem, Material, Property, RegionId, AgeId } from '@/lib/types';
 import {
   buildQuote, categoryOf, fmtKRW, fmtKRWVat, REGION_LABEL, AGE_LABEL,
-  REGION_MULTIPLIER, AGE_MULTIPLIER, adjustmentMultiplier,
+  REGION_MULTIPLIER, AGE_MULTIPLIER, adjustmentMultiplier, getUnitMismatches,
   WALL_RATIO, BASEBOARD_HEIGHT, BATH_TILE_AREA_FACTOR, BATH_WATERPROOF_AREA_FACTOR,
 } from '@/lib/calculator';
 import { setMaterials, labelOf, getPrimaryMaterial, gradeOptionsFor } from '@/lib/materials';
@@ -91,6 +91,13 @@ function CalcLogicViewer() {
     // version: 자재 갱신 시 재계산
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [property, grade, version]);
+
+  // 단위 불일치 자재 — buildQuote 직후의 가드 결과(분류 단위 비교)를 캡처
+  const unitMismatchMap = useMemo(() => {
+    const m = new Map<string, { expected: string; declared: string }>();
+    for (const x of getUnitMismatches()) m.set(x.material_id, { expected: x.expected, declared: x.declared });
+    return m;
+  }, [quote]);
 
   // 대공종(category)별 그룹 — 공사비 내림차순 (결과화면/PPTX 와 동일)
   const groups = useMemo(() => {
@@ -215,6 +222,8 @@ function CalcLogicViewer() {
                 <tbody className="divide-y divide-zinc-50">
                   {items.map((it) => {
                     const meta = calcLogicMetaOf(it.work_type);
+                    // 단위 불일치 가드: 자재 declared unit_type 이 공종 기대 단위(line.unit_type)와 다르면 경고
+                    const mm = it.material_id ? unitMismatchMap.get(it.material_id) : undefined;
                     return (
                       <tr key={it.id} className="hover:bg-blue-50/30 align-top">
                         <td className="px-3 py-1.5 font-medium text-zinc-900 whitespace-nowrap">
@@ -243,6 +252,14 @@ function CalcLogicViewer() {
                         </td>
                         <td className="px-2 py-1.5 whitespace-nowrap">
                           <span className="text-[10px] text-zinc-600">{priceApplyLabel(it.work_type, it.unit_type)}</span>
+                          {mm && (
+                            <div
+                              className="text-[9px] text-red-600 font-bold mt-0.5"
+                              title={`자재 unit_type=${mm.declared} 의 단위 분류가 공종 기대(${mm.expected})와 다릅니다. 수량이 ${mm.expected} 기준으로 산출되므로 단가·단위 데이터 오류일 수 있습니다.`}
+                            >
+                              ⚠ 단위 불일치 ({mm.declared}→{mm.expected})
+                            </div>
+                          )}
                         </td>
                         <td className="px-2 py-1.5 text-right tabular-nums text-zinc-600 whitespace-nowrap">{fmtKRW(it.unit_price)}</td>
                         <td className="px-3 py-1.5 text-right tabular-nums font-semibold text-zinc-900 whitespace-nowrap">{fmtKRW(it.subtotal)}</td>

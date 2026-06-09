@@ -105,6 +105,38 @@ export function pyeongBandTotal(mat: Material, pyeong: number): number {
 }
 
 /**
+ * 단위 불일치 가드 — 자재 unit_type 이 계산기의 기대 단위와 다른 경우를 수집·경고.
+ * (예: electrical_base 는 per_m2(면적) 기준인데 자재를 per_ea 로 잘못 저장하면 면적×단가로 폭증)
+ * 계산기는 qty 를 '기대 단위' 기준으로 산출하므로 자재 unit_type 데이터 오류가 표시·계산을 망가뜨린다.
+ * material_id 단위로 dedup. admin/calc-logic·감사에서 노출.
+ */
+/** 단위 분류 — 면적/길이/개수. per_ea·per_set·per_pyeong 은 모두 '개수'(qty×단가 의미 동일). */
+function unitClass(u: string): 'area' | 'length' | 'count' {
+  if (u === 'per_m2') return 'area';
+  if (u === 'per_m') return 'length';
+  return 'count'; // per_ea, per_set, per_pyeong, 빈값 등
+}
+
+type UnitMismatch = { work_type: string; expected: string; declared: string; material_id: string };
+const _unitMismatches = new Map<string, UnitMismatch>();
+function reportUnitMismatch(workType: string, expected: string, mat: Material): void {
+  if (_unitMismatches.has(mat.material_id)) return;
+  _unitMismatches.set(mat.material_id, {
+    work_type: workType, expected, declared: mat.unit_type, material_id: mat.material_id,
+  });
+  if (typeof console !== 'undefined') {
+    console.warn(
+      `[apt-planner] 단위 불일치: 공종 '${workType}' 기대 단위 ${expected} ≠ 자재 ${mat.material_id} unit_type=${mat.unit_type}. ` +
+      `계산기는 ${expected} 기준 수량을 사용합니다 — 자재 단가·단위가 의도와 맞는지 확인하세요.`,
+    );
+  }
+}
+/** 누적 단위 불일치 목록 (감사·admin 용). */
+export function getUnitMismatches(): UnitMismatch[] {
+  return Array.from(_unitMismatches.values());
+}
+
+/**
  * LineItem 한 줄 생성 헬퍼. material이 없거나 qty=0이면 null 반환.
  * overrideKey: 등급·자재 override 조회 키 (기본 = workType).
  *   욕실 공용/부부 분리 시 `bath_basin@@부부욕실` 같은 네임스페이스 키를 넘겨
@@ -131,6 +163,13 @@ function lineItem(
     ? overrideMat
     : getPrimaryMaterial(workType, resolvedGrade);
   if (!mat) return null;
+  // 단위 불일치 가드: 자재 unit_type 의 '단위 분류'(면적/길이/개수)가 계산기 기대(fallbackUnit)와
+  // 다르면 경고 — 면적 기반 공종(예: electrical_base)에 per_ea 자재를 넣으면 면적×단가로 폭증하는
+  // 데이터 오류를 잡는다. per_ea↔per_set 처럼 같은 '개수' 분류면 무해하므로 분류 단위로 비교.
+  if (mat.unit_type && mat.unit_type !== 'per_pyeong_band'
+      && unitClass(mat.unit_type) !== unitClass(fallbackUnit)) {
+    reportUnitMismatch(workType, fallbackUnit, mat);
+  }
   const unit = mat.unit_type || fallbackUnit;
   const unitPrice = mat.total_unit_price;
   return {
@@ -191,6 +230,7 @@ function windowLineItem(
 
 /** 메인 함수: Property+Scope+Grade → LineItem[] */
 export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection): LineItem[] {
+  _unitMismatches.clear(); // 이번 산출의 단위 불일치만 수집
   const items: LineItem[] = [];
   let seq = 1;
   const push = (li: LineItem | null) => {
@@ -358,7 +398,9 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
         qty = baseArea;
       }
       // 욕실별 네임스페이스 키 → 공용/부부 독립 등급·자재
-      push(lineItem('', bath, wt, qty, grade, 'per_ea', bathOverrideKey(wt, bath)));
+      // 타일·줄눈·방수·천장은 면적(㎡) 기반 → fallbackUnit per_m2 (단위 가드 정합), 나머지는 per_ea(개수).
+      const bathUnit = (wt === 'bath_tile' || wt === 'bath_grout' || wt === 'bath_waterproof' || wt === 'bath_ceiling') ? 'per_m2' : 'per_ea';
+      push(lineItem('', bath, wt, qty, grade, bathUnit, bathOverrideKey(wt, bath)));
     }
     // 샤워부스 / 욕조 / 둘다 — 욕실 타입에 따라 본체·전용 수전 시공.
     //  · 'booth' → 샤워부스(bath_partition) + 샤워수전(bath_shower_faucet)
