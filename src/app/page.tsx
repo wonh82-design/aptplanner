@@ -52,7 +52,7 @@ export default function Landing() {
           <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/85 via-zinc-900/55 to-zinc-900/15" />
         </div>
 
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-20 pb-24 sm:pt-32 sm:pb-36 lg:pt-40 lg:pb-44">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28 lg:pt-32 lg:pb-36">
           <div className="max-w-2xl">
             <div className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-amber-300 mb-5">
               {t.hero.eyebrow}
@@ -108,15 +108,6 @@ export default function Landing() {
               {t.hero.belowCta}
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* ===== Stats Strip — 짧고 깔끔 ===== */}
-      <section className="border-b border-zinc-200">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 sm:py-12 grid grid-cols-3 gap-4 sm:gap-10">
-          {t.stats.map((s, i) => (
-            <Stat key={i} n={s.n} l={s.l} accent={s.accent} />
-          ))}
         </div>
       </section>
 
@@ -262,17 +253,6 @@ export default function Landing() {
 }
 
 // ===== 보조 컴포넌트 ===========================================
-
-function Stat({ n, l, accent = false }: { n: string; l: string; accent?: boolean }) {
-  return (
-    <div className="flex flex-col">
-      <div className={`text-3xl sm:text-5xl font-bold tracking-tight ${accent ? 'text-amber-600' : 'text-zinc-900'}`}>
-        {n}
-      </div>
-      <div className="text-[11px] sm:text-sm text-zinc-500 mt-1.5">{l}</div>
-    </div>
-  );
-}
 
 function CompareCard({ tone, title, items }: { tone: 'good' | 'bad'; title: string; items: readonly string[] }) {
   const isGood = tone === 'good';
