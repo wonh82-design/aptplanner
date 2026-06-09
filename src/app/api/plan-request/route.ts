@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
 import { savePlanRequest } from '@/lib/db';
 import { buildPlanPptxBase64 } from '@/lib/pptx/plan-pptx';
+import { buildPlanXlsxBase64 } from '@/lib/xlsx/plan-xlsx';
 import type { Quote } from '@/lib/types';
 import type { PlanSection } from '@/lib/plan-doc';
 
 /**
  * '우리집 인테리어 계획서' 신청 접수 API (₩5,900).
  *
- * 관리자 첨부는 **수정 가능한 PPTX 공사계획서** — 결과 화면과 동일한 공종 분류로
- * 공종별 [공사범위 · 스펙 · 수량 · 공사비] + 공종 소계를 담는다.
- * (서버에서 quote(+선택 sections)로 pptxgenjs 렌더 → Resend 첨부)
+ * 관리자 첨부는 **2종**:
+ *  ① 수정 가능한 PPTX 공사계획서 — 비주얼 계획서/송부용
+ *  ② 엑셀(XLSX) 견적표 — 공종별 단가·수량·공사비 (숫자 셀 → 합계 재계산·견적요청서 가공 용이)
+ * 둘 다 결과 화면과 동일한 공종 분류(buildPlanDoc → calculator.categoryOf)로 구성.
+ * (서버에서 quote(+선택 sections)로 렌더 → Resend 첨부)
  *
  * 내구성 정책:
  *  이메일은 알림 채널일 뿐 단일 실패점이 아니다. 신청은 먼저 DB(Neon plan_requests)에
@@ -48,6 +51,9 @@ export async function POST(req: Request) {
   const at = new Date().toISOString();
   const gradeLabel = (meta.grade ? String(meta.grade) : '표준');
 
+  // 첨부 파일명 공통 접미사 (평형 없을 때 깔끔하게)
+  const fnameSuffix = `${meta.pyeong ?? ''}평_${meta.quote_id ?? quote?.quote_id ?? ''}`.replace(/^평_/, '');
+
   // ── 공사계획서 PPTX 생성 (best-effort) ──
   let pptxBase64 = '';
   if (quote) {
@@ -62,19 +68,37 @@ export async function POST(req: Request) {
       pptxBase64 = '';
     }
   }
-  const pptxFilename = `apt-planner_공사계획서_${meta.pyeong ?? ''}평_${meta.quote_id ?? quote?.quote_id ?? ''}.pptx`
-    .replace(/_평_/, '_'); // 평형 없을 때 깔끔하게
+  const pptxFilename = `apt-planner_공사계획서_${fnameSuffix}.pptx`;
+
+  // ── 공사 견적표 XLSX 생성 (best-effort) ──
+  let xlsxBase64 = '';
+  if (quote) {
+    try {
+      xlsxBase64 = buildPlanXlsxBase64({ name, email, quote, gradeLabel, sections });
+      if (xlsxBase64.length > MAX_ATTACH_BASE64) {
+        console.warn('[apt-planner] plan-request: xlsx 용량 초과 — 첨부 생략', xlsxBase64.length);
+        xlsxBase64 = '';
+      }
+    } catch (e) {
+      console.error('[apt-planner] plan-request: xlsx 생성 실패', e);
+      xlsxBase64 = '';
+    }
+  }
+  const xlsxFilename = `apt-planner_견적표_${fnameSuffix}.xlsx`;
 
   console.log('[apt-planner] PLAN REQUEST', JSON.stringify({
-    name, email, at, has_pptx: !!pptxBase64, quote_id: meta.quote_id ?? quote?.quote_id ?? null,
+    name, email, at, has_pptx: !!pptxBase64, has_xlsx: !!xlsxBase64,
+    quote_id: meta.quote_id ?? quote?.quote_id ?? null,
   }));
 
-  // ── 1) 이메일 발송 (알림 + PPTX 첨부, best-effort) ──
-  const emailed = await trySendEmail({ name, email, meta, at, pptxBase64, pptxFilename });
+  // ── 1) 이메일 발송 (알림 + PPTX·XLSX 첨부, best-effort) ──
+  const emailed = await trySendEmail({
+    name, email, meta, at, pptxBase64, pptxFilename, xlsxBase64, xlsxFilename,
+  });
 
   // ── 2) DB 영속 저장 (주문 보존 — 메일 실패와 무관) ──
   const persisted = await savePlanRequest({
-    name, email, meta, quote, hasPdf: !!pptxBase64, emailed,
+    name, email, meta, quote, hasPdf: !!pptxBase64 || !!xlsxBase64, emailed,
   });
 
   if (!emailed && !persisted) {
@@ -82,13 +106,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'delivery_failed' }, { status: 502 });
   }
 
-  return NextResponse.json({ ok: true, emailed, persisted, attached: !!pptxBase64 });
+  return NextResponse.json({ ok: true, emailed, persisted, attached: !!pptxBase64 || !!xlsxBase64 });
 }
 
-/** Resend 로 관리자 알림 메일 발송 (PPTX 첨부). 성공 시 true. */
+/** Resend 로 관리자 알림 메일 발송 (PPTX + XLSX 첨부). 성공 시 true. */
 async function trySendEmail(p: {
   name: string; email: string; meta: Record<string, unknown>; at: string;
   pptxBase64: string; pptxFilename: string;
+  xlsxBase64: string; xlsxFilename: string;
 }): Promise<boolean> {
   if (!process.env.RESEND_API_KEY) {
     console.warn('[apt-planner] plan-request: RESEND_API_KEY 미설정 — 메일 미발송 (DB 저장으로 보존)');
@@ -116,17 +141,21 @@ async function trySendEmail(p: {
 ■ 공사비 산정 내역 (고객 입력 기준)
 ${metaText || '(메타 없음)'}
 
+■ 첨부 자료 (결과 화면과 동일한 공종 분류)
+① 공사계획서 PPTX — 공종별 공사범위·스펙·수량·공사비. 비주얼 계획서/송부용 (그대로 편집 가능).
+② 견적표 XLSX — 공종별 단가·수량·공사비가 숫자 셀로 입력됨. 합계 재계산·업체 견적요청서 가공에 사용.
+
 ■ 처리 안내
-- 첨부된 '공사계획서 PPTX' 는 결과 화면과 동일한 공종 분류로 공종별 공사범위·스펙·수량·공사비를 담고 있습니다.
-- 그대로 편집해 2부 문서(① 우리집 공사계획서 ② 업체 견적용 공사계획서)로 다듬어 신청자에게 24시간 이내 송부 → 자료 수령 후 ₩5,900 입금 안내.
-${p.pptxBase64 ? '' : '\n⚠ 첨부 PPTX 누락(생성 실패 또는 용량 초과). DB(plan_requests)의 quote 로 재생성하세요.'}`;
+- 위 자료를 편집해 2부 문서(① 우리집 공사계획서 ② 업체 견적용 공사계획서)로 다듬어 신청자에게 24시간 이내 송부 → 자료 수령 후 ₩5,900 입금 안내.
+${p.pptxBase64 ? '' : '\n⚠ 첨부 PPTX 누락(생성 실패 또는 용량 초과). DB(plan_requests)의 quote 로 재생성하세요.'}${p.xlsxBase64 ? '' : '\n⚠ 첨부 XLSX 누락(생성 실패 또는 용량 초과). DB(plan_requests)의 quote 로 재생성하세요.'}`;
 
   const from = process.env.CONSULT_NOTIFY_FROM || 'apt-planner <onboarding@resend.dev>';
   try {
     const payload: Record<string, unknown> = { from, to: ADMIN_TO, reply_to: p.email, subject, text };
-    if (p.pptxBase64) {
-      payload.attachments = [{ filename: p.pptxFilename, content: p.pptxBase64 }];
-    }
+    const attachments: { filename: string; content: string }[] = [];
+    if (p.pptxBase64) attachments.push({ filename: p.pptxFilename, content: p.pptxBase64 });
+    if (p.xlsxBase64) attachments.push({ filename: p.xlsxFilename, content: p.xlsxBase64 });
+    if (attachments.length) payload.attachments = attachments;
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },

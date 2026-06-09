@@ -24,7 +24,8 @@
     "pptxgenjs": "^4.0.1",
     "qrcode": "^1.5.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -35,7 +36,6 @@
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vercel": "^54.3.0",
-    "xlsx": "^0.18.5"
+    "vercel": "^54.3.0"
   }
 }
