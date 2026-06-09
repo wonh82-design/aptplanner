@@ -35,13 +35,15 @@ type Props = {
   onNext?: () => void;
   prevLabel?: string;
   nextLabel?: string;
+  /** 다음 버튼 비활성화 — 버튼 자체는 노출하되 클릭만 막는다 (예: 평형 미입력) */
+  nextDisabled?: boolean;
 };
 
 type SectionId = 'property' | 'scope' | 'category';
 
 export function WizardSidebar({
   step, property, scope, quote, gradeLabel,
-  onJumpToStep, onPrev, onNext, prevLabel, nextLabel,
+  onJumpToStep, onPrev, onNext, prevLabel, nextLabel, nextDisabled,
 }: Props) {
   // 단계가 바뀌면 해당 단계의 섹션이 자동으로 펼쳐진다.
   // 사용자는 단계 안에서 자유롭게 다른 섹션을 열고 닫을 수 있다 (state로 보존).
@@ -64,33 +66,29 @@ export function WizardSidebar({
   return (
     <aside className="hidden lg:flex flex-col gap-3 w-72 flex-shrink-0 lg:h-full overflow-y-auto pb-2">
       {/*
-       * 총 예상 공사비 카드 — 단계 전환 시 카드 크기가 변하지 않도록 외형 통일.
-       * Step 1: 가격 자리에 '—' placeholder + 안내 텍스트
-       * Step 2+: 실제 가격 + 평당 + 범위
+       * 총 예상 공사비 카드 — Step 2부터 노출.
+       * Step 1(우리집 현황)에서는 카드를 숨겨 사이드바 상단을 비운다
+       * (현황만 입력하는 단계라 가격 placeholder가 불필요).
        */}
-      <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-4">
-        <div className="flex items-baseline justify-between mb-1">
-          <span className="text-[11px] text-zinc-500 uppercase tracking-wide">총 예상 공사비</span>
-          <span className="text-[11px] text-zinc-500">{property.pyeong}평</span>
+      {step >= 2 && (
+        <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-4">
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="text-[11px] text-zinc-500 uppercase tracking-wide">총 예상 공사비</span>
+            <span className="text-[11px] text-zinc-500">{property.pyeong}평</span>
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-extrabold tabular-nums tracking-tight text-blue-700">
+              {fmtKRWShort(quote.totals.grand_total)}
+            </span>
+          </div>
+          <div className="text-[11px] text-zinc-500 mt-0.5">
+            평당 약 {fmtKRWShort(quote.totals.per_pyeong)}
+          </div>
+          <div className="text-[10px] text-zinc-400 mt-2 pt-2 border-t border-zinc-100 leading-relaxed">
+            범위 {fmtKRWShort(quote.totals.grand_total_low)} ~ {fmtKRWShort(quote.totals.grand_total_high)}
+          </div>
         </div>
-        <div className="flex items-baseline gap-1">
-          <span className={`text-2xl font-extrabold tabular-nums tracking-tight ${
-            step >= 2 ? 'text-blue-700' : 'text-zinc-300'
-          }`}>
-            {step >= 2 ? fmtKRWShort(quote.totals.grand_total) : '—'}
-          </span>
-        </div>
-        <div className="text-[11px] text-zinc-500 mt-0.5">
-          {step >= 2
-            ? `평당 약 ${fmtKRWShort(quote.totals.per_pyeong)}`
-            : '공사 범위 선택 후 산정'}
-        </div>
-        <div className="text-[10px] text-zinc-400 mt-2 pt-2 border-t border-zinc-100 leading-relaxed">
-          {step >= 2
-            ? `범위 ${fmtKRWShort(quote.totals.grand_total_low)} ~ ${fmtKRWShort(quote.totals.grand_total_high)}`
-            : '우리집 현황을 먼저 입력해주세요'}
-        </div>
-      </div>
+      )}
 
       {/* === 우리집 현황 — 모든 단계에서 노출. Step 1에서는 열어둠 === */}
       <SidebarSection
@@ -147,25 +145,31 @@ export function WizardSidebar({
         )}
       </SidebarSection>
 
-      {/* === Nav 버튼 (하단) === */}
+      {/* === Nav 버튼 (하단) ===
+          이전 버튼은 onPrev 가 있을 때만 노출(Step 1 엔 없음).
+          다음 버튼은 onNext 가 있으면 항상 노출하되 nextDisabled 로 클릭만 차단
+          → 평형 미입력 상태에서도 비활성 버튼이 보여 다음 단계 존재를 인지시킨다. */}
       {(onPrev || onNext) && (
-        <div className="mt-1 grid grid-cols-[auto_1fr] gap-2">
-          <button
-            type="button"
-            onClick={onPrev}
-            disabled={!onPrev}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
-          >
-            ← {prevLabel || '이전'}
-          </button>
-          <button
-            type="button"
-            onClick={onNext}
-            disabled={!onNext}
-            className="rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {nextLabel || '다음'} →
-          </button>
+        <div className={`mt-1 grid gap-2 ${onPrev ? 'grid-cols-[auto_1fr]' : 'grid-cols-1'}`}>
+          {onPrev && (
+            <button
+              type="button"
+              onClick={onPrev}
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition"
+            >
+              ← {prevLabel || '이전'}
+            </button>
+          )}
+          {onNext && (
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={nextDisabled}
+              className="rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {nextLabel || '다음'} →
+            </button>
+          )}
         </div>
       )}
     </aside>

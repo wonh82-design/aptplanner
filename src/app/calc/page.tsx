@@ -204,7 +204,8 @@ export default function CalcPage() {
               quote={quote}
               gradeLabel={grade.default}
               onJumpToStep={goTo}
-              onNext={pyeongValid ? () => setConfirmStep2Open(true) : undefined}
+              onNext={() => setConfirmStep2Open(true)}
+              nextDisabled={!pyeongValid}
               nextLabel="공종 및 자재"
             />
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
