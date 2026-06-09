@@ -1101,7 +1101,7 @@ function SingleCard({
               className="flex gap-2 overflow-x-auto p-2.5 snap-x snap-mandatory scrollbar-thin"
               style={{ scrollbarWidth: 'thin' }}
             >
-              {sortedMaterials.map(({ material, isPrimary }) => {
+              {sortedMaterials.map(({ material, isPrimary }, cardIdx) => {
                 // 샷시: 자재 단가 대신 평형/베이/등급 룩업 단가를 사용 (window-cost.ts).
                 //  - 각 카드는 그 자재의 grade group 에 해당하는 룩업가를 보여준다.
                 //  - 같은 등급군 안의 여러 자재(예: '표준 추천', '표준')는 모두 같은 룩업가 표시.
@@ -1127,6 +1127,7 @@ function SingleCard({
                       isSelected={effectiveMaterialId === material.material_id}
                       totalQty={work.totalQty}
                       homeTotalOverride={homeTotalOverride}
+                      priority={cardIdx === 0}
                       onSelect={() => onSelectMaterial(material)}
                     />
                   </div>
@@ -1189,7 +1190,7 @@ function ExcludeToggleButton({ isExcluded, onClick }: { isExcluded: boolean; onC
 // =====================================================
 
 const MaterialCard = memo(function MaterialCard({
-  material, isPrimary, isSelected, totalQty, homeTotalOverride, componentLabel, interactive = true, onSelect,
+  material, isPrimary, isSelected, totalQty, homeTotalOverride, componentLabel, interactive = true, priority = false, onSelect,
 }: {
   material: Material;
   isPrimary: boolean;
@@ -1211,6 +1212,8 @@ const MaterialCard = memo(function MaterialCard({
    * 욕실 구성 카드처럼 '보여주기만' 하는 카드에 사용.
    */
   interactive?: boolean;
+  /** LCP 최적화 — 첫 카드 이미지에만 true (priority 로딩) */
+  priority?: boolean;
   onSelect: () => void;
 }) {
   // 색상은 그룹 기준 (가성비/표준/고급/단일등급) — "표준 추천" 도 표준 색
@@ -1277,6 +1280,7 @@ const MaterialCard = memo(function MaterialCard({
         url={imageUrl}
         alt={`${material.brand ?? ''} ${material.product_line ?? ''}`.trim()}
         isDummy={useDummy && !realUrl}
+        priority={priority}
       />
 
       {/* 본문 — brand/product_line + 제조사 링크 + spec + 가격 */}
@@ -1323,7 +1327,7 @@ const MaterialCard = memo(function MaterialCard({
   );
 });
 
-function MaterialCardImage({ url, alt, isDummy = false }: { url: string | null; alt: string; isDummy?: boolean }) {
+function MaterialCardImage({ url, alt, isDummy = false, priority = false }: { url: string | null; alt: string; isDummy?: boolean; priority?: boolean }) {
   const [errored, setErrored] = useState(false);
 
   if (!url || errored) {
@@ -1349,7 +1353,8 @@ function MaterialCardImage({ url, alt, isDummy = false }: { url: string | null; 
         className="object-cover group-hover:scale-105 transition-transform duration-300"
         // Drive 등 외부 origin: referrer 차단으로 hotlink 회피
         referrerPolicy="no-referrer"
-        // 카드는 페이지에 동시에 여러 개 — 기본 lazy 그대로
+        // 첫 카드(LCP 후보)만 priority — 나머지는 기본 lazy 유지
+        priority={priority}
         unoptimized={url.includes('drive.google.com')}
       />
       {isDummy && (
