@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Material, PyeongBandKey, PyeongBandPrice } from '@/lib/types';
-import { PYEONG_BANDS } from '@/lib/types';
+import type { Material, GradeGroup, PyeongBandKey, PyeongBandPrice } from '@/lib/types';
+import { PYEONG_BANDS, gradeGroupOf } from '@/lib/types';
+
+const VALID_GRADE_GROUPS = new Set(['가성비', '표준', '고급', '단일등급']);
 import { isValidAdminToken, unauthorized } from '@/lib/admin-auth';
 import { isDbConfigured, getMaterials, saveMaterialsToDb } from '@/lib/db';
 
@@ -106,6 +108,19 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       bandPrices = out;
     }
 
+    // 추가 적용 등급(grade_groups) 정규화 — 유효 GradeGroup, 중복 제거, 홈 그룹 제외, 빈 배열이면 생략
+    let gradeGroups: GradeGroup[] | undefined;
+    if (Array.isArray(m.grade_groups)) {
+      const home = gradeGroupOf((VALID_GRADES.has(grade) ? grade : '표준') as Material['primary_grade']);
+      const seen = new Set<string>();
+      const arr: GradeGroup[] = [];
+      for (const raw of m.grade_groups) {
+        const s = String(raw).trim();
+        if (VALID_GRADE_GROUPS.has(s) && s !== home && !seen.has(s)) { seen.add(s); arr.push(s as GradeGroup); }
+      }
+      if (arr.length) gradeGroups = arr;
+    }
+
     const cleaned_row: Material = {
       material_id: id,
       // sub_category 는 세부공종 (시스템 내부 ID, 구 work_type)
@@ -119,6 +134,7 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       labor_price: Number.isFinite(labPrice) ? labPrice : 0,
       total_unit_price: Number.isFinite(total) ? total : 0,
       primary_grade: VALID_GRADES.has(grade) ? grade as Material['primary_grade'] : '표준',
+      ...(gradeGroups ? { grade_groups: gradeGroups } : {}),
       ...(bandPrices ? { pyeong_band_prices: bandPrices } : {}),
       ...(imageUrl ? { image_url: imageUrl } : {}),
       ...(vendorUrl ? { vendor_url: vendorUrl } : {}),

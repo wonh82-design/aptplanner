@@ -523,7 +523,14 @@ function MaterialsList() {
                         {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
                       </select>
                     ) : (
-                      <GradeBadge grade={m.primary_grade} />
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <GradeBadge grade={m.primary_grade} />
+                        {m.grade_groups && m.grade_groups.length > 0 && (
+                          <span className="text-[9px] text-blue-700 font-semibold whitespace-nowrap" title="추가 적용 등급">
+                            +{m.grade_groups.join('·')}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </td>
                   <td className="px-3 py-2 min-w-0">

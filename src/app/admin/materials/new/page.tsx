@@ -15,8 +15,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { Grade, Material, PyeongBandKey, PyeongBandPrice } from '@/lib/types';
-import { PYEONG_BANDS } from '@/lib/types';
+import type { Grade, GradeGroup, Material, PyeongBandKey, PyeongBandPrice } from '@/lib/types';
+import { PYEONG_BANDS, gradeGroupOf } from '@/lib/types';
+
+/** 추가 적용 등급 후보 (주등급 외에 함께 적용 가능한 그룹) */
+const EXTRA_GRADE_GROUPS: GradeGroup[] = ['가성비', '표준', '고급'];
 import { normalizeImageUrl } from '@/lib/image-utils';
 import { AdminGate } from '../../AdminGate';
 import { useAdminToken } from '../../useAdminToken';
@@ -113,6 +116,30 @@ function NewMaterialForm() {
         next.total_unit_price = (Number(next.material_price) || 0) + (Number(next.labor_price) || 0);
       }
       return next;
+    });
+    setSaveResult(null);
+  };
+
+  /** 주등급 변경 — 새 홈 그룹과 겹치는 추가등급은 정리 */
+  const setPrimaryGrade = (g: Grade) => {
+    setDraft((prev) => {
+      const home = gradeGroupOf(g);
+      const cleaned = (prev.grade_groups ?? []).filter((x) => x !== home);
+      return { ...prev, primary_grade: g, grade_groups: cleaned.length ? cleaned : undefined };
+    });
+    setSaveResult(null);
+  };
+
+  /** 추가 적용 등급 토글 (홈 그룹은 토글 불가·암묵 포함이라 저장 제외) */
+  const toggleGradeGroup = (g: GradeGroup) => {
+    setDraft((prev) => {
+      const home = gradeGroupOf(prev.primary_grade as Grade);
+      if (g === home) return prev;
+      const set = new Set(prev.grade_groups ?? []);
+      if (set.has(g)) set.delete(g); else set.add(g);
+      set.delete(home);
+      const arr = Array.from(set);
+      return { ...prev, grade_groups: arr.length ? arr : undefined };
     });
     setSaveResult(null);
   };
@@ -303,10 +330,34 @@ function NewMaterialForm() {
 
         {/* 자재 정보 — 등급을 브랜드 왼쪽에 배치 */}
         <FieldGroup title="자재 정보">
-          <Field label="등급">
-            <select value={draft.primary_grade} onChange={(e) => updateField('primary_grade', e.target.value as Grade)} className="input">
+          <Field label="등급 (주등급)">
+            <select value={draft.primary_grade} onChange={(e) => setPrimaryGrade(e.target.value as Grade)} className="input">
               {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
+          </Field>
+          <Field label="함께 적용할 등급 (복수 선택)">
+            <div className="flex flex-wrap gap-1.5 pt-1.5">
+              {EXTRA_GRADE_GROUPS.map((g) => {
+                const home = gradeGroupOf(draft.primary_grade as Grade);
+                const isHome = g === home;
+                const checked = isHome || (draft.grade_groups?.includes(g) ?? false);
+                return (
+                  <label
+                    key={g}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-xs transition ${
+                      checked ? 'border-blue-400 bg-blue-50 text-blue-800 font-semibold' : 'border-zinc-300 bg-white text-zinc-600'
+                    } ${isHome ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-blue-300'}`}
+                    title={isHome ? '주등급 — 항상 적용' : '이 등급에도 함께 적용'}
+                  >
+                    <input
+                      type="checkbox" checked={checked} disabled={isHome}
+                      onChange={() => toggleGradeGroup(g)} className="accent-blue-600"
+                    />
+                    {g}{isHome && ' (주)'}
+                  </label>
+                );
+              })}
+            </div>
           </Field>
           <Field label="브랜드">
             <input value={draft.brand ?? ''} onChange={(e) => updateField('brand', e.target.value || null)} className="input" />

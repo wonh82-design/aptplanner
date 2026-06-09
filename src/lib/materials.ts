@@ -15,7 +15,7 @@
  */
 import data from '@/data/materials.json';
 import type { Grade, GradeGroup, Material } from './types';
-import { gradeGroupOf, isRecommendedGrade } from './types';
+import { gradeGroupOf, isRecommendedGrade, materialGradeGroups } from './types';
 
 /**
  * ALL_MATERIALS — in-place mutable 배열. setMaterials() 호출 시 splice 로 내용 교체.
@@ -31,11 +31,13 @@ function rebuildIndexes() {
   for (const m of ALL_MATERIALS) {
     // 그룹 단위로 인덱싱 — 사용자는 GradeGroup(4가지) 단위로 선택하기 때문.
     // "가성비 추천" + "가성비" 둘 다 key="flooring|가성비" 로 들어감.
-    const group = gradeGroupOf(m.primary_grade as Grade);
-    const k = `${m.sub_category}|${group}`;
-    const arr = byKey.get(k) || [];
-    arr.push(m);
-    byKey.set(k, arr);
+    // 다중 등급 적용: 자재가 커버하는 모든 그룹(홈 + grade_groups)에 인덱싱.
+    for (const group of materialGradeGroups(m)) {
+      const k = `${m.sub_category}|${group}`;
+      const arr = byKey.get(k) || [];
+      arr.push(m);
+      byKey.set(k, arr);
+    }
     byId.set(m.material_id, m);
   }
 }
@@ -73,7 +75,10 @@ export function getPrimaryMaterial(workType: string, group: GradeGroup): Materia
   // 1+2. 해당 그룹 candidates
   const direct = byKey.get(`${workType}|${group}`) ?? [];
   if (direct.length > 0) {
-    const recommended = direct.find((m) => isRecommendedGrade(m.primary_grade as Grade));
+    // '추천'은 그 자재의 홈 그룹에서만 유효 — 추가 그룹(grade_groups)에선 일반 멤버로 취급.
+    const recommended = direct.find(
+      (m) => isRecommendedGrade(m.primary_grade as Grade) && gradeGroupOf(m.primary_grade as Grade) === group,
+    );
     return recommended || direct[0];
   }
   // 3. 단일등급 폴백
@@ -88,7 +93,7 @@ export function getPrimaryMaterial(workType: string, group: GradeGroup): Materia
 export function gradeOptionsFor(workType: string): GradeGroup[] {
   const set = new Set<GradeGroup>();
   for (const m of ALL_MATERIALS) {
-    if (m.sub_category === workType) set.add(gradeGroupOf(m.primary_grade as Grade));
+    if (m.sub_category === workType) for (const g of materialGradeGroups(m)) set.add(g);
   }
   return Array.from(set);
 }

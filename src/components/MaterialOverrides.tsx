@@ -3,7 +3,7 @@
 import { memo, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope, BathType } from '@/lib/types';
-import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR } from '@/lib/types';
+import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR, materialServesGroup, materialGradeGroups } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
 import { fmtKRWShort, fmtKRWShortVat, pyeongBandTotal } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength, airconInstallRooms } from '@/lib/areas';
@@ -1258,6 +1258,11 @@ const MaterialCard = memo(function MaterialCard({
       }`}>
         {isRecommended && <span className={`text-[10px] ${meta.color}`}>★</span>}
         <span className={`text-[10px] font-bold ${meta.color}`}>{material.primary_grade}</span>
+        {material.grade_groups && material.grade_groups.length > 0 && (
+          <span className="text-[9px] font-medium text-zinc-500 whitespace-nowrap" title="이 자재가 함께 적용되는 등급">
+            +{material.grade_groups.join('·')}
+          </span>
+        )}
         {isSelected && (
           <span className="ml-auto flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white">
             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden>
@@ -1466,7 +1471,7 @@ function BundleCard({
     const aboveFloor = GRADES.filter((g) => gradeRank(g) >= floorRank);
     const present = aboveFloor.filter((g) =>
       works.some((w) =>
-        materialsFor(w.wt).some((m) => gradeGroupOf(m.primary_grade as Grade) === g),
+        materialsFor(w.wt).some((m) => materialServesGroup(m, g)),
       ),
     );
     return present.length > 0 ? present : aboveFloor;
@@ -1805,7 +1810,7 @@ function BathCard({
   // 실제 자재 있는 등급만 행 표시
   const availableGrades = useMemo(() => {
     const present = GRADES.filter((g) =>
-      works.some((w) => materialsFor(w.wt).some((m) => gradeGroupOf(m.primary_grade as Grade) === g)),
+      works.some((w) => materialsFor(w.wt).some((m) => materialServesGroup(m, g))),
     );
     return present.length > 0 ? present : GRADES;
   }, [works]);
@@ -2109,7 +2114,7 @@ function ComponentRow({
    */
   const allMats = materialsFor(work.wt);
   const hasGradeVariations = allMats.some(
-    (m) => gradeGroupOf(m.primary_grade as Grade) !== '단일등급',
+    (m) => materialGradeGroups(m).some((g) => g !== '단일등급'),
   );
 
   return (

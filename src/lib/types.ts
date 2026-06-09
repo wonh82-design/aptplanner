@@ -39,6 +39,27 @@ export function isRecommendedGrade(g: Grade): boolean {
 }
 
 /**
+ * 한 자재가 실제로 커버하는 등급 그룹들.
+ * = 홈 그룹(gradeGroupOf(primary_grade)) + 추가 그룹(grade_groups), 중복 제거.
+ * 한 자재를 여러 등급에 복수 적용하기 위한 단일 진실 — 인덱싱·카드 그룹핑·등급옵션이 공유.
+ */
+export function materialGradeGroups(
+  m: { primary_grade: Grade | string; grade_groups?: GradeGroup[] },
+): GradeGroup[] {
+  const set = new Set<GradeGroup>([gradeGroupOf(m.primary_grade as Grade)]);
+  if (m.grade_groups) for (const g of m.grade_groups) set.add(g);
+  return Array.from(set);
+}
+
+/** 자재가 해당 등급 그룹을 커버하는가 (홈 또는 추가 그룹). */
+export function materialServesGroup(
+  m: { primary_grade: Grade | string; grade_groups?: GradeGroup[] },
+  g: GradeGroup,
+): boolean {
+  return materialGradeGroups(m).includes(g);
+}
+
+/**
  * 공종별 '최소 등급 floor' — 일괄/기본 등급이 이 값보다 낮으면 이 값으로 올림.
  *  · 시스템 에어컨(aircon/aircon_outdoor): 가성비 라인업 미운영 → 최소 표준.
  *    → 일괄 등급 '가성비' 선택 시에도 에어컨은 '표준' 으로 적용·표시되며,
@@ -145,6 +166,12 @@ export type Material = {
    */
   pyeong_band_prices?: Partial<Record<PyeongBandKey, PyeongBandPrice>>;
   primary_grade: Grade;
+  /**
+   * 추가 적용 등급 그룹 (옵셔널). primary_grade 의 홈 그룹 외에 이 자재가 함께 커버할 등급들.
+   * 예: primary_grade='표준', grade_groups=['가성비'] → 가성비·표준 둘 다 이 자재.
+   * 없으면 홈 그룹만 커버(기존 동작). 헬퍼: materialGradeGroups / materialServesGroup.
+   */
+  grade_groups?: GradeGroup[];
   /**
    * 자재 이미지 URL (옵셔널).
    * - 구글 드라이브 공유 링크 (https://drive.google.com/file/d/{ID}/view) 그대로 넣어도 됨
