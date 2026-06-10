@@ -15,7 +15,7 @@
  */
 import data from '@/data/materials.json';
 import type { Grade, GradeGroup, Material } from './types';
-import { gradeGroupOf, isRecommendedGrade, materialGradeGroups } from './types';
+import { gradeGroupOf, isRecommendedGrade, materialGradeGroups, kitchenRepSlotOf, kitchenRepImageKey } from './types';
 
 /**
  * ALL_MATERIALS — in-place mutable 배열. setMaterials() 호출 시 splice 로 내용 교체.
@@ -57,6 +57,22 @@ export function setMaterials(materials: Material[]): void {
 /** 현재 메모리상 자재 전체 (편의 함수). */
 export function getAllMaterials(): Material[] {
   return ALL_MATERIALS;
+}
+
+/**
+ * 주방 풀세트 대표 이미지 — 우리집 평형·베이·선택등급에 맞는 이미지 URL (없으면 null).
+ * sub_category==='kitchen_set' 인 이미지 홀더 자재에서 `${slot}|${grade}` 키로 조회.
+ * 런타임 갱신(/api/materials) 반영 — ALL_MATERIALS 를 직접 순회.
+ */
+export function getKitchenRepImage(pyeong: number, bay: number, grade: GradeGroup): string | null {
+  const key = kitchenRepImageKey(kitchenRepSlotOf(pyeong, bay), grade);
+  for (const m of ALL_MATERIALS) {
+    if (m.sub_category === 'kitchen_set' && m.kitchen_rep_images) {
+      const url = m.kitchen_rep_images[key];
+      if (typeof url === 'string' && url.trim()) return url.trim();
+    }
+  }
+  return null;
 }
 
 export function getMaterialById(id: string): Material | undefined {

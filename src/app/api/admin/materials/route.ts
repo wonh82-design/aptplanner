@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Material, GradeGroup, PyeongBandKey, PyeongBandPrice } from '@/lib/types';
-import { PYEONG_BANDS, gradeGroupOf } from '@/lib/types';
+import { PYEONG_BANDS, gradeGroupOf, KITCHEN_REP_SLOTS } from '@/lib/types';
 
 const VALID_GRADE_GROUPS = new Set(['가성비', '표준', '고급', '단일등급']);
 import { isValidAdminToken, unauthorized } from '@/lib/admin-auth';
@@ -121,6 +121,22 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       if (arr.length) gradeGroups = arr;
     }
 
+    // 주방 대표 이미지(kitchen_rep_images) 정규화 — 유효 슬롯×등급 키 + 비어있지 않은 string URL 만 보존.
+    // (게이트키퍼가 알려진 필드만 남기므로 신규 필드는 여기서 명시 보존해야 DB 왕복에서 유지됨)
+    let kitchenImages: Record<string, string> | undefined;
+    if (m.kitchen_rep_images && typeof m.kitchen_rep_images === 'object') {
+      const src = m.kitchen_rep_images as Record<string, unknown>;
+      const out: Record<string, string> = {};
+      for (const slot of KITCHEN_REP_SLOTS) {
+        for (const g of ['가성비', '표준', '고급']) {
+          const k = `${slot.key}|${g}`;
+          const v = src[k];
+          if (typeof v === 'string' && v.trim()) out[k] = v.trim();
+        }
+      }
+      if (Object.keys(out).length) kitchenImages = out;
+    }
+
     const cleaned_row: Material = {
       material_id: id,
       // sub_category 는 세부공종 (시스템 내부 ID, 구 work_type)
@@ -138,6 +154,7 @@ function validateMaterials(arr: unknown): { ok: true; data: Material[] } | { ok:
       ...(bandPrices ? { pyeong_band_prices: bandPrices } : {}),
       ...(imageUrl ? { image_url: imageUrl } : {}),
       ...(vendorUrl ? { vendor_url: vendorUrl } : {}),
+      ...(kitchenImages ? { kitchen_rep_images: kitchenImages } : {}),
     };
     cleaned.push(cleaned_row);
   });

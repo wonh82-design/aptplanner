@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 /**
  * 관리자 페이지용 이미지 업로드 필드.
@@ -26,6 +26,7 @@ type Props = {
 
 export function ImageUploadField({ value, onChange, materialId, token, onUnauthorized }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId(); // 인스턴스마다 고유 — 한 화면에 여러 업로드 필드(예: 주방 18칸)가 공존해도 라벨↔input 1:1
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -127,10 +128,10 @@ export function ImageUploadField({ value, onChange, materialId, token, onUnautho
           onChange={handleFileSelect}
           disabled={uploading}
           className="hidden"
-          id="image-upload-input"
+          id={inputId}
         />
         <label
-          htmlFor="image-upload-input"
+          htmlFor={inputId}
           className={`inline-block px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition ${
             uploading
               ? 'bg-zinc-200 text-zinc-500 cursor-wait'

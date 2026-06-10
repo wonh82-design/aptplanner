@@ -4,7 +4,7 @@ import { memo, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope, BathType, DemolitionScope } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR, materialServesGroup, materialGradeGroups } from '@/lib/types';
-import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
+import { getPrimaryMaterial, labelOf, materialsFor, getKitchenRepImage } from '@/lib/materials';
 import { fmtKRWShort, fmtKRWShortVat, pyeongBandTotal, demolitionMultiplier, WALLPAPER_PUTTY_RATE } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength, airconInstallRooms } from '@/lib/areas';
 import { lookupWindowCost } from '@/lib/window-cost';
@@ -836,10 +836,9 @@ export function MaterialOverrides({
                         : 'border-zinc-200 bg-white hover:border-blue-400 hover:bg-blue-50/30'
                     }`}
                   >
-                    <span className="w-full flex items-center gap-1 text-xs font-semibold text-zinc-900">
-                      <span aria-hidden>{preset.icon}</span>
-                      <span>{preset.label}</span>
-                      {isApplied && <span className="ml-auto text-emerald-600 text-[11px] font-bold" aria-hidden>✓</span>}
+                    <span className="w-full flex items-center gap-1">
+                      <span className={`text-sm font-bold ${isApplied ? 'text-emerald-700' : 'text-zinc-700'}`}>{preset.label}</span>
+                      {isApplied && <span className="ml-auto text-emerald-600 text-xs font-bold" aria-hidden>✓</span>}
                     </span>
                     <span className="text-[10px] text-zinc-500 leading-tight">{preset.desc}</span>
                   </button>
@@ -957,6 +956,9 @@ export function MaterialOverrides({
               totalSub={item.sub}
               gradeSelection={value}
               effectiveGrade={effectiveGrade}
+              kitchenRepImageFor={item.bundle.id === 'kitchen'
+                ? (g: GradeGroup) => getKitchenRepImage(quote.property.pyeong, quote.property.bay, g)
+                : undefined}
               onSelectBundleGrade={(g) => setBundleGrade(item.bundle, g)}
               onSelectComponentGrade={(wt, g) => setGrade(wt, g)}
               onClearBundle={() => clearBundleOverride(item.bundle)}
@@ -1537,7 +1539,7 @@ function bundleMaterialSummary(works: WorkInfo[], grade: GradeGroup): string {
 
 function BundleCard({
   bundle, works, totalSub, gradeSelection, effectiveGrade, isExcluded = false, bathCount,
-  airconCount, airconRoomsLabel,
+  airconCount, airconRoomsLabel, kitchenRepImageFor,
   onSelectBundleGrade, onSelectComponentGrade, onClearBundle,
   onShowDetail, onExclude, onRestoreBundle,
   scope, onScopeChange,
@@ -1556,6 +1558,8 @@ function BundleCard({
   airconCount?: number;
   /** 시스템에어컨 설치 공간 라벨 (예: '거실·안방·작은방1·작은방2') */
   airconRoomsLabel?: string;
+  /** 주방 풀세트(bundle.id='kitchen') 전용 — 선택 등급의 평형·베이 매칭 대표 이미지 URL 조회 (없으면 null) */
+  kitchenRepImageFor?: (grade: GradeGroup) => string | null;
   onSelectBundleGrade: (g: GradeGroup) => void;
   onSelectComponentGrade: (wt: string, g: GradeGroup) => void;
   onClearBundle: () => void;
@@ -1829,6 +1833,32 @@ function BundleCard({
         })}
       </div>
       )}
+
+      {/* 주방 풀세트 — 선택 등급의 평형·베이별 대표 이미지 (관리자가 kitchen_set 에 업로드).
+          해당 평형·베이·등급 이미지가 없으면 영역 자체를 표시하지 않는다. */}
+      {bundle.id === 'kitchen' && !isExcluded && kitchenRepImageFor && bundleGrade !== 'mixed' && (() => {
+        const raw = kitchenRepImageFor(bundleGrade as GradeGroup);
+        const url = raw ? normalizeImageUrl(raw, 800) : null;
+        if (!url) return null;
+        return (
+          <div className="bg-zinc-50/40 px-3 py-3 border-t-2 border-zinc-200">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2">
+              {bundleGrade} 등급 주방 예시 — 우리집 평형·베이 기준
+            </div>
+            <div className="relative aspect-[16/10] w-full bg-zinc-100 rounded-lg border border-zinc-200 overflow-hidden">
+              <Image
+                src={url}
+                alt={`${bundleGrade} 등급 주방 대표 이미지`}
+                fill
+                sizes="(max-width: 640px) 100vw, 640px"
+                className="object-cover"
+                referrerPolicy="no-referrer"
+                unoptimized={url.includes('drive.google.com')}
+              />
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 욕실 풀세트 — 선택 등급의 구성 컴포넌트를 카드로 표시 (타일 시공팀 제외).
           항상 노출되며, 등급 행을 누르면 해당 등급 자재로 카드가 갱신된다.

@@ -13,7 +13,6 @@ import { activeRooms } from './areas';
 
 type Preset = {
   id: string;
-  icon: string;
   label: string;
   desc: string;
   /**
@@ -140,7 +139,6 @@ function fullRenovateGlobal(current: Scope): Scope['global'] {
 export const PRESETS: Preset[] = [
   {
     id: 'finish-only',
-    icon: '🎨',
     label: '철거 최소화 + 마감재만 교체',
     desc: '철거·전기·설비·조명·목공 기본 포함, 도배·마루·주방·욕실 새로',
     // 철거 최소화 = 부분철거(마감재 위주, 기준의 85%)
@@ -190,7 +188,6 @@ export const PRESETS: Preset[] = [
   },
   {
     id: 'full-only',
-    icon: '🧰',
     label: '전체 철거 + 올수리',
     desc: '샷시 없이 내부만 새로',
     // 전체 철거 + 올수리 = 기본철거(욕실·문틀 포함, 기준)
@@ -204,7 +201,6 @@ export const PRESETS: Preset[] = [
   },
   {
     id: 'full-sash',
-    icon: '🪟',
     label: '전체 철거 + 샷시 + 올수리',
     desc: '내부 전체 새로 + 외창 교체',
     // 전체 철거 + 샷시 = 올철거(샷시까지 완전철거, 기준의 120%)

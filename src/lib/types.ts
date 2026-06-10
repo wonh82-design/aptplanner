@@ -146,6 +146,30 @@ export function pyeongBandOf(pyeong: number): PyeongBandKey {
   return '50';
 }
 
+/**
+ * 주방 풀세트 대표 이미지 구간(슬롯) — 평형대×베이 6분할.
+ * 20/30평대는 베이(2/3)로 분기, 40/50평대는 베이 무관. 4·5베이는 3베이 슬롯 공용.
+ * (관리자 업로드 그리드의 행 정의이자 우리집 매칭 슬롯)
+ */
+export const KITCHEN_REP_SLOTS: { key: string; label: string }[] = [
+  { key: '20-2', label: '20평대 · 2베이' },
+  { key: '20-3', label: '20평대 · 3베이' },
+  { key: '30-2', label: '30평대 · 2베이' },
+  { key: '30-3', label: '30평대 · 3베이' },
+  { key: '40', label: '40평대' },
+  { key: '50', label: '50평대 이상' },
+];
+/** 공급평형·베이 → 주방 대표 이미지 슬롯 키 (<30→20, <40→30, <50→40, ≥50→50; 20/30평대만 bay≥3→'3' / else '2') */
+export function kitchenRepSlotOf(pyeong: number, bay: number): string {
+  const band = pyeong < 30 ? '20' : pyeong < 40 ? '30' : pyeong < 50 ? '40' : '50';
+  if (band === '20' || band === '30') return `${band}-${bay >= 3 ? '3' : '2'}`;
+  return band;
+}
+/** (슬롯, 등급) → kitchen_rep_images 맵 키 */
+export function kitchenRepImageKey(slot: string, grade: GradeGroup): string {
+  return `${slot}|${grade}`;
+}
+
 /** 자재마스터 1행 */
 export type Material = {
   material_id: string;
@@ -195,6 +219,12 @@ export type Material = {
    * 비어 있으면 버튼이 노출되지 않음.
    */
   vendor_url?: string | null;
+  /**
+   * 주방 풀세트 대표 이미지 (sub_category==='kitchen_set' 전용 — 이미지 홀더, 공사비 무관).
+   * 키 = `${slot}|${grade}` (slot ∈ KITCHEN_REP_SLOTS: 20-2/20-3/30-2/30-3/40/50, grade ∈ 가성비/표준/고급).
+   * 값 = 이미지 URL. 견적의 주방 카드가 우리집 평형·베이·선택등급에 맞는 이미지를 표시한다.
+   */
+  kitchen_rep_images?: Record<string, string>;
 };
 
 /** 평형별 표준면적 (3베이 기준) */

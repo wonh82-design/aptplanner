@@ -24,6 +24,7 @@ import { normalizeImageUrl } from '@/lib/image-utils';
 import { AdminGate } from '../../AdminGate';
 import { useAdminToken } from '../../useAdminToken';
 import { ImageUploadField } from '../../ImageUploadField';
+import { KitchenRepImageGrid } from '../../KitchenRepImageGrid';
 
 const GRADES: Grade[] = [
   '가성비 추천', '가성비',
@@ -178,6 +179,17 @@ function NewMaterialForm() {
       nextBand.total_unit_price = (Number(nextBand.material_price) || 0) + (Number(nextBand.labor_price) || 0);
       bands[key] = nextBand;
       return { ...prev, pyeong_band_prices: bands };
+    });
+    setSaveResult(null);
+  };
+
+  /** 주방 대표 이미지 한 칸 변경 (`${slot}|${grade}` → URL). url 이 비면 키 제거. */
+  const updateKitchenImage = (key: string, url: string | null) => {
+    setDraft((prev) => {
+      const imgs = { ...(prev.kitchen_rep_images ?? {}) };
+      if (url && url.trim()) imgs[key] = url.trim();
+      else delete imgs[key];
+      return { ...prev, kitchen_rep_images: Object.keys(imgs).length ? imgs : undefined };
     });
     setSaveResult(null);
   };
@@ -510,6 +522,18 @@ function NewMaterialForm() {
             </p>
           </div>
         </FieldGroup>
+
+        {draft.sub_category === 'kitchen_set' && (
+          <FieldGroup title="주방 풀세트 대표 이미지 (평형대·베이·등급별)">
+            <KitchenRepImageGrid
+              images={draft.kitchen_rep_images ?? {}}
+              onChange={updateKitchenImage}
+              materialId={draft.material_id}
+              token={token}
+              onUnauthorized={() => setToken(null)}
+            />
+          </FieldGroup>
+        )}
       </div>
     </div>
   );
