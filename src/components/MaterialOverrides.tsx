@@ -1097,6 +1097,17 @@ function SingleCard({
     onGradeRadio(isExcluded ? curGrade : 'excluded');
   };
 
+  // 철거(base_work) 전용 — 범위(부분/기본/올)별 실제 공사비.
+  // work.sub = 계산기가 산출한 '현재 선택 범위'의 공사비(VAT 제외)이므로,
+  // 현재 배수로 나눠 기준액을 역산한 뒤 각 범위 배수를 곱한다.
+  // → 현재 선택 범위 카드는 헤더의 '현재 공사비'와 정확히 일치한다.
+  const demoCostFor = (key: DemolitionScope): number => {
+    if (!demolitionScope) return 0;
+    const curMult = demolitionMultiplier(demolitionScope.value);
+    const base = curMult > 0 ? work.sub / curMult : work.sub;
+    return Math.round(base * demolitionMultiplier(key));
+  };
+
   return (
     <div className={`rounded-lg border ${isExcluded ? 'border-zinc-200 bg-zinc-50/30' : hasOverride ? 'border-blue-300' : 'border-zinc-200'}`}>
       {/* 헤더 — 공종명 [자세히] [제외/다시 추가]      현재 공사비 (강조) */}
@@ -1143,29 +1154,34 @@ function SingleCard({
         </div>
       </div>
 
-      {/* 철거 범위 선택기 (base_work 전용) — 가성비/표준/고급 대신 부분/기본/올철거 */}
+      {/* 철거 범위 선택기 (base_work 전용) — 가성비/표준/고급 대신 부분/기본/올철거.
+          각 범위 카드에 해당 범위의 실제 우리집 철거 공사비(부가세 포함)를 직접 표시.
+          단일등급 자재 카드는 노출하지 않는다(아래 캐러셀을 demolitionScope 일 때 숨김). */}
       {demolitionScope && !isExcluded && (
-        <div className="px-3 pt-3">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-zinc-500 mb-1.5">철거 범위</div>
+        <div className="px-3 pt-3 pb-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-zinc-500 mb-1.5">철거 범위 · 부가세 포함</div>
           <div className="grid grid-cols-3 gap-1.5">
             {([
-              { key: 'partial', label: '부분철거', desc: '마감재 위주', cost: '기본의 85%' },
-              { key: 'basic', label: '기본철거', desc: '욕실·문틀 포함', cost: '기준' },
-              { key: 'full', label: '올철거', desc: '샷시까지', cost: '기본의 120%' },
-            ] as { key: DemolitionScope; label: string; desc: string; cost: string }[]).map((o) => {
+              { key: 'partial', label: '부분철거', desc: '마감재 위주', ratio: '기준의 85%' },
+              { key: 'basic', label: '기본철거', desc: '욕실·문틀 포함', ratio: '기준' },
+              { key: 'full', label: '올철거', desc: '샷시까지', ratio: '기준의 120%' },
+            ] as { key: DemolitionScope; label: string; desc: string; ratio: string }[]).map((o) => {
               const sel = demolitionScope.value === o.key;
               return (
                 <button
                   key={o.key}
                   type="button"
                   onClick={() => demolitionScope.onChange(o.key)}
-                  className={`px-2 py-1.5 rounded-lg border-2 text-left transition active:scale-[0.98] ${
+                  className={`px-2 py-2 rounded-lg border-2 text-left transition active:scale-[0.98] ${
                     sel ? 'border-blue-400 bg-blue-50' : 'border-zinc-200 bg-white hover:border-zinc-300'
                   }`}
                 >
                   <div className={`text-xs font-bold ${sel ? 'text-blue-800' : 'text-zinc-700'}`}>{o.label}</div>
                   <div className="text-[9px] text-zinc-500 leading-tight mt-0.5">{o.desc}</div>
-                  <div className={`text-[9px] mt-0.5 ${sel ? 'text-blue-600 font-semibold' : 'text-zinc-400'}`}>{o.cost}</div>
+                  <div className={`text-[13px] font-bold tabular-nums mt-1.5 ${sel ? 'text-blue-700' : 'text-zinc-800'}`}>
+                    {fmtKRWShortVat(demoCostFor(o.key))}
+                  </div>
+                  <div className={`text-[9px] mt-0.5 ${sel ? 'text-blue-600 font-semibold' : 'text-zinc-400'}`}>{o.ratio}</div>
                 </button>
               );
             })}
@@ -1173,8 +1189,8 @@ function SingleCard({
         </div>
       )}
 
-      {/* 자재 카드 — 제외 상태면 영역 자체를 숨김 */}
-      {!isExcluded && (
+      {/* 자재 카드 — 제외 상태이거나 철거(범위 카드로 대체)면 영역 자체를 숨김 */}
+      {!isExcluded && !demolitionScope && (
         sortedMaterials.length === 0 ? (
           <div className="px-3 py-6 text-center text-xs text-zinc-400 italic">
             등록된 자재가 없습니다
@@ -1190,6 +1206,8 @@ function SingleCard({
                 //  - 각 카드는 그 자재의 grade group 에 해당하는 룩업가를 보여준다.
                 //  - 같은 등급군 안의 여러 자재(예: '표준 추천', '표준')는 모두 같은 룩업가 표시.
                 // 평형별 고정가: top-level 단가가 0이라 우리집 평형대 합계를 직접 주입.
+                // 철거(base_work)는 위 범위 카드로 대체되어 이 캐러셀이 렌더되지 않으므로
+                // 여기서 demolitionScope 배수 분기는 불필요(범위별 공사비는 demoCostFor 가 담당).
                 const homeTotalOverride =
                   material.sub_category === 'window'
                     ? lookupWindowCost(
@@ -1199,8 +1217,6 @@ function SingleCard({
                       )
                     : material.unit_type === 'per_pyeong_band'
                     ? pyeongBandTotal(material, property.pyeong)
-                    : demolitionScope
-                    ? Math.round(work.totalQty * material.total_unit_price * demolitionMultiplier(demolitionScope.value))
                     : undefined;
                 return (
                   <div
