@@ -107,9 +107,13 @@ export function switchOutletCount(pyeong: number): number {
   return Math.round(interp(table as never, pyeong));
 }
 
-/** 평형별 다운라이트 권장 개수 — 10평 4ea / 24평 10ea / 30평 14ea / 60평 28ea */
+/**
+ * 평형별 다운라이트 권장 개수 — 소형 ~×3 → 중형 ~×2.5 → 대형 ~×2 증배를 앵커 값에 내장.
+ * 앵커: 10평 12 / 30평 42 / 44평 52 / 60평+ 56 (interp 선형 보간 + 반올림 → 단조 증가 보장).
+ * (밴드별 배수를 곱하면 경계에서 개수가 거꾸로 줄어드는 비단조 문제가 생겨, 테이블에 직접 반영함)
+ */
 export function downlightCount(pyeong: number): number {
-  const table: Record<number, number> = { 10: 4, 30: 14, 60: 28 };
+  const table: Record<number, number> = { 10: 12, 30: 42, 44: 52, 60: 56 };
   return Math.round(interp(table as never, pyeong));
 }
 
