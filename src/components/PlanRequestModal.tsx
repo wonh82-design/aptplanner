@@ -10,9 +10,7 @@
  */
 
 import { useState } from 'react';
-import { PAYMENT_ACCOUNT, PAYMENT_ACCOUNT_READY } from '@/lib/payment';
 
-const EMPTY = '—';
 const PRICE = '5,900원';
 const ORIGINAL_PRICE = '19,800원'; // 정가 — 출시 기념 70% 할인 전
 
@@ -27,7 +25,6 @@ export function PlanRequestModal({ onClose, onSubmit }: Props) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle');
   const [errMsg, setErrMsg] = useState('');
-  const [copied, setCopied] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,14 +42,6 @@ export function PlanRequestModal({ onClose, onSubmit }: Props) {
         : '신청 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.'
       );
     }
-  };
-
-  const copyAccount = async () => {
-    try {
-      await navigator.clipboard.writeText(`${PAYMENT_ACCOUNT.bank} ${PAYMENT_ACCOUNT.number}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* ignore */ }
   };
 
   return (
@@ -147,34 +136,19 @@ export function PlanRequestModal({ onClose, onSubmit }: Props) {
               <div className="rounded-lg bg-zinc-50 border border-zinc-200 p-3 text-xs text-zinc-700 leading-relaxed">
                 <strong className="text-zinc-900">진행 순서</strong>
                 <ol className="mt-1.5 space-y-1 list-decimal list-inside">
-                  <li>24시간 이내 메일로 2부의 문서 송부</li>
-                  <li>자료 확인 후 아래 계좌로 <strong>₩{PRICE}</strong> 입금</li>
+                  <li>24시간 이내 메일로 2부의 문서 송부 (입금 계좌 함께 안내)</li>
+                  <li>자료 확인 후 메일로 안내된 계좌로 <strong>₩{PRICE}</strong> 입금</li>
                   <li>입금자명은 신청한 성명과 동일하게</li>
                 </ol>
               </div>
 
-              {/* 입금 계좌 (자료 수령 후) */}
-              <div className="rounded-lg border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-white p-4">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-2">
-                  입금 계좌 (자료 수령 후)
-                </div>
-                <div className="space-y-1.5">
-                  <Row k="은행" v={PAYMENT_ACCOUNT.bank || EMPTY} ready={!!PAYMENT_ACCOUNT.bank} />
-                  <Row k="계좌번호" v={PAYMENT_ACCOUNT.number || EMPTY} mono ready={!!PAYMENT_ACCOUNT.number} />
-                  <Row k="예금주" v={PAYMENT_ACCOUNT.holder || EMPTY} ready={!!PAYMENT_ACCOUNT.holder} />
-                  <div className="flex items-baseline justify-between pt-2 border-t border-blue-200/60">
-                    <span className="text-[11px] text-blue-700 font-bold">입금 금액</span>
-                    <span className="text-base font-bold text-blue-700">₩{PRICE}</span>
-                  </div>
-                </div>
-                {PAYMENT_ACCOUNT_READY && (
-                  <button
-                    type="button" onClick={copyAccount}
-                    className="mt-3 w-full py-2 rounded-md border border-blue-300 bg-white hover:bg-blue-50 text-blue-700 text-xs font-semibold transition"
-                  >
-                    {copied ? '계좌번호 복사됨 ✓' : '계좌번호 복사'}
-                  </button>
-                )}
+              {/* 입금 계좌는 자료와 함께 메일로 안내 — 완료 화면에는 노출하지 않는다. */}
+              <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-3 flex items-start gap-2">
+                <span className="text-blue-600 text-sm leading-none mt-0.5" aria-hidden>✉️</span>
+                <p className="text-xs text-blue-900 leading-relaxed">
+                  <strong>입금 계좌</strong>는 자료를 보내드리는 메일에 함께 안내드립니다.
+                  자료를 먼저 받아보신 후 입금하시면 됩니다.
+                </p>
               </div>
 
               <button
@@ -197,14 +171,5 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="text-xs font-medium text-zinc-600">{label}</span>
       {children}
     </label>
-  );
-}
-
-function Row({ k, v, mono = false, ready }: { k: string; v: string; mono?: boolean; ready: boolean }) {
-  return (
-    <div className="flex items-baseline justify-between">
-      <span className="text-[11px] text-zinc-500">{k}</span>
-      <span className={`text-sm ${mono ? 'font-mono' : ''} font-semibold ${ready ? 'text-zinc-900' : 'text-zinc-400'}`}>{v}</span>
-    </div>
   );
 }
