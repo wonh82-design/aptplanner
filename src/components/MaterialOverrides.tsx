@@ -772,7 +772,7 @@ export function MaterialOverrides({
         <div className="mb-4 space-y-3">
           {/* 공사범위 간단 지정 */}
           <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
-            <div className="flex items-baseline gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2 mb-2">
               <span className="text-[15px] sm:text-base font-bold text-zinc-900">공사범위 간단 지정</span>
               <span className="text-[11px] text-zinc-600">대표 시나리오 중에서 골라 한 번에 적용해요</span>
             </div>
@@ -805,7 +805,7 @@ export function MaterialOverrides({
 
           {/* 자재등급 한번에 정하기 */}
           <div className="rounded-lg border border-amber-200 bg-amber-50/40 p-3">
-            <div className="flex items-baseline gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2 mb-2">
               <span className="text-[15px] sm:text-base font-bold text-zinc-900">자재등급 한번에 정하기</span>
               <span className="text-[11px] text-zinc-600">모든 공종에 같은 등급을 일괄 적용해요</span>
             </div>

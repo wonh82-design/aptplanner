@@ -38,6 +38,14 @@ body {
            shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500
            focus:outline-none transition;
   }
+  /*
+   * select 은 포커스 시 네이티브 피커가 열려 iOS 자동 줌 대상이 아니므로,
+   * 모바일에서도 16px 강제할 필요 없이 14px(text-sm)로 컴팩트하게 유지한다.
+   * (text 입력 필드는 위 .input 의 모바일 16px 유지)
+   */
+  select.input {
+    @apply text-sm;
+  }
   .cb {
     @apply h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-1 focus:ring-blue-500;
   }
