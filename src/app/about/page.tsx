@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { SiteHeader } from '@/components/SiteHeader';
 
 export const metadata = {
-  title: '소개 — apt-planner | 만든 사람과 만든 이유',
+  title: '소개 — Apt-Planner | 만든 사람과 만든 이유',
   description:
     '건축사·건축시공기술사 자격, 대형 시공사 15년+. 아파트 설계와 하이엔드 초고층 주거 시공관리 경험으로 만든 투명한 인테리어 예산 산정 시스템.',
 };
@@ -249,7 +249,7 @@ export default function About() {
       <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 text-xs text-zinc-400 space-y-3">
           <div className="flex flex-col sm:flex-row justify-between gap-3">
-            <span>© apt-planner — All rights reserved</span>
+            <span>© Apt-Planner — All rights reserved</span>
             <span>본 서비스는 어떤 인테리어 업체와도 제휴·수수료 관계가 없습니다.</span>
           </div>
           <div className="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">

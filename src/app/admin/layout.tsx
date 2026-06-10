@@ -13,7 +13,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xs text-zinc-400 hover:text-white">← 사이트</Link>
             <span className="text-zinc-600">·</span>
-            <Link href="/admin/materials" className="text-sm font-bold">apt-planner 관리자</Link>
+            <Link href="/admin/materials" className="text-sm font-bold">Apt-Planner 관리자</Link>
           </div>
           <nav className="flex items-center gap-3 text-xs">
             <Link href="/admin/materials" className="text-zinc-300 hover:text-white">자재마스터</Link>

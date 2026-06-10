@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { SiteHeader } from '@/components/SiteHeader';
 
 export const metadata = {
-  title: 'Blog — apt-planner',
+  title: 'Blog — Apt-Planner',
   description: '인테리어 공사 가이드·자재 비교·시공 팁을 담은 apt-planner 블로그.',
 };
 
@@ -33,7 +33,7 @@ export default function BlogPage() {
 
       <footer className="border-t border-zinc-200 bg-zinc-900 text-zinc-300 mt-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 text-xs text-zinc-400 flex flex-col sm:flex-row justify-between gap-3">
-          <span>© apt-planner — All rights reserved</span>
+          <span>© Apt-Planner — All rights reserved</span>
           <span>본 서비스는 어떤 인테리어 업체와도 제휴·수수료 관계가 없습니다.</span>
         </div>
       </footer>

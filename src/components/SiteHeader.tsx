@@ -41,13 +41,13 @@ export function SiteHeader() {
         <Link
           href="/"
           className="flex items-center gap-2 min-w-0 group"
-          aria-label="apt-planner 홈"
+          aria-label="Apt-Planner 홈"
         >
           <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded bg-zinc-900 text-white text-xs sm:text-sm font-bold flex-shrink-0 group-hover:bg-blue-700 transition">
-            a
+            A
           </span>
           <span className="font-bold tracking-tight text-sm sm:text-base truncate text-zinc-900">
-            apt-planner
+            Apt-Planner
           </span>
         </Link>
 

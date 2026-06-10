@@ -228,7 +228,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row items-start gap-10">
             <div className="flex-1">
               <div className="flex items-center gap-2.5 mb-4">
-                <span className="inline-flex w-8 h-8 rounded bg-white text-zinc-900 text-sm items-center justify-center font-bold">a</span>
+                <span className="inline-flex w-8 h-8 rounded bg-white text-zinc-900 text-sm items-center justify-center font-bold">A</span>
                 <span className="font-bold text-white text-lg">{t.footer.brandName}</span>
               </div>
               <p className="text-sm leading-relaxed text-zinc-400 max-w-md">

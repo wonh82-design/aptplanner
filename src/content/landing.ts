@@ -17,7 +17,7 @@
 export const LANDING_COPY = {
   // ── 브라우저 탭·검색엔진 노출 ─────────────────────────────────
   meta: {
-    title: 'apt-planner — 인테리어의 시작',
+    title: 'Apt-Planner — 인테리어의 시작',
     description:
       '내 예산에 맞는 공사범위와 스펙을 정하고, 여러 업체에서 정직하게 견적을 받으세요.',
   },
@@ -55,7 +55,7 @@ export const LANDING_COPY = {
       ],
     },
     goodCard: {
-      title: 'apt-planner',
+      title: 'Apt-Planner',
       items: [
         '업체 수수료·제휴 0건',
         '실제 시장가격 변동 반영',
@@ -125,13 +125,13 @@ export const LANDING_COPY = {
 
   // ── FOOTER ────────────────────────────────────────────────────
   footer: {
-    brandName: 'apt-planner',
+    brandName: 'Apt-Planner',
     brandDesc:
       '인테리어 처음 하는 소비자가 정직하고 실력있는 업체를 고를 수 있도록 돕는 도구입니다.',
     neutralityHeading: '100% 소비자 편',
     neutralityBody:
       'apt-planner는 어떤 인테리어 업체와도 광고비·수수료·제휴 관계가 없습니다. 100% 소비자 편의를 위해 운영됩니다.',
-    copyright: '© apt-planner — All rights reserved',
+    copyright: '© Apt-Planner — All rights reserved',
     disclaimer: '본 견적은 시장가 기반 평균 예상치이며, 실제 견적은 실측 후 업체에따라 다를 수 있습니다.',
   },
 } as const;
