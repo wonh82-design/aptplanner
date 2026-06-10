@@ -18,7 +18,7 @@
  */
 import type {
   Property, Scope, GradeSelection, LineItem, Totals, Quote, Grade, GradeGroup,
-  RegionId, AgeId,
+  RegionId, AgeId, DemolitionScope,
 } from './types';
 import type { Material } from './types';
 import { gradeGroupOf, bathOverrideKey, applyGradeFloor, pyeongBandOf } from './types';
@@ -81,6 +81,19 @@ export const AGE_LABEL: Record<AgeId, string> = {
 export function adjustmentMultiplier(p: Property): number {
   return REGION_MULTIPLIER[p.region] * AGE_MULTIPLIER[p.age];
 }
+
+/** 철거 범위별 비용 배수 — 기본철거(basic) 100% 기준. 부분 85% / 올 120%. */
+export function demolitionMultiplier(s?: DemolitionScope): number {
+  if (s === 'partial') return 0.85;
+  if (s === 'full') return 1.2;
+  return 1.0; // basic 또는 미설정
+}
+/** 철거 범위 라인 라벨 (결과·견적서 표시용) */
+const DEMOLITION_LABEL: Record<DemolitionScope, string> = {
+  partial: '부분철거 — 마감재 위주 (샷시·문틀·천정·욕실타일 제외, 욕실 덧방만) · 기본철거 85%',
+  basic: '기본철거 — 욕실·문틀·문짝 포함 (샷시·천정 제외) · 자재마스터 기준',
+  full: '올철거 — 샷시까지 완전철거 (골조·바닥 난방배관 제외) · 기본철거 120%',
+};
 
 /** 10만원 단위 반올림 */
 function roundToHundredK(n: number): number {
@@ -254,8 +267,21 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   const windowArea = outsideWindowArea(p.pyeong, p.bay);
 
   // ===== 1. 기본공사 (전체 단위) =====
-  if (scope.global.demolition)
-    push(lineItem('', '전체', 'base_work', excArea, grade, 'per_m2'));
+  // 철거: 자재마스터 단가(=기본철거 100%)에 범위 배수 적용 (부분 85% / 올 120%).
+  //  · 확장 철거비는 확장공사, 샷시 철거비는 샷시공사에 별도 포함이라 여기서 중복 없음.
+  if (scope.global.demolition) {
+    const demoLi = lineItem('', '전체', 'base_work', excArea, grade, 'per_m2');
+    if (demoLi) {
+      const ds = scope.global.demolition_scope ?? 'basic';
+      const mult = demolitionMultiplier(ds);
+      if (mult !== 1) {
+        demoLi.unit_price = Math.round(demoLi.unit_price * mult);
+        demoLi.subtotal = Math.round(demoLi.subtotal * mult);
+      }
+      demoLi.material_label = DEMOLITION_LABEL[ds];
+      push(demoLi);
+    }
+  }
   if (scope.global.insulation)
     push(lineItem('', '전체', 'insulation', excArea, grade, 'per_m2'));
 
@@ -560,6 +586,30 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
   if (scope.global.act_permit) {
     // 구청 행위허가 신고 — 구조변경·평면수정 시 필수 (확장과 독립)
     push(lineItem('', '전체', 'act_permit', 1, grade, 'per_set'));
+  }
+
+  // ===== 무몰딩 도배 퍼티/면처리 — 도배 공사비의 15% =====
+  // 몰딩 없이 천장-벽 접점을 퍼티+면처리로 마감할 때 발생하는 도배측 추가 비용(단순 모델).
+  // (목공 기반 no_molding 과는 별개. 도배 라인이 있어야 의미가 있으므로 합계가 0이면 미발생)
+  if (scope.global.wallpaper_putty) {
+    const wpLines = items.filter((it) => it.work_type === '도배');
+    const wpTotal = wpLines.reduce((s, it) => s + it.subtotal, 0);
+    if (wpTotal > 0) {
+      const cost = Math.round(wpTotal * 0.15);
+      push({
+        id: '',
+        room: '전체',
+        work_type: 'wallpaper_putty',
+        category: categoryOf(wpLines[0]), // 도배 라인과 같은 카테고리로 묶음
+        unit_type: 'per_set',
+        qty: 1,
+        grade: grade.default,
+        material_id: null,
+        material_label: '무몰딩 도배 퍼티 및 면처리 (도배 공사비의 15%)',
+        unit_price: cost,
+        subtotal: cost,
+      });
+    }
   }
 
   // re-sequence ids

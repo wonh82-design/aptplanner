@@ -118,6 +118,7 @@ export function materialsFor(workType: string): Material[] {
  *  sub_category 값이 이미 한글인 경우(예: '마루') 이 매핑이 없어도 labelOf 가 그대로 반환. */
 export const WORK_TYPE_LABEL: Record<string, string> = {
   molding: '몰딩',
+  wallpaper_putty: '도배 퍼티/면처리',
   baseboard: '걸레받이',
   window: '샷시',
   turning_door: '터닝도어',

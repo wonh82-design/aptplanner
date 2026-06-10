@@ -2,10 +2,10 @@
 
 import { memo, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope, BathType } from '@/lib/types';
+import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope, BathType, DemolitionScope } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR, materialServesGroup, materialGradeGroups } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
-import { fmtKRWShort, fmtKRWShortVat, pyeongBandTotal } from '@/lib/calculator';
+import { fmtKRWShort, fmtKRWShortVat, pyeongBandTotal, demolitionMultiplier } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength, airconInstallRooms } from '@/lib/areas';
 import { lookupWindowCost } from '@/lib/window-cost';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
@@ -313,6 +313,18 @@ export function MaterialOverrides({
     if (!scope || !onScopeChange) return;
     const key: keyof Scope['global'] = room === '공용욕실' ? 'common_bath_set' : 'master_bath_set';
     onScopeChange({ ...scope, global: { ...scope.global, [key]: enabled } });
+  }
+
+  /** 단일 GlobalScope 불리언 플래그 토글 (예: wallpaper_putty 무몰딩) */
+  function setGlobalFlag(key: keyof Scope['global'], enabled: boolean) {
+    if (!scope || !onScopeChange) return;
+    onScopeChange({ ...scope, global: { ...scope.global, [key]: enabled } });
+  }
+
+  /** 철거 범위(부분/기본/올) 변경 */
+  function setDemolitionScope(v: DemolitionScope) {
+    if (!scope || !onScopeChange) return;
+    onScopeChange({ ...scope, global: { ...scope.global, demolition_scope: v } });
   }
 
   /** 욕실 타입 변경 — 샤워부스(booth) ↔ 욕조(tub). 욕실별 독립. */
@@ -849,6 +861,14 @@ export function MaterialOverrides({
               onClear={() => clearOverride(item.work.wt)}
               onShowDetail={() => setDetailWorkType(item.work.wt)}
               onGradeRadio={canEditScope ? (c) => handleGradeRadio(item.work.wt, c) : undefined}
+              puttyToggle={item.work.wt === '도배' && canEditScope ? {
+                on: !!scope?.global.wallpaper_putty,
+                onToggle: (v) => setGlobalFlag('wallpaper_putty', v),
+              } : undefined}
+              demolitionScope={item.work.wt === 'base_work' && canEditScope ? {
+                value: scope?.global.demolition_scope ?? 'basic',
+                onChange: setDemolitionScope,
+              } : undefined}
             />
           ) : item.kind === 'bath' ? (
             <BathCard
@@ -1003,7 +1023,7 @@ function isPrimaryMaterial(m: Material, allInGrade: Material[]): boolean {
 function SingleCard({
   work, label, effectiveGrade: curGrade, effectiveMaterialId, hasOverride, isExcluded,
   property,
-  onSelectMaterial, onClear, onShowDetail, onGradeRadio,
+  onSelectMaterial, onClear, onShowDetail, onGradeRadio, puttyToggle, demolitionScope,
 }: {
   work: WorkInfo;
   label: string;
@@ -1025,6 +1045,10 @@ function SingleCard({
    * 가성비/표준/고급 → scope ON 복원 + grade override
    */
   onGradeRadio?: (choice: GradeGroup | 'excluded') => void;
+  /** 도배 카드 전용 — '무몰딩'(도배 15% 퍼티) 헤더 토글. 제공되면 헤더에 버튼 노출. */
+  puttyToggle?: { on: boolean; onToggle: (v: boolean) => void };
+  /** 철거 카드 전용 — 범위(부분/기본/올) 선택기. 제공되면 카드 상단에 3분할 노출. */
+  demolitionScope?: { value: DemolitionScope; onChange: (v: DemolitionScope) => void };
 }) {
   // 그 work_type의 모든 자재 (현장시공도 포함 — 카드 자체와 공사비 정보 노출 위해)
   const allMaterials = materialsFor(work.wt);
@@ -1067,6 +1091,21 @@ function SingleCard({
           {onGradeRadio && (
             <ExcludeToggleButton isExcluded={isExcluded} onClick={toggleExclude} />
           )}
+          {puttyToggle && !isExcluded && (
+            <button
+              type="button"
+              onClick={() => puttyToggle.onToggle(!puttyToggle.on)}
+              title="무몰딩 적용 — 도배 공사비의 15%를 퍼티·면처리 비용으로 추가"
+              aria-pressed={puttyToggle.on}
+              className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full border text-[10px] font-bold whitespace-nowrap transition ${
+                puttyToggle.on
+                  ? 'border-amber-400 bg-amber-100 text-amber-800'
+                  : 'border-zinc-300 bg-white text-zinc-500 hover:border-amber-300'
+              }`}
+            >
+              {puttyToggle.on ? '✓ 무몰딩' : '무몰딩'}
+            </button>
+          )}
           {hasOverride && !isExcluded && (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium whitespace-nowrap">개별 설정</span>
           )}
@@ -1088,6 +1127,36 @@ function SingleCard({
           )}
         </div>
       </div>
+
+      {/* 철거 범위 선택기 (base_work 전용) — 가성비/표준/고급 대신 부분/기본/올철거 */}
+      {demolitionScope && !isExcluded && (
+        <div className="px-3 pt-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-zinc-500 mb-1.5">철거 범위</div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {([
+              { key: 'partial', label: '부분철거', desc: '마감재 위주', cost: '기본의 85%' },
+              { key: 'basic', label: '기본철거', desc: '욕실·문틀 포함', cost: '기준' },
+              { key: 'full', label: '올철거', desc: '샷시까지', cost: '기본의 120%' },
+            ] as { key: DemolitionScope; label: string; desc: string; cost: string }[]).map((o) => {
+              const sel = demolitionScope.value === o.key;
+              return (
+                <button
+                  key={o.key}
+                  type="button"
+                  onClick={() => demolitionScope.onChange(o.key)}
+                  className={`px-2 py-1.5 rounded-lg border-2 text-left transition active:scale-[0.98] ${
+                    sel ? 'border-blue-400 bg-blue-50' : 'border-zinc-200 bg-white hover:border-zinc-300'
+                  }`}
+                >
+                  <div className={`text-xs font-bold ${sel ? 'text-blue-800' : 'text-zinc-700'}`}>{o.label}</div>
+                  <div className="text-[9px] text-zinc-500 leading-tight mt-0.5">{o.desc}</div>
+                  <div className={`text-[9px] mt-0.5 ${sel ? 'text-blue-600 font-semibold' : 'text-zinc-400'}`}>{o.cost}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 자재 카드 — 제외 상태면 영역 자체를 숨김 */}
       {!isExcluded && (
@@ -1115,6 +1184,8 @@ function SingleCard({
                       )
                     : material.unit_type === 'per_pyeong_band'
                     ? pyeongBandTotal(material, property.pyeong)
+                    : demolitionScope
+                    ? Math.round(work.totalQty * material.total_unit_price * demolitionMultiplier(demolitionScope.value))
                     : undefined;
                 return (
                   <div

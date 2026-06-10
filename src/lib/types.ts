@@ -96,6 +96,15 @@ export type BathId = '공용욕실' | '부부욕실';
  */
 export type BathType = 'booth' | 'tub' | 'both';
 
+/**
+ * 철거 공사범위 — 가성비/표준/고급 대신 '범위'로 등급 구분.
+ *  · 'partial'(부분철거): 마감재 위주 철거(샷시·문틀·천정·욕실타일 제외, 욕실 덧방만 가능) — 기본철거 85%
+ *  · 'basic'(기본철거): 욕실·문틀·문짝 포함 철거(샷시·천정 제외) — 자재마스터 기준(100%)
+ *  · 'full'(올철거): 골조 제외 샷시까지 완전철거(바닥 난방배관 제외) — 기본철거 120%
+ * ※ 확장에 필요한 철거비는 확장공사, 샷시 철거비는 샷시공사에 이미 별도 포함(중복 없음).
+ */
+export type DemolitionScope = 'partial' | 'basic' | 'full';
+
 /** 욕실 이름 집합 — line_item.room 이 욕실인지 판별용 */
 export const BATH_ROOM_NAMES: readonly string[] = ['공용욕실', '부부욕실'];
 
@@ -229,6 +238,8 @@ export type RoomScope = {
 /** 전체 공종 토글 */
 export type GlobalScope = {
   demolition: boolean;        // 철거
+  /** 철거 범위(부분/기본/올). 미설정은 'basic'(기본철거, 100%). 부분 85% / 올 120% 배수 적용. */
+  demolition_scope?: DemolitionScope;
   insulation: boolean;        // 단열
   heating_pipe: boolean;      // 난방배관 교체
   common_bath_set: boolean;   // 공용욕실 세트
@@ -264,6 +275,11 @@ export type GlobalScope = {
   no_molding: boolean;         // 무몰딩 — molding 자재 대신 천장-벽 목공+도배 마감
   no_door_frame: boolean;      // 무문선 — door 자재 대신 매입보강+마감도배
   no_baseboard: boolean;       // 무걸레받이 — baseboard 자재 대신 벽-바닥 목공+도배 마감
+  /**
+   * 무몰딩 적용 (도배 헤더 버튼) — ON 시 도배 공사비의 15% 를 '퍼티 및 면처리' 비용으로 추가.
+   * 미설정(undefined)은 OFF. ※ 위 carpentry no_molding 과는 별개의 단순 모델(도배 15%).
+   */
+  wallpaper_putty?: boolean;
 };
 
 export type Scope = {

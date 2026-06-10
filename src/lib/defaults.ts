@@ -67,6 +67,7 @@ export function defaultScope(): Scope {
     },
     global: {
       demolition: true,
+      demolition_scope: 'basic', // 기본철거(100%) — 부분(85%)/올(120%)은 사용자 선택
       insulation: true,
       heating_pipe: false,
       common_bath_set: true,
@@ -102,6 +103,7 @@ export function defaultScope(): Scope {
       no_molding: false,
       no_door_frame: false,
       no_baseboard: false,
+      wallpaper_putty: false, // 무몰딩 적용(도배 15% 퍼티/면처리) — 기본 OFF
     },
   };
 }

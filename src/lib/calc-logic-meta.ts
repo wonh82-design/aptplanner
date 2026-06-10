@@ -21,7 +21,7 @@ export type CalcLogicMeta = {
 
 export const CALC_LOGIC_META: Record<string, CalcLogicMeta> = {
   // ── 기본공사 ──
-  base_work:   { formula: '전용면적(㎡)', areaRef: '전용면적 = 공급평 × 3.31 × 0.75' },
+  base_work:   { formula: '전용면적(㎡) × 철거범위 배수', areaRef: '전용면적 = 공급평 × 3.31 × 0.75', note: '철거 범위: 부분 85% / 기본 100% / 올 120% (단가에 반영)' },
   insulation:  { formula: '전용면적(㎡)', areaRef: '전용면적 = 공급평 × 3.31 × 0.75' },
 
   // ── 샷시 ──
@@ -34,6 +34,7 @@ export const CALC_LOGIC_META: Record<string, CalcLogicMeta> = {
   // ── 공간별 마감 ──
   마루:   { formula: '공간 마루면적(㎡) — 평형 표준 마감면적으로 정규화(방 수 무관)', areaRef: '표준면적(룸) → adjustedRoomFlooringArea' },
   도배:   { formula: '공간 바닥면적 × 2.8 (WALL_RATIO, 벽면 환산)', areaRef: '표준면적(룸)' },
+  wallpaper_putty: { formula: '도배 공사비 합계 × 15% (1식)', note: '무몰딩 적용(wallpaper_putty) ON 시 — 퍼티·면처리 추가비' },
   molding: { formula: '공간 둘레(m)', areaRef: '둘레(perimeters)' },
   molding_carpentry:  { formula: '공간 바닥면적(㎡) 목공 마감', areaRef: '표준면적(룸)', note: '무몰딩(no_molding) ON 시 molding 대체' },
   molding_wallpaper:  { formula: '공간 바닥면적(㎡) 도배 마감', areaRef: '표준면적(룸)', note: '무몰딩(no_molding) ON 시 molding 대체' },
