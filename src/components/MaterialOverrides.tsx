@@ -796,6 +796,16 @@ export function MaterialOverrides({
     [quote.property, quote.scope],
   );
 
+  /**
+   * 타일 시공팀(tile_labor) 공사비 — 계산기 산출 라인을 그대로 합산(읽기 전용).
+   * 욕실별이 아니라 '집 전체' 공통 라인(평형별 고정가, 욕실 수와 무관)이라 욕실 카드 합계엔
+   * 빠져 있다 → 욕실 카드에 별도 안내 노트로 노출해 투명성을 높인다.
+   */
+  const tileLaborCost = useMemo(
+    () => quote.line_items.filter((it) => it.work_type === 'tile_labor').reduce((s, it) => s + it.subtotal, 0),
+    [quote.line_items],
+  );
+
   return (
     <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
@@ -913,6 +923,7 @@ export function MaterialOverrides({
               room={item.room}
               works={item.works}
               totalSub={item.sub}
+              tileLaborSub={tileLaborCost}
               gradeSelection={value}
               effectiveGrade={effectiveGrade}
               isExcluded={
@@ -1889,13 +1900,15 @@ function BundleCard({
 // =====================================================
 
 function BathCard({
-  room, works: allWorks, totalSub, gradeSelection, effectiveGrade, isExcluded,
+  room, works: allWorks, totalSub, tileLaborSub = 0, gradeSelection, effectiveGrade, isExcluded,
   bathType, allowBoth = false, onChangeBathType,
   onSelectGrade, onClear, onExclude, onRestore,
 }: {
   room: string;
   works: WorkInfo[];
   totalSub: number;
+  /** 타일 시공팀 공사비(집 전체 공통, 욕실 수 무관) — 욕실 카드 합계엔 미포함, 안내 노트로만 노출 */
+  tileLaborSub?: number;
   gradeSelection: GradeSelection;
   effectiveGrade: (key: string) => GradeGroup;
   isExcluded: boolean;
@@ -2069,8 +2082,22 @@ function BathCard({
         })}
       </div>
 
+      {/* 타일 시공 인건비 안내 — 위 욕실 금액(자재·설비)에는 미포함.
+          tile_labor 는 '집 전체' 공통 라인(평형별 고정가, 욕실 수 무관)이라 욕실 카드 합계에서 빠진다.
+          큰 비용이 선택 화면에서 보이지 않던 문제를 노트로 해소(읽기 전용). */}
+      {!isExcluded && tileLaborSub > 0 && (
+        <div className="px-3 py-2 border-t border-amber-200 bg-amber-50/50 flex items-start gap-1.5 text-[11px] text-zinc-600 leading-relaxed">
+          <span className="text-amber-600 flex-shrink-0" aria-hidden>ℹ</span>
+          <span>
+            <strong className="text-zinc-800">타일 시공 인건비</strong>는 집 전체 공통(평형별 고정·욕실 수 무관)으로
+            약 <strong className="text-zinc-900 tabular-nums">{fmtKRWShortVat(tileLaborSub)}</strong> 별도이며,
+            위 욕실 금액에는 포함되지 않습니다(결과 화면 ‘타일’ 항목에 반영).
+          </span>
+        </div>
+      )}
+
       {/* 구성 컴포넌트 카드 — 표시 전용 (클릭 시 추가 화면 없음).
-          · 타일 시공팀(tile_labor)은 집계 단계(workInfoList)에서 제외됨.
+          · 타일 시공팀(tile_labor)은 집계 단계(workInfoList)에서 제외됨 → 위 안내 노트로 별도 노출.
           · 욕실 설치비(bath_install)는 카드만 숨기고 공사비(totalSub·등급 행·견적)에는 그대로 반영. */}
       {!isExcluded && (
         <div className="bg-zinc-50/40 px-3 py-3 border-t-2 border-zinc-200">
