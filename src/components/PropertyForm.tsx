@@ -336,11 +336,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
                 <span className="text-base leading-none">🏠</span>
                 <span className="text-xs font-bold text-zinc-900">현재 상태</span>
               </div>
-              <div className="text-[10px] text-zinc-600 font-medium mb-1.5">지금 우리집 모습은 어떤가요?</div>
-              <ul className="space-y-0.5 text-[10px] text-zinc-700 leading-snug">
-                <li className="flex items-start gap-1"><span className="inline-block w-1 h-1 rounded-full bg-zinc-500 mt-1 flex-shrink-0" /><span>발코니 있음 (확장 안 됨)</span></li>
-                <li className="flex items-start gap-1"><span className="inline-block w-1 h-1 rounded-full bg-zinc-500 mt-1 flex-shrink-0" /><span>이미 확장됨</span></li>
-              </ul>
+              <div className="text-[10px] text-zinc-600 font-medium">지금 우리집 모습은 어떤가요?</div>
             </div>
             {/* 공간별 행 */}
             <div className="space-y-1.5">
@@ -382,11 +378,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
                 <span className="text-base leading-none">🔨</span>
                 <span className="text-xs font-bold text-blue-900">공사 후</span>
               </div>
-              <div className="text-[10px] text-blue-700 font-medium mb-1.5">인테리어 후 어떻게 만들까요?</div>
-              <ul className="space-y-0.5 text-[10px] text-zinc-700 leading-snug">
-                <li className="flex items-start gap-1"><span className="inline-block w-1 h-1 rounded-full bg-blue-500 mt-1 flex-shrink-0" /><span>확장 안 함 (그대로 유지)</span></li>
-                <li className="flex items-start gap-1"><span className="inline-block w-1 h-1 rounded-full bg-blue-500 mt-1 flex-shrink-0" /><span>새로 확장 시공</span></li>
-              </ul>
+              <div className="text-[10px] text-blue-700 font-medium">인테리어 후 어떻게 만들까요?</div>
             </div>
             {/* 공간별 행 */}
             <div className="space-y-1.5">
@@ -430,11 +422,6 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             </div>
           </div>
         </div>
-
-        <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed flex items-start gap-1.5">
-          <span className="text-amber-600 flex-shrink-0 mt-px">💡</span>
-          <span>‘확장 시공’ 공간이 있으면 확장공사·새 외창·구청 신고·터닝도어 비용이 자동으로 추가됩니다.</span>
-        </p>
       </div>
 
       {/* 베이란? 도움말 모달 */}
