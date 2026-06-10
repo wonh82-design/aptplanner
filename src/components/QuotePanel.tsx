@@ -53,7 +53,8 @@ export function QuotePanel({ quote }: Props) {
       </div>
 
       <p className="mt-4 text-[11px] text-zinc-500 leading-relaxed">
-        ※ 위 합계는 자재가 + 시공·인건비 + 부가세(10%) 포함 기준이며, 지역·연식 보정 후 10만원 단위로 반올림된 총공사비와 약간의 차이가 있을 수 있습니다.
+        ※ 위 금액은 자재가 + 시공·인건비 + 부가세(10%) 포함, 지역·연식 보정 후 총공사비 기준입니다(상단 예상 공사비와 동일 기준).
+        항목별 금액은 만원 단위로 표시되어 합산 시 미세한 차이가 보일 수 있습니다.
         라인별 상세 사양·자재는 유료 인테리어 계획서 PDF에서 확인할 수 있습니다.
       </p>
     </section>
@@ -105,7 +106,7 @@ function BreakdownTable({
         })}
       </ul>
       <div className="px-3 py-2 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between">
-        <span className="text-xs font-semibold text-zinc-700">합계 (부가세 포함, 보정 전)</span>
+        <span className="text-xs font-semibold text-zinc-700">합계 (부가세 포함)</span>
         <span className="text-sm font-mono font-bold text-zinc-900 tabular-nums">{fmtKRWVat(sum)}</span>
       </div>
     </div>

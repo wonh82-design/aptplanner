@@ -100,6 +100,41 @@ function roundToHundredK(n: number): number {
   return Math.round(n / 100_000) * 100_000;
 }
 
+/**
+ * 구분 내역(공종별/공간별) 맵을 목표 합계(target)에 정확히 일치하도록 비례 배분.
+ *
+ * 각 항목을 동일 비율(target / rawSum)로 보정해 지역·연식 보정 + 10만원 반올림이
+ * 반영된 grand_total 과 같은 기준으로 만든다. 반올림 누적 잔차는 가장 큰 항목이
+ * 흡수하여 Σ(out) === target 이 정확히 성립한다.
+ *
+ * 이렇게 하지 않으면 결과 화면의 '시공 방식별 예상 공사비'(보정 후)와
+ * 하단 '견적 상세내역·공간별 구분내역'(보정 전 단순 합)의 합계가 어긋나 보인다.
+ * rawSum 이 0 이거나 항목이 없으면 원본 맵을 그대로 반환.
+ */
+function scaleBreakdownToTotal(
+  map: Record<string, number>,
+  rawSum: number,
+  target: number,
+): Record<string, number> {
+  const keys = Object.keys(map);
+  if (rawSum <= 0 || keys.length === 0) return map;
+  const out: Record<string, number> = {};
+  let acc = 0;
+  for (const k of keys) {
+    const scaled = Math.round((map[k] * target) / rawSum);
+    out[k] = scaled;
+    acc += scaled;
+  }
+  // 반올림 누적 잔차를 가장 큰 항목에 흡수 → 합계가 target 과 정확히 일치.
+  const residual = target - acc;
+  if (residual !== 0) {
+    let maxKey = keys[0];
+    for (const k of keys) if (out[k] > out[maxKey]) maxKey = k;
+    out[maxKey] += residual;
+  }
+  return out;
+}
+
 /** 그레이드 그룹 결정: override > default (사용자 선택값) */
 function effectiveGrade(work: string, sel: GradeSelection): GradeGroup {
   return sel.overrides[work] ?? sel.default;
@@ -658,15 +693,16 @@ export function categoryOf(it: LineItem): string {
 
 /** 합계 집계 + 지역/연식 보정 + 10만원 단위 반올림 */
 export function aggregateTotals(items: LineItem[], property: Property): Totals {
+  // 원본(보정 전) 합산 — grand_total 산출의 기준이자, 아래에서 보정 후로 비례 배분된다.
   const by_work_type: Record<string, number> = {};
-  const by_category: Record<string, number> = {};
-  const by_room: Record<string, number> = {};
+  const by_category_raw: Record<string, number> = {};
+  const by_room_raw: Record<string, number> = {};
   let raw = 0;
   for (const it of items) {
     by_work_type[it.category] = (by_work_type[it.category] || 0) + it.subtotal;
     const cat = categoryOf(it);
-    by_category[cat] = (by_category[cat] || 0) + it.subtotal;
-    by_room[it.room] = (by_room[it.room] || 0) + it.subtotal;
+    by_category_raw[cat] = (by_category_raw[cat] || 0) + it.subtotal;
+    by_room_raw[it.room] = (by_room_raw[it.room] || 0) + it.subtotal;
     raw += it.subtotal;
   }
 
@@ -676,6 +712,12 @@ export function aggregateTotals(items: LineItem[], property: Property): Totals {
   const grand = roundToHundredK(adjusted);
   const low   = roundToHundredK(adjusted * 0.95);
   const high  = roundToHundredK(adjusted * 1.05);
+
+  // 공종별·공간별 구분 내역을 보정 후 grand_total 에 정확히 일치하도록 비례 배분.
+  // → 결과 화면 헤드라인(보정 후)과 하단 구분 내역의 합계가 일치한다.
+  // (by_work_type 은 내부/표시 미사용이라 보정 전 원본을 유지한다.)
+  const by_category = scaleBreakdownToTotal(by_category_raw, raw, grand);
+  const by_room = scaleBreakdownToTotal(by_room_raw, raw, grand);
 
   const vat = Math.round(grand * VAT_RATE);
   return {
