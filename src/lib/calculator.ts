@@ -82,6 +82,9 @@ export function adjustmentMultiplier(p: Property): number {
   return REGION_MULTIPLIER[p.region] * AGE_MULTIPLIER[p.age];
 }
 
+/** 무몰딩 도배 퍼티/면처리 가산율 — 도배 공사비의 15%. (계산기·UI 표시 공용 단일 소스) */
+export const WALLPAPER_PUTTY_RATE = 0.15;
+
 /** 철거 범위별 비용 배수 — 기본철거(basic) 100% 기준. 부분 85% / 올 120%. */
 export function demolitionMultiplier(s?: DemolitionScope): number {
   if (s === 'partial') return 0.85;
@@ -630,7 +633,7 @@ export function buildLineItems(p: Property, scope: Scope, grade: GradeSelection)
     const wpLines = items.filter((it) => it.work_type === '도배');
     const wpTotal = wpLines.reduce((s, it) => s + it.subtotal, 0);
     if (wpTotal > 0) {
-      const cost = Math.round(wpTotal * 0.15);
+      const cost = Math.round(wpTotal * WALLPAPER_PUTTY_RATE);
       push({
         id: '',
         room: '전체',

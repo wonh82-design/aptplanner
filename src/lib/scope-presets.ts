@@ -8,7 +8,7 @@
  * ⚠️ 발코니 확장 관련 필드(expansion_current, expansion_after, expansion_report)는
  *    프리셋에서 절대 건드리지 않는다. 우리집 현황의 '발코니 확장 현황'에서만 변경 가능.
  */
-import type { Property, RoomScope, Scope, RoomId, GradeGroup } from './types';
+import type { Property, RoomScope, Scope, RoomId, GradeGroup, DemolitionScope } from './types';
 import { activeRooms } from './areas';
 
 type Preset = {
@@ -16,12 +16,20 @@ type Preset = {
   icon: string;
   label: string;
   desc: string;
+  /**
+   * 이 프리셋과 1:1로 연동되는 철거 범위.
+   * 프리셋 적용 시 scope.global.demolition_scope 로 설정되고,
+   * 역으로 철거 범위를 바꾸면 일치하는 프리셋이 강조된다.
+   *  - 철거 최소화        → 'partial'(부분철거)
+   *  - 전체 철거 + 올수리 → 'basic'(기본철거)
+   *  - 전체 철거 + 샷시   → 'full'(올철거)
+   */
+  demolitionScope: DemolitionScope;
   /** 현재 scope를 받아 확장 관련 필드는 보존, 나머지만 교체 */
   apply(p: Property, current: Scope): Scope;
   /**
    * 프리셋 적용 시 함께 설정할 work_type → 등급 그룹 매핑.
    * MaterialOverrides.applyScopePreset 에서 value.overrides 에 머지.
-   * 예: 'finish-only' 는 base_work(철거)에 '가성비' = "철거 최소화" 자재 선택.
    */
   gradeOverrides?: Record<string, GradeGroup>;
 };
@@ -131,36 +139,12 @@ function fullRenovateGlobal(current: Scope): Scope['global'] {
 
 export const PRESETS: Preset[] = [
   {
-    id: 'full-sash',
-    icon: '🪟',
-    label: '전체 철거 + 샷시 + 올수리',
-    desc: '내부 전체 새로 + 외창 교체',
-    apply(p, current) {
-      return {
-        rooms: makeRoomMap(p, current, (room) => fullRenovateRoom(room, { sash: true })),
-        global: fullRenovateGlobal(current),
-      };
-    },
-  },
-  {
-    id: 'full-only',
-    icon: '🧰',
-    label: '전체 철거 + 올수리',
-    desc: '샷시 없이 내부만 새로',
-    apply(p, current) {
-      return {
-        rooms: makeRoomMap(p, current, (room) => fullRenovateRoom(room, { sash: false })),
-        global: fullRenovateGlobal(current),
-      };
-    },
-  },
-  {
     id: 'finish-only',
     icon: '🎨',
     label: '철거 최소화 + 마감재만 교체',
     desc: '철거·전기·설비·조명·목공 기본 포함, 도배·마루·주방·욕실 새로',
-    // 철거 최소화 — base_work 가성비 등급 자동 선택
-    gradeOverrides: { base_work: '가성비' },
+    // 철거 최소화 = 부분철거(마감재 위주, 기준의 85%)
+    demolitionScope: 'partial',
     apply(p, current) {
       return {
         rooms: makeRoomMap(p, current, () => makeRoomScope({
@@ -201,6 +185,34 @@ export const PRESETS: Preset[] = [
           no_door_frame: false,
           no_baseboard: false,
         },
+      };
+    },
+  },
+  {
+    id: 'full-only',
+    icon: '🧰',
+    label: '전체 철거 + 올수리',
+    desc: '샷시 없이 내부만 새로',
+    // 전체 철거 + 올수리 = 기본철거(욕실·문틀 포함, 기준)
+    demolitionScope: 'basic',
+    apply(p, current) {
+      return {
+        rooms: makeRoomMap(p, current, (room) => fullRenovateRoom(room, { sash: false })),
+        global: fullRenovateGlobal(current),
+      };
+    },
+  },
+  {
+    id: 'full-sash',
+    icon: '🪟',
+    label: '전체 철거 + 샷시 + 올수리',
+    desc: '내부 전체 새로 + 외창 교체',
+    // 전체 철거 + 샷시 = 올철거(샷시까지 완전철거, 기준의 120%)
+    demolitionScope: 'full',
+    apply(p, current) {
+      return {
+        rooms: makeRoomMap(p, current, (room) => fullRenovateRoom(room, { sash: true })),
+        global: fullRenovateGlobal(current),
       };
     },
   },

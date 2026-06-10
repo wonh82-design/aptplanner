@@ -314,6 +314,7 @@ export default function CalcPage() {
                 property={property}
                 onJumpToProperty={() => goTo(1)}
                 bulkGradePicked={step2Picked.bulkGrade}
+                presetPicked={step2Picked.preset}
                 onPresetApplied={() => setStep2Picked(p => (p.preset ? p : { ...p, preset: true }))}
                 onBulkGradeApplied={() => setStep2Picked(p => (p.bulkGrade ? p : { ...p, bulkGrade: true }))}
               />

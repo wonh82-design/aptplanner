@@ -5,7 +5,7 @@ import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope, BathType, DemolitionScope } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR, materialServesGroup, materialGradeGroups } from '@/lib/types';
 import { getPrimaryMaterial, labelOf, materialsFor } from '@/lib/materials';
-import { fmtKRWShort, fmtKRWShortVat, pyeongBandTotal, demolitionMultiplier } from '@/lib/calculator';
+import { fmtKRWShort, fmtKRWShortVat, pyeongBandTotal, demolitionMultiplier, WALLPAPER_PUTTY_RATE } from '@/lib/calculator';
 import { activeRooms, clampPartitionLength, airconInstallRooms } from '@/lib/areas';
 import { lookupWindowCost } from '@/lib/window-cost';
 import { normalizeImageUrl, placeholderImageUrl, shouldUseDummyImages } from '@/lib/image-utils';
@@ -36,6 +36,11 @@ type Props = {
    * 미전달 시 기존 동작(현재 등급 강조) 유지.
    */
   bulkGradePicked?: boolean;
+  /**
+   * '공사범위 간단 지정' 프리셋을 사용자가 실제로 선택(또는 철거 범위 변경)했는지.
+   * true 일 때만 현재 철거 범위에 대응하는 프리셋 버튼이 강조된다(미선택 유도).
+   */
+  presetPicked?: boolean;
 };
 
 // 사용자가 선택하는 등급 그룹 3개 (단일등급은 자동 폴백)
@@ -93,7 +98,7 @@ export function MaterialOverrides({
   quote, value, onChange,
   scope, onScopeChange,
   property, onJumpToProperty,
-  onPresetApplied, onBulkGradeApplied, bulkGradePicked,
+  onPresetApplied, onBulkGradeApplied, bulkGradePicked, presetPicked,
 }: Props) {
   // 기본은 모든 항목 펼침 — 사용자가 모든 공종·자재를 한눈에 보고 선택하도록.
   // '주요 5개만 보기' 토글로 다시 압축 가능.
@@ -108,8 +113,12 @@ export function MaterialOverrides({
    * 사용자가 다시 가성비/표준/고급 라디오를 누르면 set 에서 제거되고 scope 가 다시 ON.
    */
   const [excludedKeys, setExcludedKeys] = useState<Set<string>>(new Set());
-  // 공사범위 프리셋 — 마지막 적용된 ID (시각적 강조용)
-  const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
+  // 공사범위 프리셋 강조 — 현재 철거 범위에 대응하는 프리셋(프리셋↔철거 1:1 연동).
+  // 별도 상태 없이 scope.global.demolition_scope 에서 파생 → 프리셋 클릭/철거 범위 변경 양방향 일치.
+  // presetPicked(프리셋 클릭 또는 철거 범위 변경)가 true 일 때만 강조해 초기엔 미선택으로 보인다.
+  const appliedPresetId = presetPicked
+    ? (PRESETS.find((p) => p.demolitionScope === (scope?.global.demolition_scope ?? 'basic'))?.id ?? null)
+    : null;
 
   /**
    * 한 번이라도 line_items 에 등장한 모든 work_type 의 첫 등장 idx 영구 캐시.
@@ -333,10 +342,22 @@ export function MaterialOverrides({
     onScopeChange({ ...scope, global: { ...scope.global, [key]: enabled } });
   }
 
-  /** 철거 범위(부분/기본/올) 변경 */
+  /**
+   * 철거 범위(부분/기본/올) 변경 = 대응 프리셋 전체 적용.
+   * 철거한 곳은 다시 공사해야 하므로, 철거 범위를 바꾸면 철거 범위뿐 아니라
+   * 그 프리셋에 속하는 공사범위(룸·글로벌 공종) 전체가 함께 바뀐다.
+   * → 프리셋 버튼 클릭과 완전히 동일한 동작(양방향 완전 연동).
+   */
   function setDemolitionScope(v: DemolitionScope) {
+    const preset = PRESETS.find((p) => p.demolitionScope === v);
+    if (preset) {
+      applyScopePreset(preset.id);
+      return;
+    }
+    // 대응 프리셋이 없는 경우(방어) — 철거 범위만 변경.
     if (!scope || !onScopeChange) return;
     onScopeChange({ ...scope, global: { ...scope.global, demolition_scope: v } });
+    onPresetApplied?.();
   }
 
   /** 욕실 타입 변경 — 샤워부스(booth) ↔ 욕조(tub). 욕실별 독립. */
@@ -359,9 +380,11 @@ export function MaterialOverrides({
       preset_label: preset.label,
       pyeong: property.pyeong,
     });
-    onScopeChange(preset.apply(property, scope));
+    const nextScope = preset.apply(property, scope);
+    // 프리셋 ↔ 철거 범위 1:1 연동 — 철거공사 공종의 범위 카드와 항상 일치.
+    nextScope.global.demolition_scope = preset.demolitionScope;
+    onScopeChange(nextScope);
     // 프리셋에 grade override 지정 시 함께 적용
-    // 예: 'finish-only' → base_work 가성비 (= 철거 최소화)
     if (preset.gradeOverrides) {
       const nextOverrides = { ...value.overrides, ...preset.gradeOverrides };
       // material_overrides 도 해당 wt 는 초기화 (등급 기본 자재로 돌아가도록)
@@ -371,7 +394,7 @@ export function MaterialOverrides({
       }
       onChange({ ...value, overrides: nextOverrides, material_overrides: nextMatOv });
     }
-    setAppliedPresetId(preset.id);
+    // 강조는 demolition_scope 에서 파생되므로 별도 상태 설정 불필요.
     onPresetApplied?.();
   }
 
@@ -790,7 +813,7 @@ export function MaterialOverrides({
               <span className="text-[11px] text-zinc-600">대표 시나리오 중에서 골라 한 번에 적용해요</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-              {PRESETS.map((preset, idx) => {
+              {PRESETS.map((preset) => {
                 const isApplied = appliedPresetId === preset.id;
                 return (
                   <button
@@ -803,12 +826,11 @@ export function MaterialOverrides({
                         : 'border-zinc-200 bg-white hover:border-blue-400 hover:bg-blue-50/30'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 w-full">
-                      <span className={`text-[9px] font-mono font-bold ${isApplied ? 'text-emerald-700' : 'text-blue-600'}`}>
-                        PRESET {idx + 1}
-                      </span>
-                    </div>
-                    <span className="text-xs font-semibold text-zinc-900">{preset.label}</span>
+                    <span className="w-full flex items-center gap-1 text-xs font-semibold text-zinc-900">
+                      <span aria-hidden>{preset.icon}</span>
+                      <span>{preset.label}</span>
+                      {isApplied && <span className="ml-auto text-emerald-600 text-[11px] font-bold" aria-hidden>✓</span>}
+                    </span>
                     <span className="text-[10px] text-zinc-500 leading-tight">{preset.desc}</span>
                   </button>
                 );
@@ -1068,6 +1090,12 @@ function SingleCard({
   // 그 work_type의 모든 자재 (현장시공도 포함 — 카드 자체와 공사비 정보 노출 위해)
   const allMaterials = materialsFor(work.wt);
 
+  // 무몰딩(도배 퍼티/면처리) ON 시 도배 카드 표시 공사비에 15% 가산.
+  // 계산기는 별도 라인(wallpaper_putty=도배의 15%)으로 더하지만 그 라인은 자재 카드가 없으므로,
+  // 도배 헤더·등급 카드에 15%를 반영해 "무몰딩 누르면 도배 카드 공사비도 함께 변동"하도록 한다.
+  // (다른 공종은 puttyToggle 이 없어 배수 1 → 표시 불변)
+  const puttyMult = puttyToggle?.on ? 1 + WALLPAPER_PUTTY_RATE : 1;
+
   // 등급 그룹별 그룹핑 → 각 그룹 안에서 추천(primary) 먼저 정렬
   const sortedMaterials = (() => {
     const byGroup = new Map<GradeGroup, Material[]>();
@@ -1143,7 +1171,7 @@ function SingleCard({
             <span className={`text-base font-bold tabular-nums ${
               isExcluded ? 'text-zinc-300 line-through' : 'text-blue-700'
             }`}>
-              {isExcluded ? '제외됨' : fmtKRWShortVat(work.sub)}
+              {isExcluded ? '제외됨' : fmtKRWShortVat(Math.round(work.sub * puttyMult))}
             </span>
           </div>
           {hasOverride && !isExcluded && (
@@ -1217,6 +1245,9 @@ function SingleCard({
                       )
                     : material.unit_type === 'per_pyeong_band'
                     ? pyeongBandTotal(material, property.pyeong)
+                    : puttyMult !== 1
+                    // 무몰딩 ON 도배 — 자재 기본 공사비에 퍼티/면처리 15% 가산
+                    ? Math.round(work.totalQty * material.total_unit_price * puttyMult)
                     : undefined;
                 return (
                   <div
