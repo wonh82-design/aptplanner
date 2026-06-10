@@ -119,7 +119,7 @@ export const LANDING_COPY = {
     title1: '3분 투자로 예산에 맞는',
     title2: '우리집 공사계획을 완성해보세요',
     subtitle: '가입도, 결제도 필요 없습니다',
-    cta: '우리집 공사비 계산하기',
+    cta: '우리집 인테리어 계획하기',
     footnote: '±5% 시장가 정확도 · 결과 PDF 무료 다운로드',
   },
 

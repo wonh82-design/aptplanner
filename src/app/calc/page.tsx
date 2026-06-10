@@ -226,7 +226,7 @@ export default function CalcPage() {
               onJumpToStep={goTo}
               onNext={() => setConfirmStep2Open(true)}
               nextDisabled={!pyeongValid}
-              nextLabel="공종 및 자재"
+              nextLabel="다음 단계"
             />
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
               {restored && (
@@ -276,7 +276,7 @@ export default function CalcPage() {
                       disabled={!pyeongValid}
                       className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      공종 및 자재 선택 →
+                      다음 단계 →
                     </button>
                   }
                 />
