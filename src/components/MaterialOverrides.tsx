@@ -26,6 +26,16 @@ type Props = {
   property?: Property;
   /** 확장공사 카드 클릭 시 Step 1로 점프 */
   onJumpToProperty?: () => void;
+  /** Step 2 가격 게이트 — 공사범위 프리셋 적용 시 통지 */
+  onPresetApplied?: () => void;
+  /** Step 2 가격 게이트 — 자재등급 한번에 정하기 선택 시 통지 */
+  onBulkGradeApplied?: () => void;
+  /**
+   * '자재등급 한번에 정하기'를 사용자가 실제로 선택했는지.
+   * false면 기본 등급(표준)이어도 버튼을 미선택으로 표시해 명시적 선택을 유도한다.
+   * 미전달 시 기존 동작(현재 등급 강조) 유지.
+   */
+  bulkGradePicked?: boolean;
 };
 
 // 사용자가 선택하는 등급 그룹 3개 (단일등급은 자동 폴백)
@@ -83,6 +93,7 @@ export function MaterialOverrides({
   quote, value, onChange,
   scope, onScopeChange,
   property, onJumpToProperty,
+  onPresetApplied, onBulkGradeApplied, bulkGradePicked,
 }: Props) {
   // 기본은 모든 항목 펼침 — 사용자가 모든 공종·자재를 한눈에 보고 선택하도록.
   // '주요 5개만 보기' 토글로 다시 압축 가능.
@@ -282,6 +293,7 @@ export function MaterialOverrides({
   function setBulkGrade(g: GradeGroup) {
     onChange({ default: g, overrides: {}, material_overrides: {} });
     setBulkOpen(false);
+    onBulkGradeApplied?.();
   }
 
   // ===== 욕실(공용/부부) 분리 — 욕실별 네임스페이스 키 기반 setter =====
@@ -360,6 +372,7 @@ export function MaterialOverrides({
       onChange({ ...value, overrides: nextOverrides, material_overrides: nextMatOv });
     }
     setAppliedPresetId(preset.id);
+    onPresetApplied?.();
   }
 
   /**
@@ -812,7 +825,9 @@ export function MaterialOverrides({
             <div className="grid grid-cols-3 gap-1.5">
               {(['가성비', '표준', '고급'] as GradeGroup[]).map((g) => {
                 const meta = GRADE_META[g];
-                const selected = value.default === g;
+                // 가격 게이트 사용 시(bulkGradePicked 전달) 사용자가 직접 선택하기 전에는
+                // 기본 등급(표준)이어도 미선택으로 표시 — 명시적 선택 유도.
+                const selected = (bulkGradePicked ?? true) && value.default === g;
                 return (
                   <button
                     key={g}

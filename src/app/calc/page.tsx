@@ -38,6 +38,8 @@ type StoredState = {
   grade: GradeSelection;
   maxReached: Step;
   quoteId: string;
+  /** Step 2 가격 게이트 — 프리셋·자재등급 한번에 정하기를 각각 선택했는지 (additive, 구버전 데이터엔 없음) */
+  step2Picked?: { preset: boolean; bulkGrade: boolean };
 };
 
 export default function CalcPage() {
@@ -47,6 +49,15 @@ export default function CalcPage() {
   const [scope, setScope] = useState(defaultScope());
   const [grade, setGrade] = useState(defaultGrade());
   const [planOpen, setPlanOpen] = useState(false);
+  /**
+   * Step 2 가격 게이트 — '공사범위 간단 지정'(프리셋)과 '자재등급 한번에 정하기'를
+   * 각각 한 번 이상 선택해야 Step 2에서 총 예상 공사비가 표시된다.
+   * (기본값 기반 금액이 사용자가 고르기도 전에 앵커링되는 것을 방지)
+   */
+  const [step2Picked, setStep2Picked] = useState<{ preset: boolean; bulkGrade: boolean }>({
+    preset: false,
+    bulkGrade: false,
+  });
   // quote_id는 세션 단위로 freeze — 입력 변경 시 ID가 바뀌지 않는다.
   const [quoteId, setQuoteId] = useState<string>(() => generateQuoteId());
   // localStorage 복원 알림 배너
@@ -71,6 +82,12 @@ export default function CalcPage() {
       if (data.grade) setGrade(data.grade);
       if (data.maxReached) setMaxReached(data.maxReached);
       if (data.quoteId) setQuoteId(data.quoteId);
+      if (data.step2Picked) {
+        setStep2Picked({
+          preset: !!data.step2Picked.preset,
+          bulkGrade: !!data.step2Picked.bulkGrade,
+        });
+      }
       setRestored(true);
     } catch { /* ignore */ }
     hydratedRef.current = true;
@@ -83,11 +100,11 @@ export default function CalcPage() {
     try {
       const data: StoredState = {
         version: STORAGE_VERSION,
-        property, scope, grade, maxReached, quoteId,
+        property, scope, grade, maxReached, quoteId, step2Picked,
       };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch { /* ignore */ }
-  }, [property, scope, grade, maxReached, quoteId]);
+  }, [property, scope, grade, maxReached, quoteId, step2Picked]);
 
   // ---- 평형이 0이 되면 Step 1로 강제 복귀 + 진행 차단 ----
   const pyeongValid = property.pyeong > 0;
@@ -110,6 +127,9 @@ export default function CalcPage() {
   // 견적이 비어 있는지 (모든 공사 OFF 또는 평형 0)
   const scopeEmpty = !pyeongValid || quote.line_items.length === 0 || quote.totals.grand_total === 0;
 
+  // Step 2 가격 게이트 통과 여부 — 프리셋 + 자재등급 한번에 정하기 모두 선택 시 금액 공개
+  const priceRevealed = step2Picked.preset && step2Picked.bulkGrade;
+
   const goTo = (s: Step) => {
     // 평형 미입력 상태에서 Step 2+ 진입 차단
     if (s > 1 && !pyeongValid) return;
@@ -131,6 +151,7 @@ export default function CalcPage() {
     setProperty(defaultProperty());
     setScope(defaultScope());
     setGrade(defaultGrade());
+    setStep2Picked({ preset: false, bulkGrade: false });
     setMaxReached(1);
     setQuoteId(generateQuoteId());
     setRestored(false);
@@ -278,11 +299,12 @@ export default function CalcPage() {
               prevLabel="현황 수정"
               onNext={() => goTo(3)}
               nextLabel="최종 결과"
+              hidePrice={!priceRevealed}
             />
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
               {/* 모바일 sticky 배너 — LivePricePreview 가 자체적으로 lg:hidden 처리.
                   부모 flex 의 직접 자식이어야 sticky 가 동작 (wrapper 안에 단독으로 두면 무효). */}
-              <LivePricePreview quote={quote} step={2} />
+              <LivePricePreview quote={quote} step={2} locked={!priceRevealed} />
               <MaterialOverrides
                 quote={quote}
                 value={grade}
@@ -291,6 +313,9 @@ export default function CalcPage() {
                 onScopeChange={setScope}
                 property={property}
                 onJumpToProperty={() => goTo(1)}
+                bulkGradePicked={step2Picked.bulkGrade}
+                onPresetApplied={() => setStep2Picked(p => (p.preset ? p : { ...p, preset: true }))}
+                onBulkGradeApplied={() => setStep2Picked(p => (p.bulkGrade ? p : { ...p, bulkGrade: true }))}
               />
 
               <div className="lg:hidden">

@@ -14,10 +14,35 @@ type Props = {
   quote: Quote;
   /** 2: 공사 범위 단계 · 3: 자재 등급 단계 */
   step: 2 | 3;
+  /**
+   * Step 2 가격 게이트 — true면 금액 대신 선택 유도 문구 표시.
+   * (공사범위 프리셋·자재등급 한번에 정하기를 모두 선택하기 전까지 금액 비공개)
+   */
+  locked?: boolean;
 };
 
-export function LivePricePreview({ quote, step }: Props) {
+export function LivePricePreview({ quote, step, locked = false }: Props) {
   const { totals, line_items } = quote;
+  if (locked) {
+    return (
+      <aside
+        role="status"
+        aria-live="polite"
+        className="lg:hidden sticky top-[104px] sm:top-[120px] z-30 -mx-4 sm:mx-0 mb-3 sm:mb-4"
+      >
+        <div className="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 text-white rounded-none sm:rounded-xl shadow-sm border-y sm:border border-zinc-700/40 px-4 sm:px-5 py-3 sm:py-3.5">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-0.5">
+            실시간 예상 공사비 · 부가세 포함
+          </div>
+          <div className="text-sm font-bold text-zinc-200">선택 후 표시됩니다</div>
+          <div className="mt-1.5 text-[10px] text-zinc-400">
+            아래 <strong className="text-zinc-200">공사범위 간단 지정</strong>과{' '}
+            <strong className="text-zinc-200">자재등급 한번에 정하기</strong>를 선택하면 예상 공사비가 나타나요.
+          </div>
+        </div>
+      </aside>
+    );
+  }
   return (
     <aside
       role="status"

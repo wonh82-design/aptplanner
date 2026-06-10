@@ -37,13 +37,18 @@ type Props = {
   nextLabel?: string;
   /** 다음 버튼 비활성화 — 버튼 자체는 노출하되 클릭만 막는다 (예: 평형 미입력) */
   nextDisabled?: boolean;
+  /**
+   * Step 2 가격 게이트 — true면 총 예상 공사비 카드 대신 안내 placeholder 표시.
+   * (공사범위 프리셋·자재등급 한번에 정하기를 모두 선택하기 전까지 금액 비공개)
+   */
+  hidePrice?: boolean;
 };
 
 type SectionId = 'property' | 'scope' | 'category';
 
 export function WizardSidebar({
   step, property, scope, quote, gradeLabel,
-  onJumpToStep, onPrev, onNext, prevLabel, nextLabel, nextDisabled,
+  onJumpToStep, onPrev, onNext, prevLabel, nextLabel, nextDisabled, hidePrice,
 }: Props) {
   // 단계가 바뀌면 해당 단계의 섹션이 자동으로 펼쳐진다.
   // 사용자는 단계 안에서 자유롭게 다른 섹션을 열고 닫을 수 있다 (state로 보존).
@@ -69,8 +74,19 @@ export function WizardSidebar({
        * 총 예상 공사비 카드 — Step 2부터 노출.
        * Step 1(우리집 현황)에서는 카드를 숨겨 사이드바 상단을 비운다
        * (현황만 입력하는 단계라 가격 placeholder가 불필요).
+       * hidePrice(Step 2 가격 게이트)면 금액 대신 선택 유도 placeholder.
        */}
-      {step >= 2 && (
+      {step >= 2 && (hidePrice ? (
+        <div className="rounded-xl bg-white border border-dashed border-zinc-300 p-4">
+          <div className="text-[11px] text-zinc-500 uppercase tracking-wide mb-1">총 예상 공사비</div>
+          <div className="text-sm font-bold text-zinc-400">선택 후 표시됩니다</div>
+          <div className="text-[11px] text-zinc-500 mt-2 pt-2 border-t border-zinc-100 leading-relaxed">
+            <strong className="text-zinc-700">공사범위 간단 지정</strong>과{' '}
+            <strong className="text-zinc-700">자재등급 한번에 정하기</strong>를 선택하면
+            예상 공사비가 나타나요.
+          </div>
+        </div>
+      ) : (
         <div className="rounded-xl bg-white border border-zinc-200 shadow-sm p-4">
           <div className="flex items-baseline justify-between mb-1">
             <span className="text-[11px] text-zinc-500 uppercase tracking-wide">총 예상 공사비</span>
@@ -88,7 +104,7 @@ export function WizardSidebar({
             범위 {fmtKRWShort(quote.totals.grand_total_low)} ~ {fmtKRWShort(quote.totals.grand_total_high)}
           </div>
         </div>
-      )}
+      ))}
 
       {/* === 우리집 현황 — 모든 단계에서 노출. Step 1에서는 열어둠 === */}
       <SidebarSection
