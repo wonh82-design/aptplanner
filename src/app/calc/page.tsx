@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import { PropertyForm } from '@/components/PropertyForm';
 import { MaterialOverrides } from '@/components/MaterialOverrides';
 import { QuotePanel } from '@/components/QuotePanel';
@@ -369,9 +368,6 @@ export default function CalcPage() {
                   </div>
                 </div>
 
-                {/* 신뢰 nudge — 누가 만들었나 */}
-                <TrustNudge />
-
                 {/* 마무리 nudge */}
                 <FinalNudge />
               </>
@@ -542,26 +538,6 @@ function Stat({ label, value, highlight = false }: { label: string; value: strin
         {value}
       </div>
     </div>
-  );
-}
-
-function TrustNudge() {
-  return (
-    <Link href="/about" className="block group">
-      <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 flex items-center gap-4 hover:border-blue-400 hover:shadow-sm transition">
-        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-700 text-white flex flex-col items-center justify-center">
-          <span className="text-[10px] uppercase tracking-wide opacity-70 leading-none">since</span>
-          <span className="text-sm font-bold leading-tight">15Y</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-bold text-zinc-900">누가 이 견적을 만들었나요?</div>
-          <div className="text-xs text-zinc-600 leading-relaxed mt-0.5">
-            대형 건설사 <strong>15년 시공·CS 경험</strong> · 건축사 + 건축시공기술사가 직접 검증한 데이터
-          </div>
-        </div>
-        <span className="text-xs text-blue-700 font-semibold group-hover:underline">소개 보기 →</span>
-      </div>
-    </Link>
   );
 }
 
