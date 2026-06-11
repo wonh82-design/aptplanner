@@ -135,19 +135,6 @@
     "total_unit_price": 21000.0
   },
   {
-    "brand": "벤자민무어",
-    "category": "도장",
-    "unit_type": "per_m2",
-    "labor_price": 6500.0,
-    "material_id": "MAT-WP-011",
-    "product_line": "친환경무광",
-    "sub_category": "도배",
-    "primary_grade": "고급",
-    "installer_spec": "벤자민무어 친환경 무광",
-    "material_price": 8000.0,
-    "total_unit_price": 14500.0
-  },
-  {
     "brand": "비브랜드",
     "category": "몰딩",
     "unit_type": "per_m",
@@ -508,6 +495,7 @@
   {
     "brand": "포세린",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BT-002-kxXhsLdZdNtnl47g4HivgEkWId59vZ.png",
     "unit_type": "per_m2",
     "labor_price": 0.0,
     "material_id": "MAT-BT-002",
@@ -521,6 +509,7 @@
   {
     "brand": "포세린",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BT-003-Glb25yV7f0rDoURjsx5g9wRcTJFlEW.png",
     "unit_type": "per_m2",
     "labor_price": 0.0,
     "material_id": "MAT-BT-003",
@@ -571,27 +560,18 @@
     "total_unit_price": 0.0
   },
   {
-    "brand": "현장시공",
-    "category": "타일",
-    "unit_type": "per_m2",
-    "labor_price": 0.0,
-    "material_id": "MAT-BU-001",
-    "product_line": "백시멘트",
-    "sub_category": "bath_grout",
-    "primary_grade": "가성비 추천",
-    "installer_spec": "일반 백시멘트 줄눈 자재 (시공은 타일팀)",
-    "material_price": 1500.0,
-    "total_unit_price": 1500.0
-  },
-  {
     "brand": "아덱스",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BU-002-k3E7fofzRStZQ1z51y7a0ZNIfqvnj3.png",
     "unit_type": "per_m2",
     "labor_price": 0.0,
     "material_id": "MAT-BU-002",
+    "grade_groups": [
+      "가성비"
+    ],
     "product_line": "FG4",
     "sub_category": "bath_grout",
-    "primary_grade": "표준 추천",
+    "primary_grade": "표준",
     "installer_spec": "아덱스 FG4 시멘트계 줄눈 자재 (시공은 타일팀)",
     "material_price": 4000.0,
     "total_unit_price": 4000.0
@@ -599,6 +579,7 @@
   {
     "brand": "MAPEI",
     "category": "타일",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BU-003-gOTvmMpjQm4VEdbDgQppUalAp3KcNz.png",
     "unit_type": "per_m2",
     "labor_price": 0.0,
     "material_id": "MAT-BU-003",
@@ -623,18 +604,18 @@
     "total_unit_price": 600000.0
   },
   {
-    "brand": "사제 유리 샤워부스",
+    "brand": "사제",
     "category": "욕실",
     "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BP-002-w58DLzvmVqoOwn4JYk6p8es5pUsMdT.png",
-    "unit_type": "per_ea",
-    "labor_price": 320000.0,
+    "unit_type": "per_set",
+    "labor_price": 300000.0,
     "material_id": "MAT-BP-002",
-    "product_line": null,
+    "product_line": "비브랜드",
     "sub_category": "bath_partition",
     "primary_grade": "표준 추천",
-    "installer_spec": "유리 스윙도어 샤워부스",
-    "material_price": 750000.0,
-    "total_unit_price": 1070000.0
+    "installer_spec": "유리 스윙도어 샤워부스 (문짝포함)",
+    "material_price": 500000.0,
+    "total_unit_price": 800000.0
   },
   {
     "brand": "현장시공",
@@ -799,19 +780,19 @@
     "total_unit_price": 460000.0
   },
   {
-    "brand": "TOTO",
+    "brand": "아메리칸스탠다드",
     "category": "욕실",
-    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BL-003-Zp6dL8K3MrT56rqouNb7nm68NQtw6E.png",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-BL-003-6Eii7OofegJfGmLl0Qq2G8qWhVejvu.png",
     "unit_type": "per_ea",
     "vendor_url": "https://smartstore.naver.com/81deaill/products/7023938980",
     "labor_price": 0.0,
     "material_id": "MAT-BL-003",
-    "product_line": "네오레스트",
+    "product_line": "코너스톤",
     "sub_category": "bath_toilet",
     "primary_grade": "고급 추천",
-    "installer_spec": "TOTO 네오레스트 비데일체형 CES9788",
-    "material_price": 4800000.0,
-    "total_unit_price": 4800000.0
+    "installer_spec": "비데일체형",
+    "material_price": 2100000.0,
+    "total_unit_price": 2100000.0
   },
   {
     "brand": "라우체",
@@ -866,33 +847,7 @@
     "material_id": "MAT-BI-001",
     "product_line": "욕실설치",
     "sub_category": "bath_install",
-    "primary_grade": "가성비 추천",
-    "installer_spec": "욕실 1개소 설치 인건비 (수전·양변기·세면대·악세사리·SMC 등 통합)",
-    "material_price": 0.0,
-    "total_unit_price": 300000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "욕실",
-    "unit_type": "per_ea",
-    "labor_price": 300000.0,
-    "material_id": "MAT-BI-002",
-    "product_line": "욕실설치",
-    "sub_category": "bath_install",
-    "primary_grade": "표준 추천",
-    "installer_spec": "욕실 1개소 설치 인건비 (수전·양변기·세면대·악세사리·SMC 등 통합)",
-    "material_price": 0.0,
-    "total_unit_price": 300000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "욕실",
-    "unit_type": "per_ea",
-    "labor_price": 300000.0,
-    "material_id": "MAT-BI-003",
-    "product_line": "욕실설치",
-    "sub_category": "bath_install",
-    "primary_grade": "고급 추천",
+    "primary_grade": "단일등급",
     "installer_spec": "욕실 1개소 설치 인건비 (수전·양변기·세면대·악세사리·SMC 등 통합)",
     "material_price": 0.0,
     "total_unit_price": 300000.0
@@ -900,41 +855,85 @@
   {
     "brand": "현장시공",
     "category": "타일",
-    "unit_type": "per_set",
-    "labor_price": 500000.0,
+    "unit_type": "per_pyeong_band",
+    "labor_price": 0.0,
     "material_id": "MAT-TL-001",
     "product_line": "코너비드팀",
     "sub_category": "tile_labor",
     "primary_grade": "가성비 추천",
-    "installer_spec": "타일 시공 1팀(타일러+데모도 2인) 1일 — 코너비드 일반 시공",
+    "installer_spec": "타일 시공 1팀(타일러+데모도 1인) 2일 — 코너비드 일반 시공",
     "material_price": 0.0,
-    "total_unit_price": 500000.0
+    "total_unit_price": 0.0,
+    "pyeong_band_prices": {
+      "10": {
+        "labor_price": 1000000.0,
+        "material_price": 0.0,
+        "total_unit_price": 1000000.0
+      },
+      "20": {
+        "labor_price": 1400000.0,
+        "material_price": 0.0,
+        "total_unit_price": 1400000.0
+      },
+      "30": {
+        "labor_price": 1400000.0,
+        "material_price": 0.0,
+        "total_unit_price": 1400000.0
+      },
+      "40": {
+        "labor_price": 1600000.0,
+        "material_price": 0.0,
+        "total_unit_price": 1600000.0
+      },
+      "50": {
+        "labor_price": 1800000.0,
+        "material_price": 0.0,
+        "total_unit_price": 1800000.0
+      }
+    }
   },
   {
     "brand": "현장시공",
     "category": "타일",
-    "unit_type": "per_set",
-    "labor_price": 550000.0,
+    "unit_type": "per_pyeong_band",
+    "labor_price": 0.0,
     "material_id": "MAT-TL-002",
+    "grade_groups": [
+      "고급"
+    ],
     "product_line": "졸리컷팀",
     "sub_category": "tile_labor",
     "primary_grade": "표준 추천",
-    "installer_spec": "타일 시공 1팀(타일러+데모도 2인) 1일 — 졸리컷 정밀 시공",
+    "installer_spec": "타일 시공 1팀(타일러+데모도 1인) 2일 — 졸리컷 정밀 시공",
     "material_price": 0.0,
-    "total_unit_price": 550000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "타일",
-    "unit_type": "per_set",
-    "labor_price": 600000.0,
-    "material_id": "MAT-TL-003",
-    "product_line": "졸리컷광택팀",
-    "sub_category": "tile_labor",
-    "primary_grade": "고급 추천",
-    "installer_spec": "타일 시공 1팀(타일러+데모도 2인) 1일 — 졸리컷+광택 마감 정밀",
-    "material_price": 0.0,
-    "total_unit_price": 600000.0
+    "total_unit_price": 0.0,
+    "pyeong_band_prices": {
+      "10": {
+        "labor_price": 1800000.0,
+        "material_price": 0.0,
+        "total_unit_price": 1800000.0
+      },
+      "20": {
+        "labor_price": 2000000.0,
+        "material_price": 0.0,
+        "total_unit_price": 2000000.0
+      },
+      "30": {
+        "labor_price": 2200000.0,
+        "material_price": 0.0,
+        "total_unit_price": 2200000.0
+      },
+      "40": {
+        "labor_price": 2600000.0,
+        "material_price": 0.0,
+        "total_unit_price": 2600000.0
+      },
+      "50": {
+        "labor_price": 3000000.0,
+        "material_price": 0.0,
+        "total_unit_price": 3000000.0
+      }
+    }
   },
   {
     "brand": "중국수입",
@@ -1308,121 +1307,124 @@
     "total_unit_price": 500000.0
   },
   {
-    "brand": "현장시공",
+    "brand": "국산",
     "category": "전기",
-    "unit_type": "per_ea",
+    "unit_type": "per_pyeong_band",
     "labor_price": 0.0,
     "material_id": "MAT-LH-001",
-    "product_line": "욕실간접_가성비",
+    "product_line": "욕실조명",
     "sub_category": "lighting_indirect_bath",
     "primary_grade": "가성비 추천",
-    "installer_spec": "가성비 등급에서는 미적용",
+    "installer_spec": "국산 2인치 다운라이트 기본 6개",
     "material_price": 0.0,
-    "total_unit_price": 0.0
+    "total_unit_price": 0.0,
+    "pyeong_band_prices": {
+      "10": {
+        "labor_price": 50000.0,
+        "material_price": 50000.0,
+        "total_unit_price": 100000.0
+      },
+      "20": {
+        "labor_price": 70000.0,
+        "material_price": 100000.0,
+        "total_unit_price": 170000.0
+      },
+      "30": {
+        "labor_price": 70000.0,
+        "material_price": 200000.0,
+        "total_unit_price": 270000.0
+      },
+      "40": {
+        "labor_price": 100000.0,
+        "material_price": 250000.0,
+        "total_unit_price": 350000.0
+      },
+      "50": {
+        "labor_price": 120000.0,
+        "material_price": 300000.0,
+        "total_unit_price": 420000.0
+      }
+    }
   },
   {
-    "brand": "현장시공",
+    "brand": "국산",
     "category": "전기",
-    "unit_type": "per_ea",
-    "labor_price": 60000.0,
+    "unit_type": "per_pyeong_band",
+    "labor_price": 0.0,
     "material_id": "MAT-LH-002",
-    "product_line": "욕실간접",
+    "product_line": "욕실조명",
     "sub_category": "lighting_indirect_bath",
     "primary_grade": "표준 추천",
-    "installer_spec": "욕실당 LED 간접조명 (자재+인건비)",
-    "material_price": 90000.0,
-    "total_unit_price": 150000.0
+    "installer_spec": "2인치 다운라이트 8개, 욕실장 간접등 상하, 천정 간접등",
+    "material_price": 0.0,
+    "total_unit_price": 0.0,
+    "pyeong_band_prices": {
+      "10": {
+        "labor_price": 100000.0,
+        "material_price": 100000.0,
+        "total_unit_price": 200000.0
+      },
+      "20": {
+        "labor_price": 150000.0,
+        "material_price": 200000.0,
+        "total_unit_price": 350000.0
+      },
+      "30": {
+        "labor_price": 150000.0,
+        "material_price": 300000.0,
+        "total_unit_price": 450000.0
+      },
+      "40": {
+        "labor_price": 180000.0,
+        "material_price": 400000.0,
+        "total_unit_price": 580000.0
+      },
+      "50": {
+        "labor_price": 200000.0,
+        "material_price": 450000.0,
+        "total_unit_price": 650000.0
+      }
+    }
   },
   {
-    "brand": "현장시공",
+    "brand": "수입",
     "category": "전기",
-    "unit_type": "per_ea",
-    "labor_price": 60000.0,
+    "unit_type": "per_pyeong_band",
+    "labor_price": 0.0,
     "material_id": "MAT-LH-003",
-    "product_line": "욕실간접고급",
+    "product_line": "욕실조명",
     "sub_category": "lighting_indirect_bath",
     "primary_grade": "고급 추천",
-    "installer_spec": "욕실당 LED 간접조명 (자재+인건비)",
-    "material_price": 90000.0,
-    "total_unit_price": 150000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_set",
-    "labor_price": 0.0,
-    "material_id": "MAT-LE-001",
-    "product_line": "거실마그네틱_가성비",
-    "sub_category": "lighting_magnetic_living",
-    "primary_grade": "가성비 추천",
-    "installer_spec": "가성비/표준에서는 미적용",
+    "installer_spec": "욕실 다운라이트, 욕실장 간접조명, 천정 간접조명",
     "material_price": 0.0,
-    "total_unit_price": 0.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_set",
-    "labor_price": 0.0,
-    "material_id": "MAT-LE-002",
-    "product_line": "거실마그네틱_표준",
-    "sub_category": "lighting_magnetic_living",
-    "primary_grade": "표준 추천",
-    "installer_spec": "가성비/표준에서는 미적용",
-    "material_price": 0.0,
-    "total_unit_price": 0.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_set",
-    "labor_price": 400000.0,
-    "material_id": "MAT-LE-003",
-    "product_line": "거실마그네틱",
-    "sub_category": "lighting_magnetic_living",
-    "primary_grade": "고급 추천",
-    "installer_spec": "거실 마그네틱 라인조명 (자재+인건비+목공비)",
-    "material_price": 600000.0,
-    "total_unit_price": 1000000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_set",
-    "labor_price": 0.0,
-    "material_id": "MAT-LF-001",
-    "product_line": "주방마그네틱_가성비",
-    "sub_category": "lighting_magnetic_kitchen",
-    "primary_grade": "가성비 추천",
-    "installer_spec": "가성비/표준에서는 미적용",
-    "material_price": 0.0,
-    "total_unit_price": 0.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_set",
-    "labor_price": 0.0,
-    "material_id": "MAT-LF-002",
-    "product_line": "주방마그네틱_표준",
-    "sub_category": "lighting_magnetic_kitchen",
-    "primary_grade": "표준 추천",
-    "installer_spec": "가성비/표준에서는 미적용",
-    "material_price": 0.0,
-    "total_unit_price": 0.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_set",
-    "labor_price": 200000.0,
-    "material_id": "MAT-LF-003",
-    "product_line": "주방마그네틱",
-    "sub_category": "lighting_magnetic_kitchen",
-    "primary_grade": "고급 추천",
-    "installer_spec": "주방 마그네틱 라인조명 (자재+인건비+목공비)",
-    "material_price": 300000.0,
-    "total_unit_price": 500000.0
+    "total_unit_price": 0.0,
+    "pyeong_band_prices": {
+      "10": {
+        "labor_price": 100000.0,
+        "material_price": 200000.0,
+        "total_unit_price": 300000.0
+      },
+      "20": {
+        "labor_price": 150000.0,
+        "material_price": 300000.0,
+        "total_unit_price": 450000.0
+      },
+      "30": {
+        "labor_price": 150000.0,
+        "material_price": 400000.0,
+        "total_unit_price": 550000.0
+      },
+      "40": {
+        "labor_price": 200000.0,
+        "material_price": 500000.0,
+        "total_unit_price": 700000.0
+      },
+      "50": {
+        "labor_price": 250000.0,
+        "material_price": 600000.0,
+        "total_unit_price": 850000.0
+      }
+    }
   },
   {
     "brand": "KCC",
@@ -1838,79 +1840,27 @@
     "brand": "현장시공",
     "category": "전기",
     "unit_type": "per_ea",
-    "labor_price": 300000.0,
+    "labor_price": 150000.0,
     "material_id": "MAT-IN-001",
     "product_line": "인덕션전용선",
     "sub_category": "induction_line",
-    "primary_grade": "가성비 추천",
+    "primary_grade": "단일등급",
     "installer_spec": "인덕션 220V 전용선 신설 (분전반→주방, 자재+인건비)",
-    "material_price": 200000.0,
-    "total_unit_price": 500000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_ea",
-    "labor_price": 300000.0,
-    "material_id": "MAT-IN-002",
-    "product_line": "인덕션전용선",
-    "sub_category": "induction_line",
-    "primary_grade": "표준 추천",
-    "installer_spec": "인덕션 220V 전용선 신설 (분전반→주방, 자재+인건비)",
-    "material_price": 200000.0,
-    "total_unit_price": 500000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_ea",
-    "labor_price": 300000.0,
-    "material_id": "MAT-IN-003",
-    "product_line": "인덕션전용선",
-    "sub_category": "induction_line",
-    "primary_grade": "고급 추천",
-    "installer_spec": "인덕션 220V 전용선 신설 (분전반→주방, 자재+인건비)",
-    "material_price": 200000.0,
-    "total_unit_price": 500000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "확장",
-    "unit_type": "per_m2",
-    "labor_price": 50000.0,
-    "material_id": "MAT-EX-001",
-    "product_line": "기본확장",
-    "sub_category": "expansion",
-    "primary_grade": "가성비 추천",
-    "installer_spec": "확장부 철거+단열재 30T+배관 연장+미장(평탄화) — 샷시는 별도 공종에서 자동 산정 (m²당)",
-    "material_price": 70000.0,
-    "total_unit_price": 120000.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "확장",
-    "unit_type": "per_m2",
-    "labor_price": 70000.0,
-    "material_id": "MAT-EX-002",
-    "product_line": "표준확장",
-    "sub_category": "expansion",
-    "primary_grade": "표준 추천",
-    "installer_spec": "확장부 철거+단열 50T+배관 연장+미장 정밀 — 샷시는 별도 공종에서 자동 산정 (m²당)",
-    "material_price": 90000.0,
-    "total_unit_price": 160000.0
+    "material_price": 50000.0,
+    "total_unit_price": 200000.0
   },
   {
     "brand": "현장시공",
     "category": "확장",
     "unit_type": "per_m2",
     "labor_price": 100000.0,
-    "material_id": "MAT-EX-003",
-    "product_line": "고급확장",
+    "material_id": "MAT-EX-001",
+    "product_line": "기본확장",
     "sub_category": "expansion",
-    "primary_grade": "고급 추천",
-    "installer_spec": "확장부 철거+이중 단열(70T+우레탄)+배관 연장+평탄화 정밀 — 샷시 별도 (m²당)",
-    "material_price": 120000.0,
-    "total_unit_price": 220000.0
+    "primary_grade": "단일등급",
+    "installer_spec": "확장부 철거+단열재+배관 연장+미장(평탄화)",
+    "material_price": 70000.0,
+    "total_unit_price": 170000.0
   },
   {
     "brand": "현장시공",
@@ -1984,55 +1934,43 @@
   },
   {
     "brand": "현장시공",
-    "category": "확장",
-    "unit_type": "per_set",
-    "labor_price": 2000000.0,
-    "material_id": "MAT-AP-001",
-    "product_line": "행위허가",
-    "sub_category": "act_permit",
-    "primary_grade": "단일등급",
-    "installer_spec": "구청 행위허가 신청·도면·구조검토 일식 (구조변경·평면수정 시 필수)",
-    "material_price": 0.0,
-    "total_unit_price": 2000000.0
-  },
-  {
-    "brand": "현장시공",
     "category": "전기",
-    "unit_type": "per_m2",
-    "labor_price": 3042.0,
+    "unit_type": "per_pyeong_band",
+    "labor_price": 0.0,
     "material_id": "MAT-EB-001",
     "product_line": "전기기본",
     "sub_category": "electrical_base",
-    "primary_grade": "가성비 추천",
-    "installer_spec": "전기 분전반 점검+기존 회로 정비+안전기본 (공급면적 ㎡당)",
-    "material_price": 3000.0,
-    "total_unit_price": 6042.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_m2",
-    "labor_price": 3042.0,
-    "material_id": "MAT-EB-002",
-    "product_line": "전기기본",
-    "sub_category": "electrical_base",
-    "primary_grade": "표준 추천",
-    "installer_spec": "전기 분전반 점검+기존 회로 정비+안전기본 (공급면적 ㎡당)",
-    "material_price": 3000.0,
-    "total_unit_price": 6042.0
-  },
-  {
-    "brand": "현장시공",
-    "category": "전기",
-    "unit_type": "per_m2",
-    "labor_price": 3042.0,
-    "material_id": "MAT-EB-003",
-    "product_line": "전기기본",
-    "sub_category": "electrical_base",
-    "primary_grade": "고급 추천",
-    "installer_spec": "전기 분전반 점검+기존 회로 정비+안전기본 (공급면적 ㎡당)",
-    "material_price": 3000.0,
-    "total_unit_price": 6042.0
+    "primary_grade": "단일등급",
+    "installer_spec": "전기 분전반 점검+기존 회로 정비+안전기본",
+    "material_price": 0.0,
+    "total_unit_price": 0.0,
+    "pyeong_band_prices": {
+      "10": {
+        "labor_price": 300000.0,
+        "material_price": 100000.0,
+        "total_unit_price": 400000.0
+      },
+      "20": {
+        "labor_price": 300000.0,
+        "material_price": 150000.0,
+        "total_unit_price": 450000.0
+      },
+      "30": {
+        "labor_price": 300000.0,
+        "material_price": 200000.0,
+        "total_unit_price": 500000.0
+      },
+      "40": {
+        "labor_price": 500000.0,
+        "material_price": 250000.0,
+        "total_unit_price": 750000.0
+      },
+      "50": {
+        "labor_price": 600000.0,
+        "material_price": 300000.0,
+        "total_unit_price": 900000.0
+      }
+    }
   },
   {
     "brand": "현장시공",
@@ -2617,6 +2555,7 @@
   {
     "brand": "아메리칸스탠다드",
     "category": "욕실",
+    "image_url": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-NEW-006-fSydowGQN1Qx4w9xQQ2ZWzClZ5AukL.png",
     "unit_type": "per_ea",
     "vendor_url": "https://smartstore.naver.com/81deaill/products/6853043608",
     "labor_price": 0.0,
