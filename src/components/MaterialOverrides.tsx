@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { Grade, GradeGroup, GradeSelection, Material, Property, Quote, RoomId, Scope, BathType, DemolitionScope } from '@/lib/types';
 import { gradeGroupOf, isRecommendedGrade, bathOverrideKey, BATH_ROOM_NAMES, applyGradeFloor, gradeRank, GRADE_FLOOR, materialServesGroup, materialGradeGroups } from '@/lib/types';
@@ -119,6 +119,21 @@ export function MaterialOverrides({
   const appliedPresetId = presetPicked
     ? (PRESETS.find((p) => p.demolitionScope === (scope?.global.demolition_scope ?? 'basic'))?.id ?? null)
     : null;
+
+  /**
+   * 모바일 카드 기본 접기 — Step 2 의 12+화면 스크롤 부담을 줄인다.
+   * 접힌 카드는 요약 행(공종명 + 현재 공사비)만 표시, 탭하면 펼침.
+   * 데스크톱(lg+)은 기존대로 전부 펼침. SSR 은 펼침으로 렌더 후 마운트 시 모바일 판정.
+   */
+  const [collapseMode, setCollapseMode] = useState(false);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 1023px)').matches) setCollapseMode(true);
+  }, []);
+  const expandCard = (key: string) =>
+    setExpandedKeys((prev) => { const next = new Set(prev); next.add(key); return next; });
+  const collapseCard = (key: string) =>
+    setExpandedKeys((prev) => { const next = new Set(prev); next.delete(key); return next; });
 
   /**
    * 한 번이라도 line_items 에 등장한 모든 work_type 의 첫 등장 idx 영구 캐시.
@@ -810,7 +825,20 @@ export function MaterialOverrides({
     <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-zinc-200">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <h2 className="text-base font-semibold">공종 및 자재 세부 선택</h2>
-        <span className="text-[11px] text-zinc-500">{displayItems.length}개 항목</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-zinc-500">{displayItems.length}개 항목</span>
+          {/* 모바일 전용 — 전체 접기/펼치기 토글 */}
+          <button
+            type="button"
+            onClick={() => {
+              if (collapseMode) setCollapseMode(false);
+              else { setCollapseMode(true); setExpandedKeys(new Set()); }
+            }}
+            className="lg:hidden text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 hover:bg-blue-100 rounded px-2 py-1 transition"
+          >
+            {collapseMode ? '모두 펼치기' : '모두 접기'}
+          </button>
+        </div>
       </div>
 
       {/* ===== 프리셋 행: 공사범위 간단 지정 + 자재등급 한번에 정하기 ===== */}
@@ -885,8 +913,48 @@ export function MaterialOverrides({
       </p>
 
       <div className="space-y-3">
-        {visible.map((item, i) =>
-          item.kind === 'single' ? (
+        {visible.map((item, i) => {
+          // ── 모바일 기본 접기 ──
+          // 접힌 카드는 요약 행(공종명+현재 공사비)만 렌더 — 무거운 카드 내부는 펼칠 때만.
+          const collapseKey = item.kind === 'single' ? `s-${item.work.key}` : item.kind === 'bath' ? `bath-${item.room}` : `b-${item.bundle.id}`;
+          const cardLabel = item.kind === 'single' ? item.label : item.kind === 'bath' ? item.room : item.bundle.label;
+          const cardExcluded = item.kind === 'single'
+            ? (excludedKeys.has(item.work.wt) || item.work.sub === 0)
+            : item.kind === 'bath'
+            ? (item.room === '공용욕실'
+                ? !(scope?.global.common_bath_set ?? item.works.some((w) => w.sub > 0))
+                : !(scope?.global.master_bath_set ?? item.works.some((w) => w.sub > 0)))
+            : item.works.every((w) => excludedKeys.has(w.wt) || w.sub === 0);
+          if (collapseMode && !expandedKeys.has(collapseKey)) {
+            // 도배 무몰딩 ON 이면 펼친 카드 헤더와 동일하게 15% 가산 표시
+            const putty = item.kind === 'single' && item.work.wt === '도배' && scope?.global.wallpaper_putty
+              ? 1 + WALLPAPER_PUTTY_RATE : 1;
+            const rawSub = item.kind === 'single' ? item.work.sub : item.sub;
+            return (
+              <CollapsedCard
+                key={collapseKey}
+                label={cardLabel}
+                isSet={item.kind !== 'single'}
+                isExcluded={cardExcluded}
+                cost={fmtKRWShortVat(Math.round(rawSub * putty))}
+                onExpand={() => expandCard(collapseKey)}
+              />
+            );
+          }
+          // 접기 모드에서 펼친 카드 — 하단에 다시 접기 버튼 제공
+          const recollapse = collapseMode ? (
+            <button
+              type="button"
+              onClick={() => collapseCard(collapseKey)}
+              className="w-full mt-1 py-1.5 text-[11px] font-medium text-zinc-500 hover:text-zinc-800 inline-flex items-center justify-center gap-1"
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+              {cardLabel} 접기
+            </button>
+          ) : null;
+          const card = item.kind === 'single' ? (
             <SingleCard
               key={`s-${item.work.wt}-${i}`}
               work={item.work}
@@ -1024,8 +1092,9 @@ export function MaterialOverrides({
                   : undefined
               }
             />
-          )
-        )}
+          );
+          return <div key={collapseKey}>{card}{recollapse}</div>;
+        })}
       </div>
 
       {/* '자세히' 모달 — 등급별 자재 비교 */}
@@ -1288,6 +1357,50 @@ function SingleCard({
         )
       )}
     </div>
+  );
+}
+
+// =====================================================
+// CollapsedCard — 모바일 접기 모드의 요약 행
+//   공종명 + 현재 공사비(부가세 포함) + 펼침 chevron.
+//   탭하면 본 카드로 펼쳐진다 (카드 내부는 펼칠 때만 렌더).
+// =====================================================
+function CollapsedCard({
+  label, cost, isExcluded, isSet, onExpand,
+}: {
+  label: string;
+  /** 부가세 포함 표시 문자열 (예: "448만원") */
+  cost: string;
+  isExcluded: boolean;
+  /** 세트(번들/욕실) 여부 — 배지 표시 */
+  isSet: boolean;
+  onExpand: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onExpand}
+      className="w-full flex items-center justify-between gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-3 text-left transition hover:border-blue-300 active:scale-[0.99]"
+      aria-expanded={false}
+      title={`${label} 자세히 보기`}
+    >
+      <span className="flex items-center gap-1.5 min-w-0">
+        <span className={`text-sm font-semibold truncate ${isExcluded ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
+          {label}
+        </span>
+        {isSet && (
+          <span className="flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700 font-medium whitespace-nowrap">세트</span>
+        )}
+      </span>
+      <span className="flex items-center gap-2 flex-shrink-0">
+        <span className={`text-sm font-bold tabular-nums ${isExcluded ? 'text-zinc-300' : 'text-blue-700'}`}>
+          {isExcluded ? '제외됨' : cost}
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400" aria-hidden>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </span>
+    </button>
   );
 }
 
