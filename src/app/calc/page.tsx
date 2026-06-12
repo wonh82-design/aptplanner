@@ -9,11 +9,14 @@ import { LivePricePreview } from '@/components/LivePricePreview';
 import { WizardSidebar } from '@/components/WizardSidebar';
 import { SiteHeader } from '@/components/SiteHeader';
 import { PlanRequestModal } from '@/components/PlanRequestModal';
+import { MobileBottomBar } from '@/components/MobileBottomBar';
+import { ResultShareBar } from '@/components/ResultShareBar';
 import { defaultGrade, defaultProperty, defaultScope } from '@/lib/defaults';
-import { buildQuote, fmtKRWShort, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
+import { buildQuote, fmtKRWShort, fmtKRWShortVat, REGION_LABEL, AGE_LABEL } from '@/lib/calculator';
 import { buildPlanDoc } from '@/lib/plan-doc';
 import { track } from '@/lib/analytics';
-import type { GradeSelection, Property, Scope } from '@/lib/types';
+import type { GradeGroup, GradeSelection, Property, Scope } from '@/lib/types';
+import { getAllMaterials } from '@/lib/materials';
 
 type Step = 1 | 2 | 3;
 
@@ -216,7 +219,7 @@ export default function CalcPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
         {/* ===== Step 1: 우리집 현황 — 사이드바 등장 (예상 공사비 카드는 미노출) ===== */}
         {step === 1 && (
-          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
+          <div className="pb-24 lg:pb-0 lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
             <WizardSidebar
               step={1}
               property={property}
@@ -268,26 +271,20 @@ export default function CalcPage() {
                   💡 평형을 먼저 입력해주세요. 입력하시면 공종 및 자재 선택으로 진행할 수 있습니다.
                 </div>
               )}
-              <div className="lg:hidden">
-                <StepNav
-                  right={
-                    <button
-                      onClick={() => setConfirmStep2Open(true)}
-                      disabled={!pyeongValid}
-                      className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      다음 단계 →
-                    </button>
-                  }
-                />
-              </div>
+              {/* 모바일 — 하단 고정 CTA (스크롤 위치와 무관하게 진행 가능) */}
+              <MobileBottomBar
+                onNext={() => setConfirmStep2Open(true)}
+                nextLabel="다음 단계"
+                nextDisabled={!pyeongValid}
+                hint={!pyeongValid ? '평형을 입력하면 다음 단계로 진행할 수 있어요' : undefined}
+              />
             </div>
           </div>
         )}
 
         {/* ===== Step 2: 공종 및 자재 세부 선택 — 공사범위·등급·개별자재 통합 ===== */}
         {step === 2 && (
-          <div className="lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
+          <div className="pb-24 lg:pb-0 lg:grid lg:grid-cols-[288px_minmax(0,1fr)] lg:gap-6 lg:h-[calc(100vh-7rem)]">
             <WizardSidebar
               step={2}
               property={property}
@@ -304,7 +301,7 @@ export default function CalcPage() {
             <div className="w-full max-w-3xl mx-auto lg:max-w-none lg:mx-0 flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto lg:pr-2">
               {/* 모바일 sticky 배너 — LivePricePreview 가 자체적으로 lg:hidden 처리.
                   부모 flex 의 직접 자식이어야 sticky 가 동작 (wrapper 안에 단독으로 두면 무효). */}
-              <LivePricePreview quote={quote} step={2} locked={!priceRevealed} />
+              <LivePricePreview quote={quote} locked={!priceRevealed} />
               <MaterialOverrides
                 quote={quote}
                 value={grade}
@@ -319,18 +316,14 @@ export default function CalcPage() {
                 onBulkGradeApplied={() => setStep2Picked(p => (p.bulkGrade ? p : { ...p, bulkGrade: true }))}
               />
 
-              <div className="lg:hidden">
-                <StepNav
-                  left={
-                    <button onClick={() => goTo(1)} className="btn-secondary">← 현황 수정</button>
-                  }
-                  right={
-                    <button onClick={() => goTo(3)} className="btn-primary">
-                      최종 결과 보기 →
-                    </button>
-                  }
-                />
-              </div>
+              {/* 모바일 — 하단 고정 CTA: 현재 총액 + 결과 보기 (12+화면 스크롤 어디서든 진행) */}
+              <MobileBottomBar
+                onBack={() => goTo(1)}
+                onNext={() => goTo(3)}
+                nextLabel="최종 결과 보기"
+                price={priceRevealed ? fmtKRWShortVat(quote.totals.grand_total) : null}
+                hint={priceRevealed ? undefined : '프리셋·자재등급을 선택하면 공사비가 표시돼요'}
+              />
             </div>
           </div>
         )}
@@ -345,7 +338,24 @@ export default function CalcPage() {
               />
             ) : (
               <>
-                <ResultBanner quote={quote} gradeLabel={grade.default} />
+                <ResultBanner
+                  quote={quote}
+                  gradeLabel={grade.default}
+                  currentGrade={grade.default}
+                  hasOverrides={
+                    Object.keys(grade.overrides).length > 0 ||
+                    Object.keys(grade.material_overrides).length > 0
+                  }
+                  onChangeGrade={(g) => {
+                    // 자재등급 한번에 정하기와 동일 — 모든 공종 일괄 + 개별 설정 초기화.
+                    setGrade({ default: g, overrides: {}, material_overrides: {} });
+                    // 결과에서 등급을 골랐으면 Step 2 가격 게이트의 등급 선택으로도 인정.
+                    setStep2Picked((p) => (p.bulkGrade ? p : { ...p, bulkGrade: true }));
+                  }}
+                />
+
+                {/* 결과 요약 저장·공유 — 가족 공유/업체 전달 루프 */}
+                <ResultShareBar quote={quote} gradeLabel={grade.default} />
 
                 {/* 견적 상세 내역 — 총공사비 바로 아래 항상 펼침 */}
                 <QuotePanel quote={quote} />
@@ -454,12 +464,23 @@ function StepNav({ left, right }: { left?: React.ReactNode; right?: React.ReactN
 }
 
 function ResultBanner({
-  quote, gradeLabel,
+  quote, gradeLabel, currentGrade, hasOverrides, onChangeGrade,
 }: {
   quote: ReturnType<typeof buildQuote>;
   gradeLabel: string;
+  /** 현재 기본 등급 — 토글 강조용 */
+  currentGrade: GradeGroup;
+  /** 개별 공종/자재 설정 존재 여부 — 토글 시 초기화 경고 표시용 */
+  hasOverrides: boolean;
+  /** 등급 일괄 변경 (자재등급 한번에 정하기와 동일 동작) */
+  onChangeGrade: (g: GradeGroup) => void;
 }) {
   const { totals, property } = quote;
+  const GRADE_TOGGLE: { key: GradeGroup; label: string; desc: string }[] = [
+    { key: '가성비', label: '가성비', desc: '실속·경제형' },
+    { key: '표준', label: '표준', desc: '주류·균형형' },
+    { key: '고급', label: '고급', desc: '프리미엄' },
+  ];
   // 시공 방식별 base = 부가세 포함 기준
   const base = totals.grand_total_with_vat;
 
@@ -510,6 +531,38 @@ function ResultBanner({
         {property.pyeong}평 · {REGION_LABEL[property.region]} · {AGE_LABEL[property.age]} · {gradeLabel}
       </div>
 
+      {/* 등급 즉시 전환 — "고급이면 얼마지?"를 결과 화면에서 바로 해소.
+          자재등급 한번에 정하기와 동일하게 모든 공종 일괄 적용(개별 설정 초기화). */}
+      <div className="mt-3">
+        <div className="grid grid-cols-3 gap-1.5">
+          {GRADE_TOGGLE.map((g) => {
+            const selected = currentGrade === g.key && !hasOverrides;
+            return (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => onChangeGrade(g.key)}
+                className={`px-2 py-2 rounded-lg border-2 text-left transition active:scale-[0.98] bg-white/80 ${
+                  selected
+                    ? 'border-emerald-400 ring-1 ring-emerald-200 bg-emerald-50/80'
+                    : 'border-zinc-200 hover:border-emerald-300'
+                }`}
+              >
+                <span className={`block text-sm font-bold ${selected ? 'text-emerald-800' : 'text-zinc-700'}`}>
+                  {g.label}
+                  {selected && <span className="ml-1 text-emerald-600 text-xs" aria-hidden>✓</span>}
+                </span>
+                <span className="block text-[10px] text-zinc-500 mt-0.5">{g.desc}</span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-1.5 text-[10px] text-zinc-500">
+          등급을 탭하면 모든 공종에 일괄 적용되어 아래 금액이 즉시 바뀝니다.
+          {hasOverrides && <span className="text-amber-700 font-medium"> 개별 설정한 공종·자재는 초기화돼요.</span>}
+        </p>
+      </div>
+
       {/* 3가지 시공 방식별 공사비 — 부가세 포함 */}
       <div className="mt-4 rounded-lg bg-white/70 p-4">
         <div className="flex items-baseline justify-between gap-2 mb-3">
@@ -549,7 +602,9 @@ function ResultBanner({
           })}
         </div>
         <div className="text-[11px] text-zinc-600 mt-3 leading-relaxed">
-          ※ 모든 금액은 부가세(10%) 포함, 지역·연식 보정 및 10만원 단위 반올림. 시공 방식별 비율은 시장 평균 추정치이며, 업체·디자인 난이도에 따라 다를 수 있습니다.
+          ※ 자재마스터 <strong className="text-zinc-800">{getAllMaterials().length}종</strong> 실거래 시장가 기준 산출 ·
+          모든 금액은 부가세(10%) 포함, 지역·연식 보정 및 10만원 단위 반올림.
+          시공 방식별 비율은 시장 평균 추정치이며, 업체·디자인 난이도에 따라 다를 수 있습니다.
         </div>
       </div>
     </div>

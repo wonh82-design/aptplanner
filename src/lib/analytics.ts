@@ -36,7 +36,11 @@ export type AnalyticsEvent =
   // 컨설팅 신청 폼 제출 성공
   | 'submit_consult_request'
   // 우리집 인테리어 계획서(₩5,900) 신청 제출 성공
-  | 'submit_plan_request';
+  | 'submit_plan_request'
+  // 결과 요약 이미지 — 공유 시트 호출 성공
+  | 'share_result_image'
+  // 결과 요약 이미지 — 파일 다운로드 (공유 미지원 폴백 포함)
+  | 'save_result_image';
 
 type GtagParams = Record<string, string | number | boolean | undefined>;
 
