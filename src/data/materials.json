@@ -2656,5 +2656,21 @@
     "installer_spec": "발코니 터닝도어코니 터닝도어",
     "material_price": 900000.0,
     "total_unit_price": 1200000.0
+  },
+  {
+    "brand": null,
+    "category": "주방가구",
+    "unit_type": "per_m2",
+    "labor_price": 0.0,
+    "material_id": "MAT-NEW-013",
+    "product_line": null,
+    "sub_category": "kitchen_set",
+    "primary_grade": "가성비",
+    "installer_spec": null,
+    "material_price": 0.0,
+    "total_unit_price": 0.0,
+    "kitchen_rep_images": {
+      "20-2|가성비": "https://uggjwq0pumjqmkza.public.blob.vercel-storage.com/materials/MAT-NEW-013-20-2-----yC5bwdoWFl9ANZkx4FmQLFvWZNvGOv.jpg"
+    }
   }
 ]
