@@ -124,11 +124,12 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs font-medium text-zinc-600">평형</span>
           {/* 모드 토글 */}
-          <div className="inline-flex rounded-md border border-zinc-300 bg-zinc-50 overflow-hidden text-[11px]">
+          {/* 터치 타겟 — 모바일 최소 36px 확보 (py-2), 시각 크기는 text-xs 유지 */}
+          <div className="inline-flex rounded-md border border-zinc-300 bg-zinc-50 overflow-hidden text-xs">
             <button
               type="button"
               onClick={() => setInputMode('pyeong')}
-              className={`px-2.5 py-1 transition ${
+              className={`px-3 py-2 transition ${
                 inputMode === 'pyeong'
                   ? 'bg-blue-600 text-white font-semibold'
                   : 'bg-transparent text-zinc-600 hover:bg-zinc-100'
@@ -139,7 +140,7 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             <button
               type="button"
               onClick={() => setInputMode('m2')}
-              className={`px-2.5 py-1 transition ${
+              className={`px-3 py-2 transition ${
                 inputMode === 'm2'
                   ? 'bg-blue-600 text-white font-semibold'
                   : 'bg-transparent text-zinc-600 hover:bg-zinc-100'
@@ -206,10 +207,10 @@ export function PropertyForm({ value, onChange, rooms, onRoomsChange }: Props) {
             <button
               type="button"
               onClick={() => setBayHelpOpen(true)}
-              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-[10px] transition"
+              className="inline-flex items-center gap-1 px-2 py-1.5 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-[11px] transition"
               title="베이가 무엇인지 알아보기"
             >
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="16" x2="12" y2="12" />
                 <line x1="12" y1="8" x2="12.01" y2="8" />

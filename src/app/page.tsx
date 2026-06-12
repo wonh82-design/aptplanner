@@ -48,8 +48,9 @@ export default function Landing() {
             sizes="100vw"
             className="object-cover"
           />
-          {/* 그라데이션 오버레이 — 텍스트 가독성 + 분위기 */}
-          <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/85 via-zinc-900/55 to-zinc-900/15" />
+          {/* 그라데이션 오버레이 — 텍스트 가독성 + 분위기.
+              모바일: 텍스트가 전폭을 쓰므로 진한 세로 스크림 / sm+: 좌측 텍스트 기준 가로 그라데이션 */}
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/80 via-zinc-900/65 to-zinc-900/75 sm:bg-gradient-to-r sm:from-zinc-900/85 sm:via-zinc-900/55 sm:to-zinc-900/15" />
         </div>
 
         <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28 lg:pt-32 lg:pb-36">
@@ -104,7 +105,7 @@ export default function Landing() {
             </div>
 
             {/* CTA 아래 보조 설명 — 기존 subtitle 자리에서 이동한 카피 */}
-            <p className="mt-8 text-[14px] sm:text-[15px] text-zinc-300 leading-relaxed max-w-xl">
+            <p className="mt-8 text-[14px] sm:text-[15px] text-zinc-200 leading-relaxed max-w-xl">
               {t.hero.belowCta}
             </p>
           </div>
